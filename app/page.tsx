@@ -44,11 +44,12 @@ export default function HomePage() {
     async function fetchMe() {
       try {
         const res = await fetch("/api/me");
+        if (!res.ok) throw new Error("Failed to fetch user info");
         const data = await res.json();
         setMe(data);
       } catch (err) {
         console.error(err);
-        setStatus("Failed to load user info (/api/me).");
+        setStatus("Unable to load user info. Please refresh the page.");
       } finally {
         setLoading(false);
       }
@@ -62,16 +63,16 @@ export default function HomePage() {
     async function fetchMetadata(fid: number) {
       try {
         const res = await fetch(`/api/metadata/${fid}`);
+        if (!res.ok) return;
+        
         const data = await res.json();
         
-        // If metadata exists, the image was already generated
-        if (res.ok && data.image) {
+        if (data.image && !data.image.includes('placeholder')) {
           setMeta(data);
           setHasGenerated(true);
         }
       } catch (err) {
-        console.error(err);
-        // No metadata yet - that's ok, user needs to generate first
+        console.log("No metadata yet - user needs to generate");
       }
     }
 
@@ -102,12 +103,20 @@ export default function HomePage() {
       setStatus(`✓ Farcasturd generated! Ready to mint on-chain.`);
       setHasGenerated(true);
 
-      // Refresh metadata to show the new image
       const metaRes = await fetch(`/api/metadata/${me.fid}`);
-      const metaData = await metaRes.json();
-      setMeta(metaData);
+      if (metaRes.ok) {
+        const metaData = await metaRes.json();
+        setMeta(metaData);
+      }
     } catch (err: any) {
-      setStatus(`Generation error: ${err.message}`);
+      const errorMsg = err.message || "Unknown error";
+      if (errorMsg.includes("quota")) {
+        setStatus("⚠️ Generation service temporarily unavailable. Please try again later.");
+      } else if (errorMsg.includes("rate limit")) {
+        setStatus("⚠️ Too many requests. Please wait a moment and try again.");
+      } else {
+        setStatus(`⚠️ Generation failed. Please try again.`);
+      }
       console.error("Generation failed:", err);
     } finally {
       setGenerating(false);
@@ -118,7 +127,7 @@ export default function HomePage() {
     e.preventDefault();
     if (!me) return;
     if (me.hasMinted) {
-      setStatus("Farcasturd already minted for this FID.");
+      setStatus("This FID has already minted a Farcasturd.");
       return;
     }
     if (!hasGenerated) {
@@ -143,17 +152,23 @@ export default function HomePage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setStatus(`Error: ${data.error || "unknown"}`);
+        const errorMsg = data.error || "Unknown error";
+        if (errorMsg.includes("already minted")) {
+          setStatus("This FID has already minted a Farcasturd.");
+        } else if (errorMsg.includes("configuration") || errorMsg.includes("Missing")) {
+          setStatus("⚠️ Minting service not configured. Please contact support.");
+        } else {
+          setStatus(`⚠️ Minting failed: ${errorMsg}`);
+        }
         return;
       }
 
       setLastTxHash(data.txHash);
       setStatus(`✓ Success! Farcasturd minted for FID ${data.fid}`);
-
-      // Update local state so UI reflects minted status immediately
       setMe((prev) => (prev ? { ...prev, hasMinted: true } : prev));
     } catch (err: any) {
-      setStatus(`Error: ${String(err)}`);
+      setStatus(`⚠️ Minting failed. Please try again.`);
+      console.error("Mint error:", err);
     } finally {
       setMinting(false);
     }
@@ -178,7 +193,7 @@ export default function HomePage() {
           <div className="fc-card">
             <h1 className="fc-title">Farcasturd</h1>
             <p className="fc-status">
-              Could not load user info. This will use real Farcaster auth later.
+              Unable to load user info. Please refresh the page.
             </p>
           </div>
         </section>
@@ -221,77 +236,89 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Generation & Mint section */}
+      {/* Generation & Mint section - IMPROVED LAYOUT */}
       <section className="fc-section">
-        <div className="fc-card fc-card-row">
-          <div className="fc-card-col">
-            <h2 className="fc-card-title">
-              {hasGenerated ? "Farcasturd Minting" : "Generate Your Farcasturd"}
-            </h2>
-            <p className="fc-subtle">
-              {hasGenerated
-                ? "Your Farcasturd is ready! Mint it as a non-transferable NFT on Base."
-                : "First, generate your unique AI-powered Farcasturd based on your Farcaster profile."}
-            </p>
+        <div className="fc-card">
+          <div style={{ display: "flex", gap: 20, alignItems: "flex-start" }}>
+            {/* Left: Content */}
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 10 }}>
+              <h2 className="fc-card-title">
+                {hasGenerated ? "Farcasturd Minting" : "Generate Your Farcasturd"}
+              </h2>
+              <p className="fc-subtle">
+                {hasGenerated
+                  ? "Your Farcasturd is ready! Mint it as a non-transferable NFT on Base."
+                  : "First, generate your unique AI-powered Farcasturd based on your Farcaster profile."}
+              </p>
 
-            <div style={{ marginTop: 12, display: "flex", gap: 8, flexWrap: "wrap" }}>
-              {!hasGenerated && !alreadyMinted && (
-                <button
-                  onClick={handleGenerateFarcasturd}
-                  disabled={generating}
-                  className="fc-button"
-                  type="button"
-                >
-                  {generating ? "Generating... 🎨" : "Generate Farcasturd"}
-                </button>
-              )}
-
-              {(hasGenerated || alreadyMinted) && (
-                <form onSubmit={handleMint}>
+              <div style={{ marginTop: 4, display: "flex", gap: 8, flexWrap: "wrap" }}>
+                {!hasGenerated && !alreadyMinted && (
                   <button
-                    type="submit"
-                    disabled={minting || alreadyMinted || !hasGenerated}
+                    onClick={handleGenerateFarcasturd}
+                    disabled={generating}
                     className="fc-button"
+                    type="button"
                   >
-                    {alreadyMinted
-                      ? "Already minted ✓"
-                      : minting
-                      ? "Minting... ⛓️"
-                      : "Mint on Base"}
+                    {generating ? "Generating... 🎨" : "Generate Farcasturd"}
                   </button>
-                </form>
-              )}
-            </div>
+                )}
 
-            <p className="fc-tagline">
-              {hasGenerated
-                ? "Soulbound · AI-Generated · Built on Base"
-                : "AI-Powered · Profile-Based · Free Generation"}
-            </p>
-
-            {status && <p className="fc-status">{status}</p>}
-          </div>
-
-          {me.pfpUrl && (
-            <div className="fc-card-col" style={{ alignItems: "flex-end" }}>
-              <div className="fc-pfp-wrapper">
-                <img
-                  src={me.pfpUrl}
-                  alt={`${me.displayName || me.username} Farcaster avatar`}
-                  className="fc-pfp"
-                />
+                {(hasGenerated || alreadyMinted) && (
+                  <form onSubmit={handleMint}>
+                    <button
+                      type="submit"
+                      disabled={minting || alreadyMinted || !hasGenerated}
+                      className="fc-button"
+                    >
+                      {alreadyMinted
+                        ? "Already minted ✓"
+                        : minting
+                        ? "Minting... ⛓️"
+                        : "Mint on Base"}
+                    </button>
+                  </form>
+                )}
               </div>
-              <span className="fc-subtle">Your Farcaster profile</span>
+
+              <p className="fc-tagline">
+                {hasGenerated
+                  ? "Soulbound · AI-Generated · Built on Base"
+                  : "AI-Powered · Profile-Based · Free Generation"}
+              </p>
+
+              {status && <p className="fc-status">{status}</p>}
             </div>
-          )}
+
+            {/* Right: Profile Picture - IMPROVED */}
+            {me.pfpUrl && (
+              <div style={{ 
+                display: "flex", 
+                flexDirection: "column", 
+                alignItems: "center",
+                gap: 8,
+                paddingTop: 8
+              }}>
+                <div className="fc-pfp-wrapper" style={{ width: 80, height: 80, minWidth: 80 }}>
+                  <img
+                    src={me.pfpUrl}
+                    alt={`${me.displayName || me.username} profile`}
+                    className="fc-pfp"
+                  />
+                </div>
+                <span className="fc-subtle" style={{ fontSize: "0.75rem", textAlign: "center" }}>
+                  Your Farcaster<br />profile
+                </span>
+              </div>
+            )}
+          </div>
         </div>
       </section>
 
       {/* Your Farcasturd preview */}
       <section className="fc-section">
         <div className="fc-card fc-card-row">
-          {meta?.image ? (
-            <div style={{ width: 74, height: 74, borderRadius: 22, overflow: "hidden" }}>
+          {meta?.image && !meta.image.includes('placeholder') ? (
+            <div style={{ width: 74, height: 74, minWidth: 74, borderRadius: 22, overflow: "hidden" }}>
               <img
                 src={meta.image}
                 alt="Your Farcasturd"
@@ -305,7 +332,7 @@ export default function HomePage() {
             <h2 className="fc-card-title">
               {meta ? meta.name : "Your Farcasturd"}
             </h2>
-            {meta ? (
+            {meta && !meta.image.includes('placeholder') ? (
               <>
                 <p className="fc-subtle">{meta.description}</p>
 
@@ -370,11 +397,7 @@ export default function HomePage() {
                     href={getBaseScanTxUrl(lastTxHash)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    style={{
-                      color: "#8a663d",
-                      textDecoration: "underline",
-                      fontWeight: 600,
-                    }}
+                    className="fc-basescan-link"
                   >
                     View on BaseScan
                   </a>

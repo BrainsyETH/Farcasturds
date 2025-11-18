@@ -43,7 +43,7 @@ body {
 }
 
 /* ===========
-   Root shell
+   Root shell - OPTIMIZED FOR FARCASTER MINI APP
    =========== */
 
 .fc-root {
@@ -55,7 +55,11 @@ body {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
     "Helvetica Neue", Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
 }
+
 .fc-root::before {
   content: "";
   position: fixed;
@@ -67,6 +71,7 @@ body {
     radial-gradient(circle at 1px 1px, rgba(0, 0, 0, 0.04) 1px, transparent 0);
   background-size: 6px 6px;
 }
+
 /* Use Baloo only for titles */
 .fc-title,
 .fc-card-title,
@@ -76,18 +81,24 @@ h2.fc-title {
   font-weight: 700;
   letter-spacing: -0.5px;
 }
-/* main container */
+
+/* main container - CENTERED FOR MINI APP */
 
 .fc-shell {
-  max-width: 960px;
+  max-width: 640px; /* Optimized for Farcaster mini app frame */
+  width: 100%;
   margin: 0 auto;
-  padding: 32px 20px 48px;
+  padding: 24px 20px 48px;
 }
 
 /* vertical rhythm */
 
 .fc-section {
-  margin-top: 20px;
+  margin-top: 18px;
+}
+
+.fc-section:first-child {
+  margin-top: 0;
 }
 
 /* ===========
@@ -113,7 +124,6 @@ h2.fc-title {
   50% { transform: scale(1.25) rotate(15deg); opacity: 0.9; }
 }
 
-
 .fc-subtle {
   font-size: 0.9rem;
   color: var(--fc-text-soft);
@@ -138,13 +148,6 @@ h2.fc-title {
   word-break: break-all;
 }
 
-.fc-tagline {
-  font-size: 0.8rem;
-  color: var(--fc-text-muted);
-  margin-top: 8px;
-  letter-spacing: 0.02em;
-}
-
 .fc-basescan-link {
   color: #8a663d;
   font-weight: 600;
@@ -158,6 +161,17 @@ h2.fc-title {
 }
 
 /* ===========
+   Tagline
+   =========== */
+
+.fc-tagline {
+  margin-top: 8px;
+  font-size: 0.78rem;
+  color: var(--fc-text-muted);
+  letter-spacing: 0.02em;
+}
+
+/* ===========
    Cards
    =========== */
 
@@ -165,7 +179,7 @@ h2.fc-title {
   background: radial-gradient(circle at top left, #ffffff 0, #fdf6ec 55%, #f6ebdd 100%);
   border-radius: 18px;
   border: 1px solid var(--fc-border-subtle);
-  padding: 18px 18px 16px;
+  padding: 18px;
   box-shadow:
     0 10px 25px rgba(180, 145, 104, 0.18),
     0 0 0 1px rgba(244, 230, 211, 0.85);
@@ -194,7 +208,6 @@ h2.fc-title {
     0 0 0 1px rgba(222, 194, 155, 0.9);
 }
 
-
 .fc-card-row {
   display: flex;
   gap: 18px;
@@ -205,11 +218,13 @@ h2.fc-title {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  flex: 1;
 }
 
 .fc-card-title {
   font-size: 1.05rem;
   font-weight: 600;
+  margin: 0;
 }
 
 /* avatar card on the left */
@@ -217,6 +232,7 @@ h2.fc-title {
 .fc-avatar {
   width: 74px;
   height: 74px;
+  min-width: 74px;
   border-radius: 22px;
   display: flex;
   align-items: center;
@@ -233,7 +249,6 @@ h2.fc-title {
     0 0 0 1px rgba(235, 206, 173, 0.9),
     inset 0 0 18px rgba(255, 255, 255, 0.45);
 }
-
 
 /* small metadata block */
 
@@ -352,6 +367,7 @@ h2.fc-title {
   box-shadow: none;
   color: var(--fc-text-muted);
 }
+
 /* Activity strip */
 
 .fc-activity {
@@ -383,6 +399,8 @@ h2.fc-title {
   align-items: baseline;
   font-size: 0.88rem;
   color: var(--fc-text-soft);
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .fc-activity-main {
@@ -400,20 +418,6 @@ h2.fc-title {
 .fc-activity-time {
   font-size: 0.8rem;
   color: var(--fc-text-muted);
-}
-
-/* ===========
-   Error message styling
-   =========== */
-
-.fc-error {
-  background: #fee;
-  border: 1px solid #fcc;
-  border-radius: 8px;
-  padding: 10px 14px;
-  margin-top: 10px;
-  font-size: 0.85rem;
-  color: #c33;
 }
 
 /* ===========
@@ -450,15 +454,18 @@ h2.fc-title {
 /* PFP thumbnail */
 
 .fc-pfp-wrapper {
-  width: 64px;
-  height: 64px;
+  width: 80px;
+  height: 80px;
+  min-width: 80px;
   border-radius: 999px;
-  border: 1px solid var(--fc-pill-border);
-  padding: 2px;
+  border: 2px solid var(--fc-pill-border);
+  padding: 3px;
   background: radial-gradient(circle at top, #f7e4cc 0, #f1d2b2 80%);
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(180, 145, 104, 0.2);
 }
 
 .fc-pfp {
@@ -469,12 +476,20 @@ h2.fc-title {
 }
 
 /* ===========
-   Responsive tweaks
+   Responsive tweaks for mini app
    =========== */
 
 @media (max-width: 640px) {
   .fc-shell {
-    padding-inline: 16px;
+    padding: 20px 16px 40px;
+  }
+
+  .fc-section {
+    margin-top: 16px;
+  }
+
+  .fc-card {
+    padding: 16px;
   }
 
   .fc-card-row {
@@ -482,9 +497,70 @@ h2.fc-title {
   }
 
   .fc-avatar {
-    width: 60px;
-    height: 60px;
+    width: 64px;
+    height: 64px;
+    min-width: 64px;
     border-radius: 18px;
     font-size: 1.8rem;
+  }
+  
+  .fc-pill-row {
+    gap: 6px;
+  }
+  
+  .fc-pill {
+    font-size: 0.72rem;
+    padding: 3px 8px;
+  }
+  
+  .fc-pfp-wrapper {
+    width: 70px;
+    height: 70px;
+    min-width: 70px;
+  }
+
+  /* Mobile: Stack the mint card vertically */
+  .fc-card > div {
+    flex-direction: column !important;
+    align-items: center !important;
+  }
+
+  .fc-card > div > div:last-child {
+    padding-top: 12px;
+  }
+
+  .fc-activity-item {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 4px;
+  }
+
+  h1.fc-title {
+    font-size: 1.8rem;
+  }
+}
+
+/* Extra small screens */
+@media (max-width: 400px) {
+  .fc-shell {
+    padding: 16px 12px 36px;
+  }
+
+  h1.fc-title {
+    font-size: 1.6rem;
+  }
+
+  .fc-card {
+    padding: 14px;
+  }
+
+  .fc-button {
+    font-size: 0.85rem;
+    padding: 0.5rem 1.1rem;
+  }
+
+  .fc-code {
+    font-size: 0.75rem;
+    padding: 1px 5px;
   }
 }
