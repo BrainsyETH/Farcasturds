@@ -29,11 +29,12 @@ export async function GET(_req: NextRequest) {
 
   try {
     hasMinted = await publicClient.readContract({
-      address: CONTRACT,
-      abi: farcasturdsAbi,
-      functionName: "hasMinted",
-      args: [BigInt(fid)],
-    });
+  address: CONTRACT,
+  abi: farcasturdsAbi,
+  functionName: "hasMinted",
+  args: [BigInt(fid)],
+  // Remove authorizationList requirement by adding this:
+} as any); // Temporary fix for viem type issue
   } catch (err) {
     console.error("Error reading hasMinted:", err);
   }
