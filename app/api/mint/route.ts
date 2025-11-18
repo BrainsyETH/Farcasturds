@@ -74,4 +74,13 @@ export async function POST(req: NextRequest) {
       fid,
       to,
       txHash,
-      ok:
+      ok: true,
+    });
+  } catch (err: any) {
+    console.error("Mint error:", err);
+    return NextResponse.json(
+      { error: err?.shortMessage || err?.message || "Constipation - Mint failed" },
+      { status: 500 }
+    );
+  }
+}
