@@ -1,5 +1,5 @@
 // lib/db.ts
-import { sql } from "@vercel/postgres";
+import { put, head } from "@vercel/blob";
 
 export type FarcasturdRow = {
   fid: number;
@@ -10,14 +10,36 @@ export type FarcasturdRow = {
 };
 
 export async function getFarcasturdRow(fid: number): Promise<FarcasturdRow | null> {
-  const result = await sql<FarcasturdRow>`
-    SELECT fid, image_base64, mime_type, prompt, created_at
-    FROM farcasturds
-    WHERE fid = ${fid}
-    LIMIT 1;
-  `;
+  try {
+    // Use Vercel Blob head() to check if it exists
+    const blobPath = `farcasturds/${fid}.png`;
+    const metadata = await head(blobPath);
+    
+    if (!metadata) {
+      return null;
+    }
 
-  return result.rows[0] ?? null;
+    // Fetch the actual blob
+    const response = await fetch(metadata.url);
+    if (!response.ok) {
+      console.error(`[DB] Failed to fetch blob: ${response.status}`);
+      return null;
+    }
+
+    const buffer = await response.arrayBuffer();
+    const base64 = Buffer.from(buffer).toString("base64");
+
+    return {
+      fid,
+      image_base64: base64,
+      mime_type: "image/png",
+      prompt: null, // No metadata storage without KV
+      created_at: metadata.uploadedAt?.toISOString() || new Date().toISOString(),
+    };
+  } catch (error) {
+    console.error(`[DB] Error fetching farcasturd for FID ${fid}:`, error);
+    return null;
+  }
 }
 
 export async function insertFarcasturdRow(params: {
@@ -28,15 +50,40 @@ export async function insertFarcasturdRow(params: {
 }): Promise<FarcasturdRow> {
   const { fid, imageBase64, mimeType = "image/png", prompt } = params;
 
-  const result = await sql<FarcasturdRow>`
-    INSERT INTO farcasturds (fid, image_base64, mime_type, prompt)
-    VALUES (${fid}, ${imageBase64}, ${mimeType}, ${prompt})
-    ON CONFLICT (fid) DO UPDATE
-      SET image_base64 = EXCLUDED.image_base64,
-          mime_type = EXCLUDED.mime_type,
-          prompt = EXCLUDED.prompt
-    RETURNING fid, image_base64, mime_type, prompt, created_at;
-  `;
+  try {
+    // Convert base64 to buffer
+    const buffer = Buffer.from(imageBase64, "base64");
 
-  return result.rows[0];
+    // Upload to Vercel Blob
+    const blob = await put(`farcasturds/${fid}.png`, buffer, {
+      access: 'public',
+      allowOverwrite: true, 
+    });
+
+    const created_at = new Date().toISOString();
+
+    console.log(`[DB] ✓ Uploaded farcasturd to ${blob.url}`);
+
+    return {
+      fid,
+      image_base64: imageBase64,
+      mime_type: mimeType,
+      prompt,
+      created_at,
+    };
+  } catch (error) {
+    console.error("[DB] Error inserting farcasturd:", error);
+    throw error;
+  }
+}
+
+// Helper function to check if farcasturd exists
+export async function farcasturdExists(fid: number): Promise<boolean> {
+  try {
+    const metadata = await head(`farcasturds/${fid}.png`);
+    return !!metadata;
+  } catch (error) {
+    // head() throws if blob doesn't exist
+    return false;
+  }
 }

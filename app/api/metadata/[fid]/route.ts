@@ -1,6 +1,7 @@
 // app/api/metadata/[fid]/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { ensureFarcasturd, buildOnchainMetadata } from "@/lib/farcasturdStore";
+import { getFarcasturd, buildOnchainMetadata } from "@/lib/farcasturdStore";
+import { farcasturdExists } from "@/lib/db";
 
 type Params = { params: { fid: string } };
 
@@ -14,7 +15,30 @@ export async function GET(_req: NextRequest, { params }: Params) {
   }
 
   try {
-    const record = await ensureFarcasturd(fidNum);
+    // Check if farcasturd exists WITHOUT generating
+    const exists = await farcasturdExists(fidNum);
+    
+    if (!exists) {
+      // Return default/placeholder metadata
+      return NextResponse.json({
+        name: `Farcasturd #${fidNum}`,
+        description: "Generate your unique Farcasturd!",
+        image: "/placeholder.png", // Add a placeholder image to your public folder
+        attributes: []
+      }, {
+        status: 200,
+        headers: {
+          "Cache-Control": "public, max-age=60", // Shorter cache for non-generated
+        },
+      });
+    }
+
+    // Only fetch existing farcasturd, don't generate
+    const record = await getFarcasturd(fidNum);
+    if (!record) {
+      throw new Error("Farcasturd exists but couldn't be fetched");
+    }
+    
     const metadata = buildOnchainMetadata(record);
 
     return NextResponse.json(metadata, {

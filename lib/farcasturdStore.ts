@@ -22,15 +22,22 @@ function mapRowToRecord(row: FarcasturdRow): FarcasturdRecord {
   };
 }
 
+// Get existing farcasturd WITHOUT generating
 export async function getFarcasturd(fid: number): Promise<FarcasturdRecord | null> {
   const row = await getFarcasturdRow(fid);
   if (!row) return null;
   return mapRowToRecord(row);
 }
 
+// Generate OR fetch existing farcasturd (only call this from generate button!)
 export async function ensureFarcasturd(fid: number): Promise<FarcasturdRecord> {
   const existing = await getFarcasturd(fid);
-  if (existing) return existing;
+  if (existing) {
+    console.log(`[Store] Farcasturd already exists for FID ${fid}`);
+    return existing;
+  }
+
+  console.log(`[Store] Generating new Farcasturd for FID ${fid}`);
 
   // 1) Fetch Farcaster profile
   const profile = await getFarcasterProfile(fid);
@@ -38,13 +45,15 @@ export async function ensureFarcasturd(fid: number): Promise<FarcasturdRecord> {
   // 2) Generate the image via OpenAI
   const { imageBuffer, prompt } = await generateFarcasterdImage(fid, profile);
 
-  // 3) Store base64 in Postgres
+  // 3) Store base64 in Blob
   const imageBase64 = imageBuffer.toString("base64");
   const row = await insertFarcasturdRow({
     fid,
     imageBase64,
     prompt,
   });
+
+  console.log(`[Store] ✓ Successfully generated Farcasturd for FID ${fid}`);
 
   return mapRowToRecord(row);
 }
@@ -61,6 +70,22 @@ export function buildOnchainMetadata(record: FarcasturdRecord) {
     attributes: [
       { trait_type: "FID", value: record.fid },
       { trait_type: "Generation", value: "gpt-image-1 + Farcaster PFP context" },
+    ],
+  };
+}
+
+// Helper to build placeholder metadata when farcasturd doesn't exist yet
+export function buildPlaceholderMetadata(fid: number) {
+  const externalUrl = `${APP_BASE_URL}/u/${fid}`;
+
+  return {
+    name: `Farcasturd #${fid}`,
+    description: "Generate your unique Farcasturd! A non-transferable badge tied to your Farcaster ID.",
+    image: `${APP_BASE_URL}/placeholder.png`, // Make sure to add this to your public folder
+    external_url: externalUrl,
+    attributes: [
+      { trait_type: "FID", value: fid },
+      { trait_type: "Status", value: "Not Generated" },
     ],
   };
 }
