@@ -1,0 +1,23 @@
+[
+  {
+    "type": "function",
+    "name": "mintFor",
+    "inputs": [
+      { "name": "to", "type": "address", "internalType": "address" },
+      { "name": "fid", "type": "uint256", "internalType": "uint256" }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "hasMinted",
+    "inputs": [
+      { "name": "fid", "type": "uint256", "internalType": "uint256" }
+    ],
+    "outputs": [
+      { "name": "", "type": "bool", "internalType": "bool" }
+    ],
+    "stateMutability": "view"
+  }
+]
