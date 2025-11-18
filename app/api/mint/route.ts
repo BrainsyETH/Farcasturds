@@ -5,30 +5,33 @@ import { privateKeyToAccount } from "viem/accounts";
 import { base } from "viem/chains";
 import { farcasturdsAbi } from "@/abi/Farcasturds";
 
-const CONTRACT = process.env
-  .NEXT_PUBLIC_FARCASTURDS_ADDRESS as `0x${string}`;
-const RPC = process.env.BASE_RPC_URL!;
-const MINTER_PK = process.env
-  .FARCASTURDS_MINTER_PRIVATE_KEY as `0x${string}`;
+// Lazy initialization - only runs at request time
+function getClients() {
+  const CONTRACT = process.env.NEXT_PUBLIC_FARCASTURDS_ADDRESS as `0x${string}`;
+  const RPC = process.env.BASE_RPC_URL!;
+  const MINTER_PK = process.env.FARCASTURDS_MINTER_PRIVATE_KEY as `0x${string}`;
 
-if (!CONTRACT || !RPC || !MINTER_PK) {
-  throw new Error(
-    "Missing NEXT_PUBLIC_FARCASTURDS_ADDRESS / BASE_RPC_URL / FARCASTURDS_MINTER_PRIVATE_KEY"
-  );
+  if (!CONTRACT || !RPC || !MINTER_PK) {
+    throw new Error(
+      "Missing NEXT_PUBLIC_FARCASTURDS_ADDRESS / BASE_RPC_URL / FARCASTURDS_MINTER_PRIVATE_KEY"
+    );
+  }
+
+  const account = privateKeyToAccount(MINTER_PK);
+
+  const publicClient = createPublicClient({
+    chain: base,
+    transport: http(RPC),
+  });
+
+  const walletClient = createWalletClient({
+    account,
+    chain: base,
+    transport: http(RPC),
+  });
+
+  return { CONTRACT, publicClient, walletClient };
 }
-
-const account = privateKeyToAccount(MINTER_PK);
-
-const publicClient = createPublicClient({
-  chain: base,
-  transport: http(RPC),
-});
-
-const walletClient = createWalletClient({
-  account,
-  chain: base,
-  transport: http(RPC),
-});
 
 export async function POST(req: NextRequest) {
   try {
@@ -40,6 +43,9 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
+
+    // Initialize clients at request time
+    const { CONTRACT, publicClient, walletClient } = getClients();
 
     // Check if this FID already minted
     const already = await publicClient.readContract({
@@ -68,13 +74,4 @@ export async function POST(req: NextRequest) {
       fid,
       to,
       txHash,
-      ok: true,
-    });
-  } catch (err: any) {
-    console.error("Mint error:", err);
-    return NextResponse.json(
-      { error: err?.shortMessage || err?.message || "Constipation - Mint failed" },
-      { status: 500 }
-    );
-  }
-}
+      ok:
