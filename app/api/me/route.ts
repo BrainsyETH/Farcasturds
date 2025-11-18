@@ -13,30 +13,34 @@ const MOCK_USER = {
   pfpUrl: "https://i.imgur.com/ODhZl9K.png",
 };
 
-const CONTRACT = process.env
-  .NEXT_PUBLIC_FARCASTURDS_ADDRESS as `0x${string}`;
-const RPC = process.env.BASE_RPC_URL!;
-
-const publicClient = createPublicClient({
-  chain: base,
-  transport: http(RPC),
-});
+const CONTRACT = process.env.NEXT_PUBLIC_FARCASTURDS_ADDRESS as `0x${string}`;
+const RPC = process.env.BASE_RPC_URL;
 
 export async function GET(_req: NextRequest) {
   const { fid } = MOCK_USER;
 
   let hasMinted = false;
 
-  try {
-    hasMinted = await publicClient.readContract({
-  address: CONTRACT,
-  abi: farcasturdsAbi,
-  functionName: "hasMinted",
-  args: [BigInt(fid)],
-  // Remove authorizationList requirement by adding this:
-} as any); // Temporary fix for viem type issue
-  } catch (err) {
-    console.error("Error reading hasMinted:", err);
+  // Only check on-chain status if env vars are configured
+  if (CONTRACT && RPC) {
+    try {
+      const publicClient = createPublicClient({
+        chain: base,
+        transport: http(RPC),
+      });
+
+      hasMinted = await publicClient.readContract({
+        address: CONTRACT,
+        abi: farcasturdsAbi,
+        functionName: "hasMinted",
+        args: [BigInt(fid)],
+      } as any);
+    } catch (err) {
+      console.error("Error reading hasMinted:", err);
+      // Don't fail the request, just return false for hasMinted
+    }
+  } else {
+    console.warn("Contract or RPC not configured - skipping on-chain check");
   }
 
   return NextResponse.json({

@@ -3,7 +3,8 @@ import { getFarcasterProfile } from "./farcasterClient";
 import { generateFarcasterdImage } from "./farcasturdAi";
 import { getFarcasturdRow, insertFarcasturdRow, type FarcasturdRow } from "./db";
 
-const APP_BASE_URL = process.env.APP_BASE_URL!;
+// Fallback to a relative URL if APP_BASE_URL is not set
+const APP_BASE_URL = process.env.APP_BASE_URL || "";
 
 export type FarcasturdRecord = {
   fid: number;
@@ -15,7 +16,7 @@ export type FarcasturdRecord = {
 function mapRowToRecord(row: FarcasturdRow): FarcasturdRecord {
   return {
     fid: row.fid,
-    // Image is served by our image route (see below)
+    // Image is served by our image route
     imageUrl: `${APP_BASE_URL}/api/image/${row.fid}`,
     prompt: row.prompt ?? "",
     createdAt: row.created_at,
@@ -59,13 +60,13 @@ export async function ensureFarcasturd(fid: number): Promise<FarcasturdRecord> {
 }
 
 export function buildOnchainMetadata(record: FarcasturdRecord) {
-  const externalUrl = `${APP_BASE_URL}/u/${record.fid}`;
+  const externalUrl = APP_BASE_URL ? `${APP_BASE_URL}/u/${record.fid}` : `/u/${record.fid}`;
 
   return {
     name: `Farcasturd #${record.fid}`,
     description:
       "Your 1:1 Farcasturd on Base — a non-transferable badge tied to your Farcaster ID. Generated once from a single Farcasturd prompt using the holder's Farcaster profile.",
-    image: record.imageUrl,        // <- stable, persisted URL
+    image: record.imageUrl,
     external_url: externalUrl,
     attributes: [
       { trait_type: "FID", value: record.fid },
@@ -76,12 +77,12 @@ export function buildOnchainMetadata(record: FarcasturdRecord) {
 
 // Helper to build placeholder metadata when farcasturd doesn't exist yet
 export function buildPlaceholderMetadata(fid: number) {
-  const externalUrl = `${APP_BASE_URL}/u/${fid}`;
+  const externalUrl = APP_BASE_URL ? `${APP_BASE_URL}/u/${fid}` : `/u/${fid}`;
 
   return {
     name: `Farcasturd #${fid}`,
     description: "Generate your unique Farcasturd! A non-transferable badge tied to your Farcaster ID.",
-    image: `${APP_BASE_URL}/placeholder.png`, // Make sure to add this to your public folder
+    image: "/placeholder.png", // Add a placeholder image to your public folder
     external_url: externalUrl,
     attributes: [
       { trait_type: "FID", value: fid },

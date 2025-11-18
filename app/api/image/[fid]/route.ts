@@ -1,39 +1,38 @@
-// app/api/generate/route.ts
+// app/api/image/[fid]/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { ensureFarcasturd } from "@/lib/farcasturdStore";
+import { getFarcasturdRow } from "@/lib/db";
 
-export async function POST(req: NextRequest) {
+type Params = { params: { fid: string } };
+
+export const runtime = "nodejs";
+
+export async function GET(_req: NextRequest, { params }: Params) {
+  const fidNum = Number(params.fid);
+
+  if (!fidNum || Number.isNaN(fidNum) || fidNum <= 0) {
+    return new NextResponse("Invalid FID", { status: 400 });
+  }
+
   try {
-    const { fid } = await req.json();
+    const row = await getFarcasturdRow(fidNum);
 
-    if (!fid || typeof fid !== "number") {
-      return NextResponse.json(
-        { error: "Valid FID required" },
-        { status: 400 }
-      );
+    if (!row) {
+      return new NextResponse("Farcasturd not found", { status: 404 });
     }
 
-    console.log(`[Generate] Starting generation for FID ${fid}`);
+    // Convert base64 to buffer
+    const imageBuffer = Buffer.from(row.image_base64, "base64");
 
-    // This will:
-    // 1. Fetch Farcaster profile from Neynar
-    // 2. Generate AI image via OpenAI
-    // 3. Store base64 image in Postgres
-    const record = await ensureFarcasturd(fid);
-
-    console.log(`[Generate] Successfully generated for FID ${fid}`);
-
-    return NextResponse.json({
-      success: true,
-      fid: record.fid,
-      imageUrl: record.imageUrl,
-      prompt: record.prompt,
+    // Return the image with proper headers
+    return new NextResponse(imageBuffer, {
+      status: 200,
+      headers: {
+        "Content-Type": row.mime_type || "image/png",
+        "Cache-Control": "public, max-age=31536000, immutable",
+      },
     });
   } catch (err: any) {
-    console.error("[Generate] Error:", err);
-    return NextResponse.json(
-      { error: err.message || "Generation failed" },
-      { status: 500 }
-    );
+    console.error("Image fetch error for fid", fidNum, err);
+    return new NextResponse("Failed to fetch image", { status: 500 });
   }
 }
