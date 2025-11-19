@@ -2,14 +2,14 @@ import { Metadata } from 'next'
 import './globals.css' // Adjust this import based on your actual CSS file
 
 export const metadata: Metadata = {
-  title: 'Farcasturd',
-  description: 'The ultimate Farcaster Mini App experience',
+  title: 'Farcasturds',
+  description: 'Pumps, but mostly dumps.',
   icons: {
     icon: '/icon.png',
   },
   openGraph: {
-    title: 'Farcasturd',
-    description: 'Play now on Farcaster',
+    title: 'Farcasturds',
+    description: 'Your Number Two on Base',
     images: ['/preview.png'],
   },
   other: {
@@ -18,13 +18,13 @@ export const metadata: Metadata = {
       version: "1",
       imageUrl: "https://farcasturds.vercel.app/preview.png",
       button: {
-        title: "🎮 Play",
+        title: "💩 Mint a Turd",
         action: {
           type: "launch_frame",
-          name: "Farcasturd",
+          name: "Farcasturds",
           url: "https://farcasturds.vercel.app",
           splashImageUrl: "https://farcasturds.vercel.app/splash.png",
-          splashBackgroundColor: "#1a1a1a"
+          splashBackgroundColor: "#f5eee4"
         }
       }
     }),
@@ -33,13 +33,13 @@ export const metadata: Metadata = {
       version: "1",
       imageUrl: "https://farcasturds.vercel.app/preview.png",
       button: {
-        title: "🎮 Play",
+        title: "💩 Mint a Turd",
         action: {
           type: "launch_frame",
-          name: "Farcasturd",
+          name: "Farcasturds",
           url: "https://farcasturds.vercel.app",
           splashImageUrl: "https://farcasturds.vercel.app/splash.png",
-          splashBackgroundColor: "#1a1a1a"
+          splashBackgroundColor: "#f5eee4"
         }
       }
     })
