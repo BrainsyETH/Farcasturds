@@ -1,7 +1,7 @@
 // app/api/me/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { createPublicClient, http } from "viem";
-import { base } from "viem/chains";
+import { baseSepolia } from "viem/chains"; // ← Changed from 'base'
 import { NeynarAPIClient } from "@neynar/nodejs-sdk";
 import { farcasturdsAbi } from "@/abi/Farcasturds";
 
@@ -90,7 +90,7 @@ export async function GET(req: NextRequest) {
   if (CONTRACT && RPC) {
     try {
       const publicClient = createPublicClient({
-        chain: base,
+        chain: baseSepolia, // ← Changed from 'base'
         transport: http(RPC),
       });
 

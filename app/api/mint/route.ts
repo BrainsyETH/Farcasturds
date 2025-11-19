@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createWalletClient, createPublicClient, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { base } from "viem/chains";
+import { baseSepolia } from "viem/chains"; // ← Changed from 'base' to 'baseSepolia'
 import { farcasturdsAbi } from "@/abi/Farcasturds";
 
 // Lazy initialization - only runs at request time
@@ -20,13 +20,13 @@ function getClients() {
   const account = privateKeyToAccount(MINTER_PK);
 
   const publicClient = createPublicClient({
-    chain: base,
+    chain: baseSepolia, // ← Changed from 'base'
     transport: http(RPC),
   });
 
   const walletClient = createWalletClient({
     account,
-    chain: base,
+    chain: baseSepolia, // ← Changed from 'base'
     transport: http(RPC),
   });
 
