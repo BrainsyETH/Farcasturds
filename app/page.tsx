@@ -214,16 +214,8 @@ export default function HomePage() {
       {/* Header / identity */}
       <section className="fc-section">
         <div className="fc-header-row">
-          <div>
-            <div className="fc-kicker">Farcaster mini app</div>
             <h1 className="fc-title fc-gradient-text">Farcasturd</h1>
-            <p className="fc-subtle">
-              Generate and mint your 1:1 Farcasturd on Base — a non-transferable
-              badge tied to your Farcaster ID.
-            </p>
-          </div>
         </div>
-
         <div className="fc-pill-row">
           <span className="fc-pill">
             Logged in as <strong>{me.displayName || me.username}</strong>
@@ -237,7 +229,7 @@ export default function HomePage() {
               {truncateAddress(me.wallet) || "0x0000…0000"}
             </span>
           </span>
-          <span className="fc-pill fc-pill-soft">Soulbound on Base</span>
+          <span className="fc-pill fc-pill-soft">Soulbound</span>
         </div>
       </section>
 
@@ -308,11 +300,6 @@ export default function HomePage() {
                     className="fc-pfp"
                   />
                 </div>
-                <span className="fc-subtle" style={{ fontSize: "0.75rem", textAlign: "center" }}>
-                  Your Farcaster
-                  <br />
-                  profile
-                </span>
               </div>
             )}
           </div>
@@ -370,7 +357,7 @@ export default function HomePage() {
           ) : (
             <p className="fc-subtle">
               {hasGenerated
-                ? "Loading your Farcasturd..."
+                ? "Dumping your Farcasturd..."
                 : "Generate your Farcasturd to see it here!"}
             </p>
           )}

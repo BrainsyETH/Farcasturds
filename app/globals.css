@@ -3,7 +3,7 @@
    =========== */
 
 :root {
-  --fc-bg: #f5eee4;
+  --fc-bg: #f0e4f5;
   --fc-bg-alt: #f9f3eb;
   --fc-bg-card: #ffffff;
   --fc-bg-soft: #f9f1e7;
@@ -49,7 +49,7 @@ body {
 
 .fc-root {
   min-height: 100vh;
-  background: linear-gradient(135deg, #fdf7ef, #f3e4d4, #f0e0ce, #f7eee3);
+  background: linear-gradient(135deg, #8f4eb1, #9049a4, #762c8f, #622a6c);
   background-size: 400% 400%;
   animation: gradientShift 15s ease infinite;
   color: var(--fc-text);

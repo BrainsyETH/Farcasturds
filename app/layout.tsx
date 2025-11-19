@@ -1,5 +1,5 @@
 import { Metadata } from 'next'
-import './globals.css' // Adjust this import based on your actual CSS file
+import './globals.css'
 
 export const metadata: Metadata = {
   title: 'Farcasturds',
@@ -54,7 +54,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        {/* Add any additional head elements here */}
+        {/* Add */}
       </head>
       <body>
         {children}
