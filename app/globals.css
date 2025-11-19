@@ -667,7 +667,7 @@ h2.fc-title {
   h1.fc-title {
     font-size: 1.8rem;
   }
-}
+
 
 /* Mobile scaling for preview only */
 @media (max-width: 480px) {
