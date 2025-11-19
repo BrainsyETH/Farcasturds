@@ -1,20 +1,25 @@
 // lib/colorExtractor.ts
-import Vibrant from "node-vibrant";
+import { Vibrant } from "node-vibrant/node";
 
 export type ColorPalette = {
-  primary: string;
-  secondary: string;
-  vibrant: string;
-  muted: string;
+  primary: string;      // Main color
+  secondary: string;    // Accent color
+  vibrant: string;      // Most vibrant color
+  muted: string;        // Muted/background color
 };
 
+/**
+ * Extract dominant colors from a profile picture URL
+ */
 export async function extractColorsFromPfp(
   pfpUrl: string
 ): Promise<ColorPalette | null> {
   try {
     console.log(`[Color] Extracting colors from: ${pfpUrl}`);
 
-    const palette = await Vibrant.from(pfpUrl).getPalette();
+    // Use the constructor API to avoid any bundler weirdness with .from()
+    const v = new Vibrant(pfpUrl);
+    const palette = await v.getPalette();
 
     if (!palette) {
       console.warn("[Color] No palette extracted");
@@ -28,7 +33,7 @@ export async function extractColorsFromPfp(
       muted: palette.Muted?.hex || "#DEB887",
     };
   } catch (error: any) {
-    console.error("[Color] Extraction failed:", error.message);
+    console.error("[Color] Extraction failed:", error?.message || error);
     return null;
   }
 }
