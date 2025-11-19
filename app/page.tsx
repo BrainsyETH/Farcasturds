@@ -44,24 +44,47 @@ export default function HomePage() {
   useEffect(() => {
     async function initializeApp() {
       try {
-        // Initialize the SDK
+        console.log("[App] Initializing Farcaster SDK...");
+        
+        // Signal that the app is ready
         sdk.actions.ready();
 
-        // Get the Farcaster context
-        const context = sdk.context;
-        
-        if (!context?.user?.fid) {
-          throw new Error("Unable to get Farcaster user context");
+        // Wait a bit for context to be available (SDK needs time to receive context from parent)
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        let viewerFid: number | undefined;
+
+        // Try to get context from SDK
+        if (sdk.context?.user?.fid) {
+          viewerFid = sdk.context.user.fid;
+          console.log("[App] ✓ Loaded viewer FID from SDK context:", viewerFid);
+        } else {
+          // Fallback: Check URL params (useful for testing)
+          const params = new URLSearchParams(window.location.search);
+          const fidParam = params.get('fid');
+          
+          if (fidParam) {
+            viewerFid = parseInt(fidParam, 10);
+            console.log("[App] ⚠️ Using FID from URL param (dev mode):", viewerFid);
+          }
         }
 
-        const viewerFid = context.user.fid;
-        console.log("[App] Loaded viewer FID:", viewerFid);
+        if (!viewerFid) {
+          throw new Error("Unable to get Farcaster user context. Try refreshing or check the embed configuration.");
+        }
 
         // Fetch user data from our API
+        console.log("[App] Fetching user data for FID:", viewerFid);
         const res = await fetch(`/api/me?fid=${viewerFid}`);
-        if (!res.ok) throw new Error("Failed to fetch user info");
+        
+        if (!res.ok) {
+          const errorText = await res.text();
+          console.error("[App] API error:", errorText);
+          throw new Error("Failed to fetch user info");
+        }
         
         const data = await res.json();
+        console.log("[App] ✓ User data loaded:", data);
         setMe(data);
       } catch (err: any) {
         console.error("[App] Initialization error:", err);
@@ -209,7 +232,10 @@ export default function HomePage() {
           <div className="fc-card">
             <h1 className="fc-title">Farcasturd</h1>
             <p className="fc-status">
-              Unable to load user info. Please refresh the page.
+              {status || "Unable to load user info. Please refresh the page."}
+            </p>
+            <p className="fc-subtle" style={{ marginTop: 12, fontSize: "0.85rem" }}>
+              💡 Dev tip: Try adding ?fid=YOUR_FID to the URL for testing
             </p>
           </div>
         </section>
