@@ -23,12 +23,12 @@ export async function GET(_req: NextRequest, { params }: Params) {
       return NextResponse.json({
         name: `Farcasturds #${fidNum}`,
         description: "Generate your unique Farcasturd!",
-        image: "/placeholder.png", // Add a placeholder image to your public folder
+        image: "/placeholder.png",
         attributes: []
       }, {
         status: 200,
         headers: {
-          "Cache-Control": "public, max-age=60", // Shorter cache for non-generated
+          "Cache-Control": "no-cache, no-store, must-revalidate", // FIXED: Don't cache placeholder
         },
       });
     }

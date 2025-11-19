@@ -139,7 +139,10 @@ export default function HomePage() {
   useEffect(() => {
     async function fetchMetadata(fid: number) {
       try {
-        const res = await fetch(`/api/metadata/${fid}`);
+        // FIXED: Bypass cache with cache-busting query param
+        const res = await fetch(`/api/metadata/${fid}?t=${Date.now()}`, {
+          cache: 'no-store'
+        });
         if (!res.ok) return;
 
         const data = await res.json();
@@ -180,7 +183,10 @@ export default function HomePage() {
       setStatus(`✓ Farcasturd generated! Ready to mint on-chain.`);
       setHasGenerated(true);
 
-      const metaRes = await fetch(`/api/metadata/${me.fid}`);
+      // FIXED: Bypass cache when refetching after generation
+      const metaRes = await fetch(`/api/metadata/${me.fid}?t=${Date.now()}`, {
+        cache: 'no-store'
+      });
       if (metaRes.ok) {
         const metaData = await metaRes.json();
         setMeta(metaData);
