@@ -442,6 +442,8 @@ h2.fc-title {
     transform 120ms ease-out,
     box-shadow 120ms ease-out,
     filter 120ms ease-out;
+    justify-content: center;
+  text-align: center;
 }
 
 .fc-button:hover:not(:disabled) {
@@ -633,7 +635,7 @@ h2.fc-title {
 }
 
 /* Shimmer stays on the wrapper */
-.fc-nft-preview::after {
+.fc-nft-preview:after {
   content: "";
   position: absolute;
   inset: 0;
