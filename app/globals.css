@@ -552,66 +552,64 @@ h2.fc-title {
   width: 100%;
   display: flex;
   justify-content: center;
-  margin: 8px 0 14px;
+  margin: 12px 0 20px;
 }
 
+/* The bordered square frame */
 .fc-nft-preview {
-  position: relative;           /* shimmer anchor */
-  display: inline-flex;         /* shrink-wrap to image */
-  justify-content: center;
-  align-items: center;
-}
-
-/* Image WITH purple border */
-.fc-nft-preview img {
-  display: block;
-  width: 300px;                 /* adjust size as needed */
-  height: auto;
+  width: 260px;                /* adjust size if needed */
+  aspect-ratio: 1 / 1;         /* always a perfect square */
 
   border-radius: 24px;
-  border: 3px solid var(--fc-farcaster-purple);
+  overflow: hidden;
+  background: white;
 
+  border: 3px solid var(--fc-farcaster-purple);
   box-shadow:
     0 6px 16px rgba(143, 91, 255, 0.22),
     0 0 0 1px rgba(143, 91, 255, 0.4);
 
-  background: #ffffff;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* The actual image */
+.fc-nft-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;        /* NO CROPPING */
+  object-position: center;    /* explicit centering */
+  display: block;
 }
 
 /* Shimmer overlay */
 .fc-nft-preview::after {
   content: "";
   position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
+  inset: 0;
+  pointer-events: none;
 
   background: linear-gradient(
     45deg,
     transparent 30%,
-    rgba(255, 255, 255, 0.25) 50%,
+    rgba(255, 255, 255, 0.28) 50%,
     transparent 70%
   );
 
   animation: shimmer 3s infinite;
-  pointer-events: none;        /* allows clicking image below */
-  border-radius: inherit;
 }
 
 @keyframes shimmer {
-  0% {
-    transform: translateX(-100%) translateY(-100%) rotate(45deg);
-  }
-  100% {
-    transform: translateX(100%) translateY(100%) rotate(45deg);
-  }
+  0%   { transform: translate(-100%, -100%) rotate(45deg); }
+  100% { transform: translate(100%, 100%) rotate(45deg); }
 }
 
 /* Mobile scaling */
 @media (max-width: 480px) {
-  .fc-nft-preview img {
-    width: 160px;
+  .fc-nft-preview {
+    width: 180px;
   }
 }
 

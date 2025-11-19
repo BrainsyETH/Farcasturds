@@ -47,7 +47,7 @@ The image must show:
 - Big or small expressive eyes and a friendly smile.
 - A dynamic, engaging pose that reflects ${personalityHints || "a friendly, approachable personality"}.
 - Modern 3D render quality, similar to high-end NFT/PFP characters.
-- Soft studio-style lighting and a simple gradient background.
+- Soft studio-style lighting and a simple gradient background in a random shade of purple.
 - The color of the character can be versatile.
 
 ${colorScheme}
