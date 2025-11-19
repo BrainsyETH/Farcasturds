@@ -47,46 +47,68 @@ export default function HomePage() {
         console.log("[App] Initializing Farcaster SDK...");
         
         // Signal that the app is ready
-        sdk.actions.ready();
+        try {
+          sdk.actions.ready();
+        } catch (sdkError) {
+          console.warn("[App] SDK ready() failed (expected in embed tool):", sdkError);
+        }
 
-        // Wait a bit for context to be available (SDK needs time to receive context from parent)
-        await new Promise(resolve => setTimeout(resolve, 200));
+        // Wait for context to potentially be available
+        await new Promise(resolve => setTimeout(resolve, 300));
 
         let viewerFid: number | undefined;
 
         // Try to get context from SDK
-        console.log("[App] SDK context:", sdk.context);
-        
-        if (sdk.context?.user?.fid) {
-          const rawFid = sdk.context.user.fid;
-          console.log("[App] Raw FID value:", rawFid, "Type:", typeof rawFid);
+        try {
+          console.log("[App] Checking SDK context...");
+          console.log("[App] SDK context available:", !!sdk.context);
+          console.log("[App] SDK context.user:", sdk.context?.user);
           
-          // Handle different FID types (number, BigInt, or object)
-          if (typeof rawFid === 'number') {
-            viewerFid = rawFid;
-          } else if (typeof rawFid === 'bigint') {
-            viewerFid = Number(rawFid);
-          } else if (typeof rawFid === 'string') {
-            viewerFid = parseInt(rawFid, 10);
-          } else if (rawFid && typeof rawFid === 'object') {
-            // Try to convert object to number
-            viewerFid = Number(rawFid.toString());
+          if (sdk.context?.user?.fid) {
+            const rawFid = sdk.context.user.fid;
+            console.log("[App] Raw FID value:", rawFid, "Type:", typeof rawFid);
+            
+            // Handle different FID types (number, BigInt, or object)
+            if (typeof rawFid === 'number') {
+              viewerFid = rawFid;
+            } else if (typeof rawFid === 'bigint') {
+              viewerFid = Number(rawFid);
+            } else if (typeof rawFid === 'string') {
+              viewerFid = parseInt(rawFid, 10);
+            } else if (rawFid && typeof rawFid === 'object') {
+              // Try to convert object to number
+              viewerFid = Number(rawFid.toString());
+            }
+            
+            if (viewerFid) {
+              console.log("[App] ✓ Loaded viewer FID from SDK context:", viewerFid);
+            }
           }
-          
-          console.log("[App] ✓ Loaded viewer FID from SDK context:", viewerFid);
-        } else {
-          // Fallback: Check URL params (useful for testing)
+        } catch (contextError) {
+          console.warn("[App] Error accessing SDK context:", contextError);
+        }
+
+        // Fallback: Check URL params (for testing in embed tool)
+        if (!viewerFid) {
           const params = new URLSearchParams(window.location.search);
           const fidParam = params.get('fid');
           
           if (fidParam) {
             viewerFid = parseInt(fidParam, 10);
-            console.log("[App] ⚠️ Using FID from URL param (dev mode):", viewerFid);
+            console.log("[App] ✓ Using FID from URL param:", viewerFid);
+          } else {
+            // Check if we're in embed tool vs real Warpcast
+            const isEmbedTool = window.location.hostname.includes('localhost') || 
+                               window.self !== window.top;
+            
+            if (isEmbedTool) {
+              console.log("[App] Detected embed tool environment - FID param required");
+            }
           }
         }
 
         if (!viewerFid || isNaN(viewerFid)) {
-          throw new Error("Unable to get valid Farcaster user FID. Try adding ?fid=YOUR_FID to the URL.");
+          throw new Error("No FID available. Add ?fid=YOUR_FID to test in the embed tool.");
         }
 
         // Fetch user data from our API
@@ -95,8 +117,8 @@ export default function HomePage() {
         
         if (!res.ok) {
           const errorText = await res.text();
-          console.error("[App] API error:", errorText);
-          throw new Error("Failed to fetch user info");
+          console.error("[App] API error:", res.status, errorText);
+          throw new Error(`Failed to fetch user info: ${res.status}`);
         }
         
         const data = await res.json();
@@ -104,7 +126,7 @@ export default function HomePage() {
         setMe(data);
       } catch (err: any) {
         console.error("[App] Initialization error:", err);
-        setStatus(err.message || "Unable to load user info. Please refresh the page.");
+        setStatus(err.message || "Unable to load user info.");
       } finally {
         setLoading(false);
       }
@@ -170,7 +192,7 @@ export default function HomePage() {
       } else if (errorMsg.includes("rate limit")) {
         setStatus("⚠️ Too many requests. Please wait a moment and try again.");
       } else {
-        setStatus(`⚠️ Generation failed. Please try again.`);
+        setStatus(`⚠️ Generation failed: ${errorMsg}`);
       }
       console.error("Generation failed:", err);
     } finally {
@@ -234,7 +256,7 @@ export default function HomePage() {
       <main className="fc-shell">
         <section className="fc-section">
           <div className="fc-card">
-            <p className="fc-subtle">Turds loading...</p>
+            <p className="fc-subtle">Loading your Farcasturd...</p>
           </div>
         </section>
       </main>
@@ -247,12 +269,35 @@ export default function HomePage() {
         <section className="fc-section">
           <div className="fc-card">
             <h1 className="fc-title">Farcasturd</h1>
-            <p className="fc-status">
-              {status || "Unable to load user info. Please refresh the page."}
+            <p className="fc-status" style={{ marginBottom: 16 }}>
+              {status || "Unable to load user info"}
             </p>
-            <p className="fc-subtle" style={{ marginTop: 12, fontSize: "0.85rem" }}>
-              💡 Dev tip: Try adding ?fid=YOUR_FID to the URL for testing
-            </p>
+            
+            <div style={{ 
+              padding: "16px", 
+              background: "rgba(255, 243, 205, 0.3)", 
+              borderRadius: "12px",
+              border: "1px solid rgba(255, 193, 7, 0.3)"
+            }}>
+              <p style={{ fontWeight: 600, marginBottom: 8 }}>🧪 Testing in Embed Tool?</p>
+              <p className="fc-subtle" style={{ fontSize: "0.9rem", marginBottom: 12 }}>
+                The Farcaster SDK can't access your FID in the embed tool. Add your FID to the URL:
+              </p>
+              <div style={{ 
+                background: "white", 
+                padding: "10px", 
+                borderRadius: "8px",
+                fontFamily: "monospace",
+                fontSize: "0.85rem",
+                wordBreak: "break-all",
+                marginBottom: 12
+              }}>
+                {window.location.origin}?fid=YOUR_FID
+              </div>
+              <p className="fc-subtle" style={{ fontSize: "0.85rem" }}>
+                Replace YOUR_FID with your actual Farcaster ID number (e.g., ?fid=198116)
+              </p>
+            </div>
           </div>
         </section>
       </main>
@@ -295,7 +340,7 @@ export default function HomePage() {
               </h2>
               <p className="fc-subtle">
                 {hasGenerated
-                  ? "Your Farcasturd is ready is ready to dump!"
+                  ? "Your Farcasturd is ready to dump!"
                   : "First, generate your unique Farcasturd, loosely based on your Farcaster profile."}
               </p>
 
