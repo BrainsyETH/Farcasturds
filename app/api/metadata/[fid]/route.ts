@@ -21,7 +21,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
     if (!exists) {
       // Return default/placeholder metadata
       return NextResponse.json({
-        name: `Farcasturd #${fidNum}`,
+        name: `Farcasturds #${fidNum}`,
         description: "Generate your unique Farcasturd!",
         image: "/placeholder.png", // Add a placeholder image to your public folder
         attributes: []

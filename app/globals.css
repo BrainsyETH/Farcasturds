@@ -268,6 +268,8 @@ h2.fc-title {
   font-size: 1.05rem;
   font-weight: 600;
   margin: 0;
+  justify-content: center;
+  text-align: center;
 }
 
 /* avatar card on the left */
@@ -318,6 +320,17 @@ h2.fc-title {
   flex-wrap: wrap;
   gap: 6px;
   margin-top: 10px;
+}
+/* Center attribute pills */
+.fc-attr-row {
+  justify-content: center;
+  text-align: center;
+}
+
+/* Center pill rows */
+.fc-pill-row {
+  justify-content: center;
+  text-align: center;
 }
 
 .fc-attr-pill {

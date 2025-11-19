@@ -141,7 +141,7 @@ export default function HomePage() {
     }
 
     setMinting(true);
-    setStatus("⛓️ Minting Farcasturd on Base...");
+    setStatus("💩 Minting Farcasturd on Base...");
     setLastTxHash(null);
 
     try {
@@ -184,7 +184,7 @@ export default function HomePage() {
       <main className="fc-shell">
         <section className="fc-section">
           <div className="fc-card">
-            <p className="fc-subtle">Loading Farcasturd mini app…</p>
+            <p className="fc-subtle">Turds loading...</p>
           </div>
         </section>
       </main>
@@ -229,7 +229,6 @@ export default function HomePage() {
               {truncateAddress(me.wallet) || "0x0000…0000"}
             </span>
           </span>
-          <span className="fc-pill fc-pill-soft">Soulbound</span>
         </div>
       </section>
 
@@ -239,11 +238,11 @@ export default function HomePage() {
           <div style={{ display: "flex", gap: 20, alignItems: "flex-start" }}>
             <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 10 }}>
               <h2 className="fc-card-title">
-                {hasGenerated ? "Farcasturd Minting" : "Generate Your Farcasturd"}
+                {hasGenerated ? "" : "Generate Your 1:1 Farcasturd"}
               </h2>
               <p className="fc-subtle">
                 {hasGenerated
-                  ? "Your Farcasturd is ready is ready to mint!"
+                  ? "Your Farcasturd is ready is ready to dump!"
                   : "First, generate your unique Farcasturd, loosely based on your Farcaster profile."}
               </p>
 
@@ -269,15 +268,15 @@ export default function HomePage() {
                       {alreadyMinted
                         ? "Already minted ✓"
                         : minting
-                        ? "Minting... ⛓️"
-                        : "Mint on Base"}
+                        ? "Minting... 💩"
+                        : "Mint"}
                     </button>
                   </form>
                 )}
               </div>
 
               <p className="fc-tagline">
-                Soulbound · AI-Generated · Built on Base
+                Unique · Soulbound · No Dumping
               </p>
 
               {status && <p className="fc-status">{status}</p>}
@@ -331,10 +330,6 @@ export default function HomePage() {
                 <div>
                   <strong>Image URL:</strong>{" "}
                   <span className="fc-code">{meta.image}</span>
-                </div>
-                <div style={{ marginTop: 4 }}>
-                  <strong>External URL:</strong>{" "}
-                  <span className="fc-code">{meta.external_url}</span>
                 </div>
               </div>
 
