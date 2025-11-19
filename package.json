@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@farcaster/miniapp-sdk": "^0.2.1",
     "@neynar/nodejs-sdk": "^3.89.0",
     "@vercel/blob": "^2.0.0",
     "@vercel/kv": "^3.0.0",

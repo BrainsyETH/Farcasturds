@@ -31,3 +31,6 @@ contracts/lib/
 
 # DS Store
 .DS_Store
+
+# Ignore verification configs
+.well-known/

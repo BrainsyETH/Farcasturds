@@ -1,6 +1,7 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { sdk } from "@farcaster/miniapp-sdk";
 
 type MeResponse = {
   fid: number;
@@ -39,26 +40,28 @@ export default function HomePage() {
   const [lastTxHash, setLastTxHash] = useState<string | null>(null);
   const [hasGenerated, setHasGenerated] = useState(false);
 
-  // Load Farcaster user (mock identity for now, real hasMinted from API)
+  // Initialize SDK + load Farcaster user
   useEffect(() => {
-  async function fetchMe() {
-    try {
-      const viewerFid = 198116; // TEMP: replace with real viewer FID
-      const res = await fetch(`/api/me?fid=${viewerFid}`);
-      if (!res.ok) throw new Error("Failed to fetch user info");
-      const data = await res.json();
-      setMe(data);
-    } catch (err) {
-      console.error(err);
-      setStatus("Unable to load user info. Please refresh the page.");
-    } finally {
-      setLoading(false);
+    // Make sure we only touch the SDK in the browser
+    sdk.actions.ready();
+
+    async function fetchMe() {
+      try {
+        const viewerFid = 198116; // TEMP: replace with real viewer FID
+        const res = await fetch(`/api/me?fid=${viewerFid}`);
+        if (!res.ok) throw new Error("Failed to fetch user info");
+        const data = await res.json();
+        setMe(data);
+      } catch (err) {
+        console.error(err);
+        setStatus("Unable to load user info. Please refresh the page.");
+      } finally {
+        setLoading(false);
+      }
     }
-  }
 
-  fetchMe();
-}, []);
-
+    fetchMe();
+  }, []);
 
   // Load metadata preview for this fid
   useEffect(() => {
@@ -66,10 +69,10 @@ export default function HomePage() {
       try {
         const res = await fetch(`/api/metadata/${fid}`);
         if (!res.ok) return;
-        
+
         const data = await res.json();
-        
-        if (data.image && !data.image.includes('placeholder')) {
+
+        if (data.image && !data.image.includes("placeholder")) {
           setMeta(data);
           setHasGenerated(true);
         }
@@ -238,11 +241,10 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Generation & Mint section - IMPROVED LAYOUT */}
+      {/* Generation & Mint section */}
       <section className="fc-section">
         <div className="fc-card">
           <div style={{ display: "flex", gap: 20, alignItems: "flex-start" }}>
-            {/* Left: Content */}
             <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 10 }}>
               <h2 className="fc-card-title">
                 {hasGenerated ? "Farcasturd Minting" : "Generate Your Farcasturd"}
@@ -283,23 +285,22 @@ export default function HomePage() {
               </div>
 
               <p className="fc-tagline">
-                {hasGenerated
-                  ? "Soulbound · AI-Generated · Built on Base"
-                  : "Soulbound · AI-Generated · Built on Base"}
+                Soulbound · AI-Generated · Built on Base
               </p>
 
               {status && <p className="fc-status">{status}</p>}
             </div>
 
-            {/* Right: Profile Picture */}
             {me.pfpUrl && (
-              <div style={{ 
-                display: "flex", 
-                flexDirection: "column", 
-                alignItems: "center",
-                gap: 8,
-                paddingTop: 8
-              }}>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: 8,
+                  paddingTop: 8,
+                }}
+              >
                 <div className="fc-pfp-wrapper" style={{ width: 80, height: 80, minWidth: 80 }}>
                   <img
                     src={me.pfpUrl}
@@ -308,7 +309,9 @@ export default function HomePage() {
                   />
                 </div>
                 <span className="fc-subtle" style={{ fontSize: "0.75rem", textAlign: "center" }}>
-                  Your Farcaster<br />profile
+                  Your Farcaster
+                  <br />
+                  profile
                 </span>
               </div>
             )}
@@ -316,14 +319,13 @@ export default function HomePage() {
         </div>
       </section>
 
-            {/* Your Farcasturd preview */}
+      {/* Your Farcasturd preview */}
       <section className="fc-section">
         <div className="fc-card">
           <h2 className="fc-card-title">
             {meta ? meta.name : "Your Farcasturd"}
           </h2>
 
-          {/* Centered large NFT preview */}
           <div className="fc-nft-preview-wrap">
             {meta?.image && !meta.image.includes("placeholder") ? (
               <div className="fc-nft-preview">
@@ -374,7 +376,6 @@ export default function HomePage() {
           )}
         </div>
       </section>
-
 
       {/* Recent activity */}
       <section className="fc-section">
