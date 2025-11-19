@@ -41,22 +41,24 @@ export default function HomePage() {
 
   // Load Farcaster user (mock identity for now, real hasMinted from API)
   useEffect(() => {
-    async function fetchMe() {
-      try {
-        const res = await fetch("/api/me");
-        if (!res.ok) throw new Error("Failed to fetch user info");
-        const data = await res.json();
-        setMe(data);
-      } catch (err) {
-        console.error(err);
-        setStatus("Unable to load user info. Please refresh the page.");
-      } finally {
-        setLoading(false);
-      }
+  async function fetchMe() {
+    try {
+      const viewerFid = 198116; // TEMP: replace with real viewer FID
+      const res = await fetch(`/api/me?fid=${viewerFid}`);
+      if (!res.ok) throw new Error("Failed to fetch user info");
+      const data = await res.json();
+      setMe(data);
+    } catch (err) {
+      console.error(err);
+      setStatus("Unable to load user info. Please refresh the page.");
+    } finally {
+      setLoading(false);
     }
+  }
 
-    fetchMe();
-  }, []);
+  fetchMe();
+}, []);
+
 
   // Load metadata preview for this fid
   useEffect(() => {
@@ -85,7 +87,7 @@ export default function HomePage() {
     if (!me?.fid) return;
 
     setGenerating(true);
-    setStatus("🎨 Generating your unique Farcasturd...");
+    setStatus("💩 Generating your unique Farcasturd...");
 
     try {
       const res = await fetch("/api/generate", {
@@ -247,8 +249,8 @@ export default function HomePage() {
               </h2>
               <p className="fc-subtle">
                 {hasGenerated
-                  ? "Your Farcasturd is ready! Mint it as a non-transferable NFT on Base."
-                  : "First, generate your unique AI-powered Farcasturd based on your Farcaster profile."}
+                  ? "Your Farcasturd is ready is ready to mint!"
+                  : "First, generate your unique Farcasturd, loosely based on your Farcaster profile."}
               </p>
 
               <div style={{ marginTop: 4, display: "flex", gap: 8, flexWrap: "wrap" }}>
@@ -259,7 +261,7 @@ export default function HomePage() {
                     className="fc-button"
                     type="button"
                   >
-                    {generating ? "Generating... 🎨" : "Generate Farcasturd"}
+                    {generating ? "Generating...💩" : "Generate Farcasturd"}
                   </button>
                 )}
 
@@ -283,13 +285,13 @@ export default function HomePage() {
               <p className="fc-tagline">
                 {hasGenerated
                   ? "Soulbound · AI-Generated · Built on Base"
-                  : "AI-Powered · Profile-Based · Free Generation"}
+                  : "Soulbound · AI-Generated · Built on Base"}
               </p>
 
               {status && <p className="fc-status">{status}</p>}
             </div>
 
-            {/* Right: Profile Picture - IMPROVED */}
+            {/* Right: Profile Picture */}
             {me.pfpUrl && (
               <div style={{ 
                 display: "flex", 
@@ -314,65 +316,65 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Your Farcasturd preview */}
+            {/* Your Farcasturd preview */}
       <section className="fc-section">
-        <div className="fc-card fc-card-row">
-          {meta?.image && !meta.image.includes('placeholder') ? (
-            <div style={{ width: 74, height: 74, minWidth: 74, borderRadius: 22, overflow: "hidden" }}>
-              <img
-                src={meta.image}
-                alt="Your Farcasturd"
-                style={{ width: "100%", height: "100%", objectFit: "cover" }}
-              />
-            </div>
-          ) : (
-            <div className="fc-avatar">💩</div>
-          )}
-          <div className="fc-card-col">
-            <h2 className="fc-card-title">
-              {meta ? meta.name : "Your Farcasturd"}
-            </h2>
-            {meta && !meta.image.includes('placeholder') ? (
-              <>
-                <p className="fc-subtle">{meta.description}</p>
+        <div className="fc-card">
+          <h2 className="fc-card-title">
+            {meta ? meta.name : "Your Farcasturd"}
+          </h2>
 
-                <div className="fc-meta-block">
-                  <div>
-                    <strong>Image URL:</strong>{" "}
-                    <span className="fc-code">{meta.image}</span>
-                  </div>
-                  <div style={{ marginTop: 4 }}>
-                    <strong>External URL:</strong>{" "}
-                    <span className="fc-code">{meta.external_url}</span>
-                  </div>
-                </div>
-
-                {meta.attributes && meta.attributes.length > 0 && (
-                  <div className="fc-attr-row">
-                    {meta.attributes.map((attr) => (
-                      <div
-                        key={`${attr.trait_type}-${attr.value}`}
-                        className="fc-attr-pill"
-                      >
-                        <span className="fc-attr-label">{attr.trait_type}</span>
-                        <span className="fc-attr-value">
-                          {String(attr.value)}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </>
+          {/* Centered large NFT preview */}
+          <div className="fc-nft-preview-wrap">
+            {meta?.image && !meta.image.includes("placeholder") ? (
+              <div className="fc-nft-preview">
+                <img src={meta.image} alt="Your Farcasturd" />
+              </div>
             ) : (
-              <p className="fc-subtle">
-                {hasGenerated
-                  ? "Loading your Farcasturd..."
-                  : "Generate your Farcasturd to see it here!"}
-              </p>
+              <div className="fc-avatar">💩</div>
             )}
           </div>
+
+          {meta && !meta.image.includes("placeholder") ? (
+            <>
+              <p className="fc-subtle">{meta.description}</p>
+
+              <div className="fc-meta-block">
+                <div>
+                  <strong>Image URL:</strong>{" "}
+                  <span className="fc-code">{meta.image}</span>
+                </div>
+                <div style={{ marginTop: 4 }}>
+                  <strong>External URL:</strong>{" "}
+                  <span className="fc-code">{meta.external_url}</span>
+                </div>
+              </div>
+
+              {meta.attributes && meta.attributes.length > 0 && (
+                <div className="fc-attr-row">
+                  {meta.attributes.map((attr) => (
+                    <div
+                      key={`${attr.trait_type}-${attr.value}`}
+                      className="fc-attr-pill"
+                    >
+                      <span className="fc-attr-label">{attr.trait_type}</span>
+                      <span className="fc-attr-value">
+                        {String(attr.value)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          ) : (
+            <p className="fc-subtle">
+              {hasGenerated
+                ? "Loading your Farcasturd..."
+                : "Generate your Farcasturd to see it here!"}
+            </p>
+          )}
         </div>
       </section>
+
 
       {/* Recent activity */}
       <section className="fc-section">

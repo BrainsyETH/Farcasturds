@@ -26,6 +26,7 @@
   --fc-button-bg-disabled: #d4c2ad;
 
   --fc-code-bg: #f2e7d9;
+  --fc-farcaster-purple: #8f5bff;
 }
 
 /* Reset-ish */
@@ -48,9 +49,9 @@ body {
 
 .fc-root {
   min-height: 100vh;
-  background:
-    radial-gradient(circle at top left, #fdf7ef 0, #f3e4d4 45%, #f0e0ce 70%),
-    radial-gradient(circle at bottom right, #f7eee3 0, #f1e0cf 45%, #ebd4c2 80%);
+  background: linear-gradient(135deg, #fdf7ef, #f3e4d4, #f0e0ce, #f7eee3);
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
   color: var(--fc-text);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
     "Helvetica Neue", Arial, sans-serif;
@@ -58,6 +59,11 @@ body {
   display: flex;
   justify-content: center;
   align-items: flex-start;
+}
+
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
 }
 
 .fc-root::before {
@@ -70,6 +76,12 @@ body {
   background-image:
     radial-gradient(circle at 1px 1px, rgba(0, 0, 0, 0.04) 1px, transparent 0);
   background-size: 6px 6px;
+  animation: textureScroll 20s linear infinite;
+}
+
+@keyframes textureScroll {
+  0% { background-position: 0 0; }
+  100% { background-position: 60px 60px; }
 }
 
 /* Use Baloo only for titles */
@@ -108,6 +120,12 @@ h2.fc-title {
 .fc-title-wrap {
   position: relative;
   display: inline-block;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
 }
 
 .fc-sparkle {
@@ -172,13 +190,14 @@ h2.fc-title {
 }
 
 /* ===========
-   Cards
+   Cards with Glassmorphism
    =========== */
 
 .fc-card {
-  background: radial-gradient(circle at top left, #ffffff 0, #fdf6ec 55%, #f6ebdd 100%);
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px) saturate(180%);
   border-radius: 18px;
-  border: 1px solid var(--fc-border-subtle);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   padding: 18px;
   box-shadow:
     0 10px 25px rgba(180, 145, 104, 0.18),
@@ -206,6 +225,30 @@ h2.fc-title {
   box-shadow:
     0 14px 30px rgba(180, 145, 104, 0.26),
     0 0 0 1px rgba(222, 194, 155, 0.9);
+}
+
+/* Stagger animation on load */
+.fc-card:nth-child(1) { animation: slideIn 0.4s ease-out; }
+.fc-card:nth-child(2) { animation: slideIn 0.4s ease-out 0.1s both; }
+.fc-card:nth-child(3) { animation: slideIn 0.4s ease-out 0.2s both; }
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Featured card with purple accent */
+.fc-card.fc-featured {
+  border: 2px solid var(--fc-farcaster-purple);
+  box-shadow:
+    0 10px 25px rgba(143, 91, 255, 0.25),
+    0 0 40px rgba(143, 91, 255, 0.15);
 }
 
 .fc-card-row {
@@ -248,6 +291,12 @@ h2.fc-title {
     0 12px 26px rgba(200, 122, 49, 0.25),
     0 0 0 1px rgba(235, 206, 173, 0.9),
     inset 0 0 18px rgba(255, 255, 255, 0.45);
+  
+  transition: transform 200ms ease-out;
+}
+
+.fc-avatar:hover {
+  transform: rotate(5deg) scale(1.05);
 }
 
 /* small metadata block */
@@ -281,6 +330,12 @@ h2.fc-title {
   border: 1px solid rgba(191, 133, 66, 0.65);
   font-size: 0.78rem;
   color: #5b4631;
+  transition: all 180ms ease-out;
+}
+
+.fc-attr-pill:hover {
+  transform: scale(1.08);
+  box-shadow: 0 4px 12px rgba(191, 133, 66, 0.3);
 }
 
 .fc-attr-label {
@@ -315,6 +370,12 @@ h2.fc-title {
   border: 1px solid var(--fc-pill-border);
   font-size: 0.78rem;
   color: var(--fc-text-soft);
+  transition: all 180ms ease-out;
+}
+
+.fc-pill:hover {
+  transform: scale(1.08);
+  box-shadow: 0 4px 12px rgba(191, 133, 66, 0.3);
 }
 
 .fc-pill-soft {
@@ -322,7 +383,7 @@ h2.fc-title {
 }
 
 /* ===========
-   Button
+   Button with Enhanced Glow
    =========== */
 
 .fc-button {
@@ -351,6 +412,7 @@ h2.fc-title {
   filter: brightness(1.03);
   box-shadow:
     0 12px 22px rgba(198, 137, 71, 0.6),
+    0 0 30px rgba(233, 177, 97, 0.4),
     0 0 0 1px rgba(227, 204, 172, 1);
 }
 
@@ -391,6 +453,18 @@ h2.fc-title {
   height: 7px;
   border-radius: 999px;
   background: linear-gradient(135deg, #22c55e, #84cc16);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { 
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+  }
+  50% { 
+    transform: scale(1.1);
+    box-shadow: 0 0 0 8px rgba(34, 197, 94, 0);
+  }
 }
 
 .fc-activity-item {
@@ -451,6 +525,14 @@ h2.fc-title {
   color: transparent;
 }
 
+/* Farcaster Purple Highlight */
+.fc-highlight {
+  position: relative;
+  color: var(--fc-farcaster-purple);
+  font-weight: 700;
+  text-shadow: 0 0 20px rgba(143, 91, 255, 0.3);
+}
+
 /* PFP thumbnail */
 
 .fc-pfp-wrapper {
@@ -473,6 +555,60 @@ h2.fc-title {
   height: 100%;
   border-radius: inherit;
   object-fit: cover;
+}
+
+/* ===========
+   Farcasturd preview (large centered NFT) with Shimmer
+   =========== */
+
+.fc-nft-preview-wrap {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin: 8px 0 14px;
+}
+
+.fc-nft-preview {
+  width: 400px;
+  height: 400px;
+  border-radius: 24px;
+  overflow: hidden;
+  border: 3px solid var(--fc-farcaster-purple);
+  box-shadow:
+    0 6px 16px rgba(143, 91, 255, 0.22),
+    0 0 0 1px rgba(143, 91, 255, 0.4);
+  background: #ffffff;
+  padding: 6px;
+  position: relative;
+}
+
+.fc-nft-preview::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.3) 50%,
+    transparent 70%
+  );
+  animation: shimmer 3s infinite;
+  pointer-events: none;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+  100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+}
+
+.fc-nft-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* show full image, no cropping */
+  border-radius: 18px;
 }
 
 /* ===========
@@ -503,16 +639,16 @@ h2.fc-title {
     border-radius: 18px;
     font-size: 1.8rem;
   }
-  
+
   .fc-pill-row {
     gap: 6px;
   }
-  
+
   .fc-pill {
     font-size: 0.72rem;
     padding: 3px 8px;
   }
-  
+
   .fc-pfp-wrapper {
     width: 70px;
     height: 70px;
@@ -537,6 +673,16 @@ h2.fc-title {
 
   h1.fc-title {
     font-size: 1.8rem;
+  }
+}
+
+/* Mobile scaling for preview only */
+@media (max-width: 480px) {
+  .fc-nft-preview {
+    width: 140px;
+    height: 140px;
+    border-radius: 20px;
+    padding: 5px;
   }
 }
 

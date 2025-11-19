@@ -1,61 +1,66 @@
 // lib/farcasturdPrompt.ts
 import type { FarcasterProfile } from "./farcasterClient";
+import type { ColorPalette } from "./colorExtractor";
 
-/**
- * Build a single, consistent prompt used for ALL Farcasturd generations.
- * The personalization comes from analyzing the user's bio and profile.
- */
 export function buildFarcasterdPrompt(
   fid: number,
-  profile: FarcasterProfile
+  profile: FarcasterProfile,
+  colors?: ColorPalette | null
 ): string {
   const name = profile.displayName || profile.username || `FID ${fid}`;
+  
+  // Build color scheme from their PFP or use defaults
+  let colorScheme = "";
+  if (colors) {
+    colorScheme = `COLOR PALETTE (extracted from user's profile picture):
+- Primary color: ${colors.primary}
+- Secondary/accent color: ${colors.secondary}
+- Vibrant highlights: ${colors.vibrant}
+- Background/muted tones: ${colors.muted}
+
+Use these colors creatively throughout the character design, accessories, and background to match their existing identity.`;
+  } else {
+    colorScheme = "Use warm, inviting colors with brown/tan base tones.";
+  }
 
   // Analyze bio for personality traits
   let personalityHints = "";
   if (profile.bio) {
     const bio = profile.bio.toLowerCase();
-
+    
     if (bio.includes("build") || bio.includes("dev") || bio.includes("engineer")) {
-      personalityHints = "wearing trendy glasses and giving off tech-savvy vibes";
+      personalityHints = "tech genius with oversized glasses, surrounded by floating code symbols and circuit patterns";
     } else if (bio.includes("art") || bio.includes("design") || bio.includes("create")) {
-      personalityHints = "with artistic flair, paint splatter effects, and creative energy";
+      personalityHints = "creative artist covered in paint splatters, holding a brush, with abstract colorful shapes floating around";
     } else if (bio.includes("degen") || bio.includes("ape") || bio.includes("crypto")) {
-      personalityHints = "with laser eyes and a mischievous, degen crypto energy";
+      personalityHints = "crypto degen with glowing laser eyes, wearing a gold chain, diamond hands gesture, surrounded by crypto symbols";
     } else if (bio.includes("music") || bio.includes("dj")) {
-      personalityHints = "wearing headphones and vibing to music";
+      personalityHints = "music lover with large DJ headphones, surrounded by floating musical notes and sound waves";
     } else if (bio.includes("game") || bio.includes("gamer")) {
-      personalityHints = "with gaming controller and excited gaming energy";
-    } else if (bio.includes("coffee") || bio.includes("☕")) {
-      personalityHints = "holding a steaming coffee cup with cozy vibes";
+      personalityHints = "gamer with gaming headset, holding a glowing controller, with pixel effects and game UI elements";
+    } else {
+      personalityHints = "unique character with distinctive personality and style";
     }
   }
 
-  // Build the prompt
   return `Create a cute, charming cartoon poop emoji character representing "${name}".
 
-CHARACTER DESIGN:
-- Adorable and friendly poop emoji (💩) style character
-- Glossy, smooth brown/tan texture with a slight shine
-- Big expressive eyes with personality and warmth
-- Wide friendly smile that's inviting and fun
-- ${personalityHints || "unique personality that stands out"}
-- Sitting or standing in a dynamic, engaging pose
+${colorScheme}
 
-STYLE REQUIREMENTS:
-- High-quality 3D render, Pixar/Disney animation quality
-- Professional character design with clean silhouette
-- Modern, contemporary aesthetic
-- Well-lit with soft studio lighting
-- Solid color gradient background (warm, inviting tones)
-- NO text, logos, watermarks, or UI elements
-- NO gross or offensive elements
+CHARACTER CONCEPT:
+${personalityHints || "Friendly and approachable with unique flair"}
 
-MOOD:
-- Fun, shareable, and meme-worthy
-- Cute rather than crude
-- Profile picture ready
-- Instantly recognizable as a character
+DESIGN REQUIREMENTS:
+- Adorable poop emoji (💩) base with personality
+- Big expressive eyes and friendly smile
+- Dynamic, engaging pose
+- Single character only
+- Modern 3D render, Pudgy Penguin quality
+- Clean silhouette, well-lit with soft studio lighting
+- Gradient background using the muted tones
+- NO text, logos, or watermarks
 
-This is a digital collectible NFT avatar - make it special and unique while keeping the core poop emoji charm.`;
+IMPORTANT: Integrate the extracted colors naturally into the character design - use them for accessories, effects, background gradients, and highlights. Make the colors feel cohesive with their existing brand.
+
+This is a digital collectible NFT avatar - make it special and personalized.`;
 }

@@ -65,12 +65,12 @@ export function buildOnchainMetadata(record: FarcasturdRecord) {
   return {
     name: `Farcasturd #${record.fid}`,
     description:
-      "Your 1:1 Farcasturd on Base — a non-transferable badge tied to your Farcaster ID. Generated once from a single Farcasturd prompt using the holder's Farcaster profile.",
+      "Your 1:1 Farcasturd on Base — non-transferable poop tied to your Farcaster ID. Generated once from a single Farcasturd prompt using the holder's Farcaster profile.",
     image: record.imageUrl,
     external_url: externalUrl,
     attributes: [
       { trait_type: "FID", value: record.fid },
-      { trait_type: "Generation", value: "gpt-image-1 + Farcaster PFP context" },
+      { trait_type: "Generation", value: "AI + Farcaster PFP" },
     ],
   };
 }
@@ -81,7 +81,7 @@ export function buildPlaceholderMetadata(fid: number) {
 
   return {
     name: `Farcasturd #${fid}`,
-    description: "Generate your unique Farcasturd! A non-transferable badge tied to your Farcaster ID.",
+    description: "Generate your unique Farcasturd! Unique poop tied to your Farcaster ID.",
     image: "/placeholder.png", // Add a placeholder image to your public folder
     external_url: externalUrl,
     attributes: [

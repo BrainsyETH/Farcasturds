@@ -11,7 +11,7 @@ const baloo = Baloo_2({
 export const metadata: Metadata = {
   title: "Farcasturd",
   description:
-    "Mint your 1:1 Farcasturd on Base — a non-transferable badge tied to your Farcaster ID.",
+    "Mint your 1:1 Farcasturd on Base — non-transferable poop tied to your Farcaster ID.",
 };
 
 export default function RootLayout({

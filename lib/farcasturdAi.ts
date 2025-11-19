@@ -1,12 +1,9 @@
 // lib/farcasturdAi.ts
 import { buildFarcasterdPrompt } from "./farcasturdPrompt";
+import { extractColorsFromPfp } from "./colorExtractor";
 import type { FarcasterProfile } from "./farcasterClient";
 import { openai } from "./openaiClient";
 
-/**
- * Generate a 1024x1024 Farcasturd avatar using DALL-E 3.
- * Returns the raw image Buffer and the text prompt used.
- */
 export async function generateFarcasterdImage(
   fid: number,
   profile: FarcasterProfile
@@ -15,10 +12,21 @@ export async function generateFarcasterdImage(
     throw new Error("OPENAI_API_KEY not configured");
   }
 
-  const prompt = buildFarcasterdPrompt(fid, profile);
+  // Extract colors from their profile picture
+  let colors = null;
+  if (profile.pfpUrl) {
+    try {
+      colors = await extractColorsFromPfp(profile.pfpUrl);
+      console.log(`[AI] Extracted colors for FID ${fid}:`, colors);
+    } catch (error: any) {
+      console.warn(`[AI] Color extraction failed, continuing without colors:`, error.message);
+    }
+  }
+
+  const prompt = buildFarcasterdPrompt(fid, profile, colors);
 
   console.log(`[AI] Generating Farcasturd for FID ${fid}`);
-  console.log(`[AI] Prompt: ${prompt.substring(0, 100)}...`);
+  console.log(`[AI] Prompt: ${prompt.substring(0, 150)}...`);
 
   const maxRetries = 2;
   let lastError;
@@ -27,12 +35,11 @@ export async function generateFarcasterdImage(
     try {
       console.log(`[AI] Attempt ${attempt}/${maxRetries}`);
 
-      // Call OpenAI DALL-E 3 API
       const result = await openai.images.generate({
         model: "dall-e-3",
         prompt,
         size: "1024x1024",
-        quality: "standard", // or "hd" for better quality (costs more)
+        quality: "standard",
         n: 1,
         response_format: "b64_json",
       });
@@ -52,7 +59,6 @@ export async function generateFarcasterdImage(
       lastError = error;
       console.error(`[AI] Attempt ${attempt} failed:`, error.message);
 
-      // Don't retry on certain errors
       if (error.code === "insufficient_quota") {
         throw new Error("OpenAI API quota exceeded. Please check your billing.");
       }
@@ -60,15 +66,13 @@ export async function generateFarcasterdImage(
         throw new Error("Invalid OpenAI API key");
       }
 
-      // Retry on rate limits or timeouts
       if (attempt < maxRetries) {
-        const delay = attempt * 2000; // 2s, 4s
+        const delay = attempt * 2000;
         console.log(`[AI] Retrying in ${delay}ms...`);
         await new Promise(resolve => setTimeout(resolve, delay));
       }
     }
   }
 
-  // All retries failed
   throw new Error(`Image generation failed after ${maxRetries} attempts: ${lastError?.message}`);
 }
