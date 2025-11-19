@@ -171,12 +171,16 @@ h2.fc-title {
   color: var(--fc-text-soft);
   line-height: 1.4;
   margin: 0;
+  align-items: center;
+  justify-content: center;
 }
 
 .fc-status {
   margin-top: 10px;
   font-size: 0.85rem;
   color: var(--fc-text-muted);
+  align-items: center;
+  justify-content: center;
 }
 
 .fc-code {
@@ -191,14 +195,14 @@ h2.fc-title {
 }
 
 .fc-basescan-link {
-  color: #8a663d;
+  color: #2910c9;
   font-weight: 600;
   font-size: 0.8rem;
   text-decoration: underline;
 }
 
 .fc-basescan-link:hover {
-  color: #a87945;
+  color: #2e0fc8;
   text-decoration-thickness: 2px;
 }
 

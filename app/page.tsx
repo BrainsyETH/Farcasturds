@@ -346,8 +346,8 @@ export default function HomePage() {
               </h2>
               <p className="fc-subtle">
                 {hasGenerated
-                  ? "Your Farcasturd is ready to dump!"
-                  : "First, generate your unique Farcasturd, loosely based on your Farcaster profile."}
+                  ? "Your Farcasturd is ready to mint!"
+                  : "Generare your turd now."}
               </p>
 
               <div style={{ marginTop: 4, display: "flex", gap: 8, flexWrap: "wrap" }}>
@@ -497,7 +497,7 @@ export default function HomePage() {
             </div>
           ) : (
             <p className="fc-subtle" style={{ fontSize: "0.85rem" }}>
-              No activity yet. Generate and mint your Farcasturd to get started!
+              No activity yet.
             </p>
           )}
         </div>
