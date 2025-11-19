@@ -1,5 +1,6 @@
 // lib/colorExtractor.ts
-import * as Vibrant from "node-vibrant/node"; // ← Changed this line
+import Vibrant from "node-vibrant";
+
 
 export type ColorPalette = {
   primary: string;      // Main color
