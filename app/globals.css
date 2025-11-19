@@ -3,10 +3,10 @@
    =========== */
 
 :root {
-  --fc-bg: #f0e4f5;
-  --fc-bg-alt: #f9f3eb;
+  --fc-bg: #e9d5f5;  /* light purple instead of #f0e4f5 */
+  --fc-bg-alt: #f3e6ff;  /* light purple instead of #f9f3eb */
   --fc-bg-card: #ffffff;
-  --fc-bg-soft: #f9f1e7;
+  --fc-bg-soft: #f5ebff;  /* light purple instead of #f9f1e7 */
 
   --fc-border-subtle: rgba(180, 152, 120, 0.45);
   --fc-border-strong: rgba(141, 110, 74, 0.8);
@@ -15,9 +15,9 @@
   --fc-text-soft: #6b5b4c;
   --fc-text-muted: #9b8b7b;
 
-  --fc-accent-1: #b97338; /* warm brown */
-  --fc-accent-2: #e0a96b; /* tan/orange */
-  --fc-accent-3: #8c5c3a; /* deeper brown */
+  --fc-accent-1: #b97338;
+  --fc-accent-2: #e0a96b;
+  --fc-accent-3: #8c5c3a;
 
   --fc-pill-bg: #f7efe4;
   --fc-pill-border: rgba(177, 145, 104, 0.7);
