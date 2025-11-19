@@ -50,13 +50,29 @@ export default function HomePage() {
         sdk.actions.ready();
 
         // Wait a bit for context to be available (SDK needs time to receive context from parent)
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, 200));
 
         let viewerFid: number | undefined;
 
         // Try to get context from SDK
+        console.log("[App] SDK context:", sdk.context);
+        
         if (sdk.context?.user?.fid) {
-          viewerFid = sdk.context.user.fid;
+          const rawFid = sdk.context.user.fid;
+          console.log("[App] Raw FID value:", rawFid, "Type:", typeof rawFid);
+          
+          // Handle different FID types (number, BigInt, or object)
+          if (typeof rawFid === 'number') {
+            viewerFid = rawFid;
+          } else if (typeof rawFid === 'bigint') {
+            viewerFid = Number(rawFid);
+          } else if (typeof rawFid === 'string') {
+            viewerFid = parseInt(rawFid, 10);
+          } else if (rawFid && typeof rawFid === 'object') {
+            // Try to convert object to number
+            viewerFid = Number(rawFid.toString());
+          }
+          
           console.log("[App] ✓ Loaded viewer FID from SDK context:", viewerFid);
         } else {
           // Fallback: Check URL params (useful for testing)
@@ -69,8 +85,8 @@ export default function HomePage() {
           }
         }
 
-        if (!viewerFid) {
-          throw new Error("Unable to get Farcaster user context. Try refreshing or check the embed configuration.");
+        if (!viewerFid || isNaN(viewerFid)) {
+          throw new Error("Unable to get valid Farcaster user FID. Try adding ?fid=YOUR_FID to the URL.");
         }
 
         // Fetch user data from our API
