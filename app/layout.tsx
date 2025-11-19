@@ -16,14 +16,14 @@ export const metadata: Metadata = {
     // Farcaster Mini App metadata
     'fc:miniapp': JSON.stringify({
       version: "1",
-      imageUrl: "https://farcasturds.vercel.app/preview.png",
+      imageUrl: "https://b4b0aaz7b39hhkor.public.blob.vercel-storage.com/icons/preview.png",
       button: {
         title: "💩 Mint a Turd",
         action: {
           type: "launch_frame",
           name: "Farcasturds",
           url: "https://farcasturds.vercel.app",
-          splashImageUrl: "https://farcasturds.vercel.app/splash.png",
+          splashImageUrl: "https://b4b0aaz7b39hhkor.public.blob.vercel-storage.com/icons/splash.png",
           splashBackgroundColor: "#f5eee4"
         }
       }
@@ -31,14 +31,14 @@ export const metadata: Metadata = {
     // Backward compatibility
     'fc:frame': JSON.stringify({
       version: "1",
-      imageUrl: "https://farcasturds.vercel.app/preview.png",
+      imageUrl: "https://b4b0aaz7b39hhkor.public.blob.vercel-storage.com/icons/preview.png",
       button: {
         title: "💩 Mint a Turd",
         action: {
           type: "launch_frame",
           name: "Farcasturds",
           url: "https://farcasturds.vercel.app",
-          splashImageUrl: "https://farcasturds.vercel.app/splash.png",
+          splashImageUrl: "https://b4b0aaz7b39hhkor.public.blob.vercel-storage.com/icons/splash.png",
           splashBackgroundColor: "#f5eee4"
         }
       }
