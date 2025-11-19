@@ -618,11 +618,12 @@ h2.fc-title {
 }
 
 .fc-nft-preview img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain; /* show full image, no cropping */
-  border-radius: 18px;
+  max-width: 100%;
+  height: auto;
+  display: block; 
+  object-fit: contain;
 }
+
 
 /* ===========
    Responsive tweaks for mini app
