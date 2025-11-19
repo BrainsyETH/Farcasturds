@@ -206,6 +206,95 @@ export default function HomePage() {
     }
   }
 
+  // Combined Generate & Mint function
+  async function handleGenerateAndMint(e: React.FormEvent) {
+    e.preventDefault();
+    if (!me) return;
+    if (me.hasMinted) {
+      setStatus("This FID has already minted a Farcasturd.");
+      return;
+    }
+
+    // Step 1: Generate
+    setGenerating(true);
+    setMinting(false);
+    setStatus("Making a turd just for you...💩");
+    setLastTxHash(null);
+
+    try {
+      // Generate the Farcasturd
+      const genRes = await fetch("/api/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fid: me.fid }),
+      });
+
+      if (!genRes.ok) {
+        const error = await genRes.json();
+        throw new Error(error.error || "Generation failed");
+      }
+
+      await genRes.json();
+      setHasGenerated(true);
+
+      // Fetch metadata to confirm generation
+      const metaRes = await fetch(`/api/metadata/${me.fid}?t=${Date.now()}`, {
+        cache: 'no-store'
+      });
+      if (metaRes.ok) {
+        const metaData = await metaRes.json();
+        setMeta(metaData);
+      }
+
+      // Step 2: Mint
+      setGenerating(false);
+      setMinting(true);
+      setStatus("Farcasturd created! Now minting on Base...💩");
+
+      const mintRes = await fetch("/api/mint", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fid: me.fid,
+          to: me.wallet,
+        }),
+      });
+
+      const mintData = await mintRes.json();
+
+      if (!mintRes.ok) {
+        const errorMsg = mintData.error || "Unknown error";
+        if (errorMsg.includes("already minted")) {
+          setStatus("This FID has already minted a Farcasturd.");
+        } else if (errorMsg.includes("configuration") || errorMsg.includes("Missing")) {
+          setStatus("⚠️ Minting service not configured. Please contact support.");
+        } else {
+          setStatus(`⚠️ Minting failed: ${errorMsg}`);
+        }
+        return;
+      }
+
+      setLastTxHash(mintData.txHash);
+      setStatus(`✓ Success! Farcasturd minted for FID ${mintData.fid}`);
+      setMe((prev) => (prev ? { ...prev, hasMinted: true } : prev));
+    } catch (err: any) {
+      const errorMsg = err.message || "Unknown error";
+      if (errorMsg.includes("quota")) {
+        setStatus("⚠️ Generation service temporarily unavailable. Please try again later.");
+      } else if (errorMsg.includes("rate limit")) {
+        setStatus("⚠️ Too many requests. Please wait a moment and try again.");
+      } else if (errorMsg.includes("Generation failed")) {
+        setStatus(`⚠️ Generation failed: ${errorMsg}`);
+      } else {
+        setStatus(`⚠️ Process failed. Please try again.`);
+      }
+      console.error("Generate & Mint error:", err);
+    } finally {
+      setGenerating(false);
+      setMinting(false);
+    }
+  }
+
   async function handleMint(e: React.FormEvent) {
     e.preventDefault();
     if (!me) return;
@@ -339,53 +428,8 @@ export default function HomePage() {
       {/* Generation & Mint section */}
       <section className="fc-section">
         <div className="fc-card">
-          <div style={{ display: "flex", gap: 20, alignItems: "flex-start" }}>
-            <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 10 }}>
-              <h2 className="fc-card-title">
-                {hasGenerated ? "" : "Generate Your 1:1 Farcasturd"}
-              </h2>
-              <p className="fc-subtle">
-                {hasGenerated
-                  ? "Your Farcasturd is ready to mint!"
-                  : "Generare your turd now."}
-              </p>
-
-              <div style={{ marginTop: 4, display: "flex", gap: 8, flexWrap: "wrap" }}>
-                {!hasGenerated && !alreadyMinted && (
-                  <button
-                    onClick={handleGenerateFarcasturd}
-                    disabled={generating}
-                    className="fc-button"
-                    type="button"
-                  >
-                    {generating ? "Generating...💩" : "Generate Farcasturd"}
-                  </button>
-                )}
-
-                {(hasGenerated || alreadyMinted) && (
-                  <form onSubmit={handleMint}>
-                    <button
-                      type="submit"
-                      disabled={minting || alreadyMinted || !hasGenerated}
-                      className="fc-button"
-                    >
-                      {alreadyMinted
-                        ? "Already minted ✓"
-                        : minting
-                        ? "Minting... 💩"
-                        : "Mint"}
-                    </button>
-                  </form>
-                )}
-              </div>
-
-              <p className="fc-tagline">
-                Unique · Soulbound · No Dumping
-              </p>
-
-              {status && <p className="fc-status">{status}</p>}
-            </div>
-
+          <div style={{ display: "flex", gap: 20, alignItems: "center" }}>
+            {/* PFP on the left */}
             {me.pfpUrl && (
               <div
                 style={{
@@ -393,18 +437,77 @@ export default function HomePage() {
                   flexDirection: "column",
                   alignItems: "center",
                   gap: 8,
-                  paddingTop: 8,
                 }}
               >
-                <div className="fc-pfp-wrapper" style={{ width: 80, height: 80, minWidth: 80 }}>
+                <div className="fc-pfp-wrapper" style={{ width: 100, height: 100, minWidth: 100 }}>
                   <img
                     src={me.pfpUrl}
                     alt={`${me.displayName || me.username} profile`}
                     className="fc-pfp"
+                    style={{ width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover" }}
                   />
                 </div>
               </div>
             )}
+
+            {/* Content on the right */}
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 10 }}>
+              <h2 className="fc-card-title">
+                {alreadyMinted ? "Your Farcasturd" : hasGenerated ? "Ready to Mint!" : "Generate Your 1:1 Farcasturd"}
+              </h2>
+              <p className="fc-subtle">
+                {alreadyMinted
+                  ? "You've already claimed your unique Farcasturd!"
+                  : hasGenerated
+                  ? "Your Farcasturd is ready to mint on Base!"
+                  : "Generate your unique turd now."}
+              </p>
+
+              <div style={{ marginTop: 4, display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center" }}>
+                {!hasGenerated && !alreadyMinted && (
+                  <form onSubmit={handleGenerateAndMint}>
+                    <button
+                      type="submit"
+                      disabled={generating || minting}
+                      className="fc-button"
+                    >
+                      {generating
+                        ? "Generating...💩"
+                        : minting
+                        ? "Minting...💩"
+                        : "Generate & Mint"}
+                    </button>
+                  </form>
+                )}
+
+                {hasGenerated && !alreadyMinted && (
+                  <form onSubmit={handleMint}>
+                    <button
+                      type="submit"
+                      disabled={minting}
+                      className="fc-button"
+                    >
+                      {minting ? "Minting... 💩" : "Mint Now"}
+                    </button>
+                  </form>
+                )}
+
+                {alreadyMinted && (
+                  <button
+                    disabled
+                    className="fc-button"
+                  >
+                    Already Minted ✓
+                  </button>
+                )}
+              </div>
+
+              <p className="fc-tagline" style={{ textAlign: "center" }}>
+                Unique · Soulbound · No Dumping
+              </p>
+
+              {status && <p className="fc-status" style={{ textAlign: "center" }}>{status}</p>}
+            </div>
           </div>
         </div>
       </section>

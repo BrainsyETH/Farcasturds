@@ -170,17 +170,19 @@ h2.fc-title {
   font-size: 0.9rem;
   color: var(--fc-text-soft);
   line-height: 1.4;
-  margin: 0;
-  align-items: center;
-  justify-content: center;
+  margin: 0 auto;
+  text-align: center;
+  display: block;
+  width: 100%;
 }
 
 .fc-status {
-  margin-top: 10px;
+  margin: 10px auto 0;
   font-size: 0.85rem;
   color: var(--fc-text-muted);
-  align-items: center;
-  justify-content: center;
+  text-align: center;
+  display: block;
+  width: 100%;
 }
 
 .fc-code {
@@ -211,10 +213,13 @@ h2.fc-title {
    =========== */
 
 .fc-tagline {
-  margin-top: 8px;
+  margin: 8px auto 0;
   font-size: 0.78rem;
   color: var(--fc-text-muted);
   letter-spacing: 0.02em;
+  text-align: center;
+  display: block;
+  width: 100%;
 }
 
 /* ===========
@@ -295,9 +300,10 @@ h2.fc-title {
 .fc-card-title {
   font-size: 1.05rem;
   font-weight: 600;
-  margin: 0;
-  justify-content: center;
+  margin: 0 auto;
   text-align: center;
+  display: block;
+  width: 100%;
 }
 
 /* avatar card on the left */
@@ -446,8 +452,8 @@ h2.fc-title {
     transform 120ms ease-out,
     box-shadow 120ms ease-out,
     filter 120ms ease-out;
-    justify-content: center;
   text-align: center;
+  margin: 0 auto;
 }
 
 .fc-button:hover:not(:disabled) {
@@ -543,9 +549,16 @@ h2.fc-title {
 
 .fc-header-row {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
+  justify-content: center;
+  align-items: center;
   gap: 16px;
+  text-align: center;
+  width: 100%;
+}
+
+.fc-header-row .fc-title {
+  margin: 0 auto;
+  text-align: center;
 }
 
 .fc-kicker {
@@ -699,19 +712,31 @@ h2.fc-title {
   }
 
   .fc-pfp-wrapper {
-    width: 70px;
-    height: 70px;
-    min-width: 70px;
+    width: 90px !important;
+    height: 90px !important;
+    min-width: 90px !important;
+    margin: 0 auto;
   }
 
   /* Mobile: Stack the mint card vertically */
   .fc-card > div {
     flex-direction: column !important;
     align-items: center !important;
+    gap: 16px !important;
+  }
+
+  .fc-card > div > div {
+    padding-top: 0 !important;
+    width: 100%;
+  }
+
+  .fc-card > div > div:first-child {
+    order: 1;
+    margin-bottom: 8px;
   }
 
   .fc-card > div > div:last-child {
-    padding-top: 12px;
+    order: 2;
   }
 
   .fc-activity-item {
