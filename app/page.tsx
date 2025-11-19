@@ -42,25 +42,36 @@ export default function HomePage() {
 
   // Initialize SDK + load Farcaster user
   useEffect(() => {
-    // Make sure we only touch the SDK in the browser
-    sdk.actions.ready();
-
-    async function fetchMe() {
+    async function initializeApp() {
       try {
-        const viewerFid = 198116; // TEMP: replace with real viewer FID
+        // Initialize the SDK
+        sdk.actions.ready();
+
+        // Get the Farcaster context
+        const context = sdk.context;
+        
+        if (!context?.user?.fid) {
+          throw new Error("Unable to get Farcaster user context");
+        }
+
+        const viewerFid = context.user.fid;
+        console.log("[App] Loaded viewer FID:", viewerFid);
+
+        // Fetch user data from our API
         const res = await fetch(`/api/me?fid=${viewerFid}`);
         if (!res.ok) throw new Error("Failed to fetch user info");
+        
         const data = await res.json();
         setMe(data);
-      } catch (err) {
-        console.error(err);
-        setStatus("Unable to load user info. Please refresh the page.");
+      } catch (err: any) {
+        console.error("[App] Initialization error:", err);
+        setStatus(err.message || "Unable to load user info. Please refresh the page.");
       } finally {
         setLoading(false);
       }
     }
 
-    fetchMe();
+    initializeApp();
   }, []);
 
   // Load metadata preview for this fid
