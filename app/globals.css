@@ -1,37 +1,51 @@
-/* ===========
-   Base + theme tokens (light / brown)
-   =========== */
+/* ============================================================
+   FARCASTER PURPLE THEME — CLEAN, MODERN, GLOWING
+   Works seamlessly with Farcasturds UI
+   ============================================================ */
 
 :root {
-  --fc-bg: #e9d5f5;  /* light purple instead of #f0e4f5 */
-  --fc-bg-alt: #f3e6ff;  /* light purple instead of #f9f3eb */
-  --fc-bg-card: #ffffff;
-  --fc-bg-soft: #f5ebff;  /* light purple instead of #f9f1e7 */
+  /* Background */
+  --fc-bg: #8f5bff;
+  --fc-bg-alt: #9b68ff;
+  --fc-bg-soft: #a479ff;
 
-  --fc-border-subtle: rgba(180, 152, 120, 0.45);
-  --fc-border-strong: rgba(141, 110, 74, 0.8);
+  /* Card backgrounds */
+  --fc-bg-card: rgba(255, 255, 255, 0.7);
 
-  --fc-text: #1f2933;
-  --fc-text-soft: #6b5b4c;
-  --fc-text-muted: #9b8b7b;
+  /* Text */
+  --fc-text: #1b0a33; /* deep eggplant */
+  --fc-text-soft: #4d3a66;
+  --fc-text-muted: #6e5c88;
 
+  /* Accents: warm browns (for Farcasturds elements) */
   --fc-accent-1: #b97338;
   --fc-accent-2: #e0a96b;
   --fc-accent-3: #8c5c3a;
 
-  --fc-pill-bg: #f7efe4;
-  --fc-pill-border: rgba(177, 145, 104, 0.7);
+  /* Borders */
+  --fc-border-subtle: rgba(255, 255, 255, 0.25);
+  --fc-border-strong: rgba(255, 255, 255, 0.6);
 
-  --fc-button-bg: linear-gradient(135deg, #490c63, #490b5f, #532363);
-  --fc-button-bg-disabled: #d4c2ad;
+  /* Pills */
+  --fc-pill-bg: rgba(255, 255, 255, 0.35);
+  --fc-pill-border: rgba(255, 255, 255, 0.55);
 
-  --fc-code-bg: #f2e7d9;
+  /* Buttons */
+  --fc-button-bg: linear-gradient(
+    135deg,
+    #bb8bff,
+    #a36bff,
+    #8f5bff,
+    #753ee6
+  );
+  --fc-button-bg-disabled: rgba(255, 255, 255, 0.35);
+
+  /* Code blocks */
+  --fc-code-bg: rgba(255, 255, 255, 0.35);
+
+  /* Farcaster Purple */
   --fc-farcaster-purple: #8f5bff;
 }
-/* ===========
-   Root shell - OPTIMIZED FOR FARCASTER MINI APP
-   =========== */
-
 
 /* Reset-ish */
 
@@ -47,27 +61,29 @@ body {
   padding: 0;
 }
 
-/* ===========
-   Root shell - OPTIMIZED FOR FARCASTER MINI APP
-   =========== */
 
-/* ===========
-   Root shell - OPTIMIZED FOR FARCASTER MINI APP
-   =========== */
 
 .fc-root {
   min-height: 100vh;
-  background: linear-gradient(135deg, #8f4eb1, #9049a4, #762c8f, #622a6c);
-  background-size: 400% 400%;
-  animation: gradientShift 15s ease infinite;
+
+  background: linear-gradient(
+    135deg,
+    #7a32ff,
+    #9b68ff,
+    #7b25d9,
+    #5a14ad
+  );
+  background-size: 350% 350%;
+  animation: gradientShift 12s ease infinite;
+
   color: var(--fc-text);
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
-    "Helvetica Neue", Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont,
+    "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
   display: flex;
   justify-content: center;
   align-items: flex-start;
 }
+
 
 @keyframes gradientShift {
   0%, 100% { background-position: 0% 50%; }
@@ -79,18 +95,18 @@ body {
   position: fixed;
   inset: 0;
   pointer-events: none;
-  opacity: 0.4;
-  mix-blend-mode: multiply;
-  background-image:
-    radial-gradient(circle at 1px 1px, rgba(0, 0, 0, 0.04) 1px, transparent 0);
-  background-size: 6px 6px;
-  animation: textureScroll 20s linear infinite;
+
+  /* soft white sparkle overlay */
+  background-image: radial-gradient(
+    circle at 1px 1px,
+    rgba(255, 255, 255, 0.05) 1px,
+    transparent 0
+  );
+  background-size: 7px 7px;
+
+  opacity: 0.18;
 }
 
-@keyframes textureScroll {
-  0% { background-position: 0 0; }
-  100% { background-position: 60px 60px; }
-}
 
 /* Use Baloo only for titles */
 .fc-title,
