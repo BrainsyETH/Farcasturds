@@ -10,15 +10,6 @@ const neynar = new NeynarAPIClient({
   apiKey: process.env.NEYNAR_API_KEY!,
 });
 
-// Local/dev fallback
-const MOCK_USER = {
-  fid: 198116,
-  username: "Brainsy",
-  displayName: "Brainsy",
-  wallet: "0x019061f6272B28e9d6BaaD2a1D65d0C16Bd8c555",
-  pfpUrl: "https://i.imgur.com/ODhZl9K.png",
-};
-
 const CONTRACT = process.env
   .NEXT_PUBLIC_FARCASTURDS_ADDRESS as `0x${string}`;
 const RPC = process.env.BASE_RPC_URL;
@@ -45,27 +36,54 @@ async function getUserFromNeynar(fid: number) {
   };
 }
 
+// Helper: create mock user for testing when Neynar fails
+function createMockUser(fid: number) {
+  return {
+    fid: fid,
+    username: `user${fid}`,
+    displayName: `Test User ${fid}`,
+    wallet: "0x0000000000000000000000000000000000000000", // Zero address for testing
+    pfpUrl: undefined,
+  };
+}
+
 // GET /api/me?fid=1234
 export async function GET(req: NextRequest) {
   const url = new URL(req.url);
   const fidParam =
     url.searchParams.get("fid") || req.headers.get("x-fc-fid") || "";
 
-  let user = MOCK_USER;
+  // Parse FID from request
+  let fidNum: number | undefined;
+  if (fidParam) {
+    fidNum = Number(fidParam);
+    if (Number.isNaN(fidNum) || fidNum <= 0) {
+      return NextResponse.json(
+        { error: "Invalid FID provided" },
+        { status: 400 }
+      );
+    }
+  }
+
+  if (!fidNum) {
+    return NextResponse.json(
+      { error: "FID required. Add ?fid=YOUR_FID to the URL" },
+      { status: 400 }
+    );
+  }
+
+  let user;
   let hasMinted = false;
 
-  // 1) Try real Neynar user if fid is provided
-  if (fidParam) {
-    const fidNum = Number(fidParam);
-    if (!Number.isNaN(fidNum) && fidNum > 0) {
-      try {
-        user = await getUserFromNeynar(fidNum);
-      } catch (err) {
-        console.warn("[/api/me] Neynar lookup failed, using MOCK_USER:", err);
-      }
-    }
-  } else {
-    console.warn("[/api/me] No fid provided, using MOCK_USER");
+  // 1) Try real Neynar user
+  try {
+    console.log(`[/api/me] Fetching user from Neynar for FID ${fidNum}`);
+    user = await getUserFromNeynar(fidNum);
+    console.log(`[/api/me] ✓ Successfully fetched user from Neynar:`, user.username);
+  } catch (err) {
+    console.warn(`[/api/me] Neynar lookup failed for FID ${fidNum}, using mock user:`, err);
+    user = createMockUser(fidNum);
+    console.log(`[/api/me] ⚠️ Using mock user for FID ${fidNum}`);
   }
 
   // 2) On-chain hasMinted check
@@ -82,9 +100,11 @@ export async function GET(req: NextRequest) {
         functionName: "hasMinted",
         args: [BigInt(user.fid)],
       } as any);
+
+      console.log(`[/api/me] hasMinted check for FID ${user.fid}:`, hasMinted);
     } catch (err) {
-      console.error("Error reading hasMinted:", err);
-      // soft-fail
+      console.error(`[/api/me] Error reading hasMinted for FID ${user.fid}:`, err);
+      // soft-fail - continue without hasMinted data
     }
   } else {
     console.warn(
