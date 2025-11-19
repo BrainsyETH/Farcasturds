@@ -165,7 +165,7 @@ export default function HomePage() {
     if (!me?.fid) return;
 
     setGenerating(true);
-    setStatus("💩 Generating your unique Farcasturd...");
+    setStatus("Making a turd just for you...💩");
 
     try {
       const res = await fetch("/api/generate", {
@@ -180,7 +180,7 @@ export default function HomePage() {
       }
 
       const data = await res.json();
-      setStatus(`✓ Farcasturd generated! Ready to mint on-chain.`);
+      setStatus(`✓ Farcasturd generated! Ready to mint on Base.`);
       setHasGenerated(true);
 
       // FIXED: Bypass cache when refetching after generation
@@ -219,7 +219,7 @@ export default function HomePage() {
     }
 
     setMinting(true);
-    setStatus("💩 Minting Farcasturd on Base...");
+    setStatus("Minting Farcasturd on Base...💩");
     setLastTxHash(null);
 
     try {

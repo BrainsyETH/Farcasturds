@@ -548,32 +548,6 @@ h2.fc-title {
 
 /* PFP thumbnail */
 
-.fc-pfp-wrapper {
-  width: 80px;
-  height: 80px;
-  min-width: 80px;
-  border-radius: 999px;
-  border: 2px solid var(--fc-pill-border);
-  padding: 3px;
-  background: radial-gradient(circle at top, #f7e4cc 0, #f1d2b2 80%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  box-shadow: 0 4px 12px rgba(180, 145, 104, 0.2);
-}
-
-.fc-pfp {
-  width: 100%;
-  height: 100%;
-  border-radius: inherit;
-  object-fit: cover;
-}
-
-/* ===========
-   Farcasturd preview (large centered NFT) with Shimmer
-   =========== */
-
 .fc-nft-preview-wrap {
   width: 100%;
   display: flex;
@@ -582,19 +556,29 @@ h2.fc-title {
 }
 
 .fc-nft-preview {
-  width: 400px;
-  height: 400px;
+  position: relative;           /* shimmer anchor */
+  display: inline-flex;         /* shrink-wrap to image */
+  justify-content: center;
+  align-items: center;
+}
+
+/* Image WITH purple border */
+.fc-nft-preview img {
+  display: block;
+  width: 300px;                 /* adjust size as needed */
+  height: auto;
+
   border-radius: 24px;
-  overflow: hidden;
   border: 3px solid var(--fc-farcaster-purple);
+
   box-shadow:
     0 6px 16px rgba(143, 91, 255, 0.22),
     0 0 0 1px rgba(143, 91, 255, 0.4);
+
   background: #ffffff;
-  padding: 6px;
-  position: relative;
 }
 
+/* Shimmer overlay */
 .fc-nft-preview::after {
   content: "";
   position: absolute;
@@ -602,37 +586,34 @@ h2.fc-title {
   left: -50%;
   width: 200%;
   height: 200%;
+
   background: linear-gradient(
     45deg,
     transparent 30%,
-    rgba(255, 255, 255, 0.3) 50%,
+    rgba(255, 255, 255, 0.25) 50%,
     transparent 70%
   );
+
   animation: shimmer 3s infinite;
-  pointer-events: none;
+  pointer-events: none;        /* allows clicking image below */
+  border-radius: inherit;
 }
 
 @keyframes shimmer {
-  0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
-  100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
-}
-
-.fc-nft-preview img {
-  max-width: 100%;
-  height: auto;
-  display: block; 
-  object-fit: contain;
-}
-
-
-/* ===========
-   Responsive tweaks for mini app
-   =========== */
-
-@media (max-width: 640px) {
-  .fc-shell {
-    padding: 20px 16px 40px;
+  0% {
+    transform: translateX(-100%) translateY(-100%) rotate(45deg);
   }
+  100% {
+    transform: translateX(100%) translateY(100%) rotate(45deg);
+  }
+}
+
+/* Mobile scaling */
+@media (max-width: 480px) {
+  .fc-nft-preview img {
+    width: 160px;
+  }
+}
 
   .fc-section {
     margin-top: 16px;
