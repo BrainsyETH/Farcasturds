@@ -395,6 +395,10 @@ export default function HomePage() {
         priceInEth = mintPrice.replace(' ETH', '').trim();
       }
 
+      console.log('[Mint] Price string:', mintPrice);
+      console.log('[Mint] Parsed price:', priceInEth);
+      console.log('[Mint] Wei value:', parseEther(priceInEth).toString());
+
       setStatus("Preparing transaction...");
 
       writeContract({
