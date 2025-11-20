@@ -681,7 +681,7 @@ export default function HomePage() {
             </div>
           )}
           <span className="fc-pill">
-            Logged in as <strong>{me.displayName || me.username}</strong>
+          <strong>{me.displayName || me.username}</strong>
           </span>
           <span className="fc-pill">
             FID <strong>{me.fid}</strong>
