@@ -1,5 +1,6 @@
 import { Metadata } from 'next'
 import './globals.css'
+import { Providers } from '@/components/Providers'
 
 export const metadata: Metadata = {
   title: 'Farcasturds',
@@ -57,7 +58,9 @@ export default function RootLayout({
         {/* Add */}
       </head>
       <body>
-        {children}
+        <Providers>
+          {children}
+        </Providers>
       </body>
     </html>
   )
