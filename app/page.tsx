@@ -330,56 +330,8 @@ export default function HomePage() {
       return;
     }
 
-    // Step 1: Generate
-    setGenerating(true);
-    setStatus("Making a turd just for you...💩");
-
-    try {
-      const genRes = await fetch("/api/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fid: me.fid }),
-      });
-
-      if (!genRes.ok) {
-        const error = await genRes.json();
-        throw new Error(error.error || "Generation failed");
-      }
-
-      await genRes.json();
-      setHasGenerated(true);
-
-      // Fetch metadata to confirm generation
-      setIsRefreshing(true);
-      const metaRes = await fetch(`/api/metadata/${me.fid}?t=${Date.now()}`, {
-        cache: 'no-store'
-      });
-      if (metaRes.ok) {
-        const metaData = await metaRes.json();
-        setMeta(metaData);
-      }
-      setIsRefreshing(false);
-
-      // Step 2: Open Mint Modal
-      setStatus("✓ Farcasturd generated! Opening payment modal...");
-      setTimeout(() => {
-        setShowMintModal(true);
-        setStatus(null);
-      }, 1000);
-
-    } catch (err: any) {
-      const errorMsg = err.message || "Unknown error";
-      if (errorMsg.includes("quota")) {
-        setStatus("⚠️ Generation service temporarily unavailable. Please try again later.");
-      } else if (errorMsg.includes("rate limit")) {
-        setStatus("⚠️ Too many requests. Please wait a moment and try again.");
-      } else {
-        setStatus(`⚠️ Generation failed. Please try again.`);
-      }
-      console.error("Generate error:", err);
-    } finally {
-      setGenerating(false);
-    }
+    // Open mint modal immediately - generation happens AFTER mint confirms
+    setShowMintModal(true);
   }
 
   async function handleMint(e: React.FormEvent) {
@@ -398,11 +350,52 @@ export default function HomePage() {
     setShowMintModal(true);
   }
 
-  function handleMintSuccess(txHash: string) {
+  async function handleMintSuccess(txHash: string) {
+    if (!me) return;
+
     setLastTxHash(txHash);
-    localStorage.setItem(`farcasturd_tx_${me?.fid}`, txHash);
+    localStorage.setItem(`farcasturd_tx_${me.fid}`, txHash);
     setMe((prev) => (prev ? { ...prev, hasMinted: true } : prev));
-    setStatus(`✓ Success! Farcasturd minted for FID ${me?.fid}`);
+
+    // Now generate the image AFTER successful mint
+    setStatus("✓ Mint successful! Generating your Farcasturd...💩");
+    setGenerating(true);
+
+    try {
+      const genRes = await fetch("/api/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fid: me.fid }),
+      });
+
+      if (!genRes.ok) {
+        const error = await genRes.json();
+        throw new Error(error.error || "Generation failed");
+      }
+
+      await genRes.json();
+      setHasGenerated(true);
+
+      // Fetch metadata to show the generated image
+      setIsRefreshing(true);
+      const metaRes = await fetch(`/api/metadata/${me.fid}?t=${Date.now()}`, {
+        cache: 'no-store'
+      });
+      if (metaRes.ok) {
+        const metaData = await metaRes.json();
+        setMeta(metaData);
+      }
+      setIsRefreshing(false);
+
+      setStatus(`✓ Farcasturd minted and generated for FID ${me.fid}! 💩`);
+      setTimeout(() => setStatus(null), 3000);
+    } catch (err: any) {
+      console.error("Generation after mint failed:", err);
+      setStatus("✓ Minted! But generation failed. Refresh to try again.");
+      setTimeout(() => setStatus(null), 5000);
+    } finally {
+      setGenerating(false);
+    }
   }
 
   async function handleShareToFarcaster() {
@@ -753,12 +746,12 @@ export default function HomePage() {
       </section>
 
       {/* Mint Payment Modal */}
-      {me && meta?.image && (
+      {me && (
         <MintModal
           isOpen={showMintModal}
           onClose={() => setShowMintModal(false)}
           fid={me.fid}
-          imageUrl={meta.image}
+          imageUrl={meta?.image || ''}
           onSuccess={handleMintSuccess}
         />
       )}
