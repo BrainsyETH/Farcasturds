@@ -1,9 +1,9 @@
 // app/api/me/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { createPublicClient, http } from "viem";
-import { baseSepolia } from "viem/chains"; // ← Changed from 'base'
+import { base } from "viem/chains";
 import { NeynarAPIClient } from "@neynar/nodejs-sdk";
-import { farcasturdsAbi } from "@/abi/Farcasturds";
+import { farcasturdsV2Abi } from "@/abi/FarcasturdsV2";
 
 // ---- Neynar client ----
 const neynar = new NeynarAPIClient({
@@ -90,13 +90,13 @@ export async function GET(req: NextRequest) {
   if (CONTRACT && RPC) {
     try {
       const publicClient = createPublicClient({
-        chain: baseSepolia, // ← Changed from 'base'
+        chain: base,
         transport: http(RPC),
       });
 
       hasMinted = await publicClient.readContract({
         address: CONTRACT,
-        abi: farcasturdsAbi,
+        abi: farcasturdsV2Abi,
         functionName: "hasMinted",
         args: [BigInt(user.fid)],
       } as any);

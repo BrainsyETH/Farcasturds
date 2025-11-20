@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
 import { parseEther } from 'viem'
-import { farcasturdsAbi } from '@/abi/Farcasturds'
+import { farcasturdsV2Abi } from '@/abi/FarcasturdsV2'
 
 interface MintModalProps {
   isOpen: boolean
@@ -88,7 +88,7 @@ export function MintModal({ isOpen, onClose, fid, imageUrl, onSuccess }: MintMod
 
       writeContract({
         address: CONTRACT_ADDRESS,
-        abi: farcasturdsAbi,
+        abi: farcasturdsV2Abi,
         functionName: 'mintFor',
         args: [address, BigInt(fid)],
         value: parseEther(mintPrice || '0'),
@@ -167,7 +167,7 @@ export function MintModal({ isOpen, onClose, fid, imageUrl, onSuccess }: MintMod
           <div className="mb-4 p-3 bg-green-600 bg-opacity-30 border border-green-400 rounded-lg">
             <p className="text-green-200 text-sm mb-2">Transaction Hash:</p>
             <a
-              href={`https://sepolia.basescan.org/tx/${hash}`}
+              href={`https://basescan.org/tx/${hash}`}
               target="_blank"
               rel="noopener noreferrer"
               className="text-green-300 hover:text-green-100 text-xs font-mono break-all underline"
