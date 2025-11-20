@@ -78,14 +78,6 @@ export default function HomePage() {
     async function initializeApp() {
       try {
         console.log("[App] Initializing Farcaster SDK...");
-        
-        // Signal that the app is ready
-        try {
-          sdk.actions.ready();
-          console.log("[App] ✓ SDK ready signal sent");
-        } catch (sdkError) {
-          console.warn("[App] SDK ready() failed (expected in embed tool):", sdkError);
-        }
 
         let viewerFid: number | undefined;
 
@@ -191,13 +183,13 @@ export default function HomePage() {
       } finally {
         if (mounted) {
           setLoading(false);
-          // Hide splash screen
-          const splash = document.getElementById('splash-screen');
-          if (splash) {
-            splash.style.opacity = '0';
-            setTimeout(() => {
-              splash.style.display = 'none';
-            }, 300);
+
+          // Signal to Farcaster that app is ready and hide native splash screen
+          try {
+            sdk.actions.ready();
+            console.log("[App] ✓ SDK ready signal sent - splash screen should hide");
+          } catch (sdkError) {
+            console.warn("[App] SDK ready() failed (expected in embed tool):", sdkError);
           }
         }
       }
@@ -576,7 +568,8 @@ export default function HomePage() {
   }
 
   if (loading) {
-    // Splash screen in layout.tsx handles loading display
+    // Farcaster's native splash screen shows during loading
+    // sdk.actions.ready() is called when loading completes
     return null;
   }
 

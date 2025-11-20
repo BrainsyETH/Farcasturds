@@ -58,30 +58,6 @@ export default function RootLayout({
         {/* Add */}
       </head>
       <body>
-        {/* Splash screen that shows until app loads */}
-        <div id="splash-screen" style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          backgroundColor: '#6938c7',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 9999,
-          transition: 'opacity 0.3s ease-out'
-        }}>
-          <img
-            src="/icons/splash.png"
-            alt="Farcasturds"
-            style={{
-              maxWidth: '90%',
-              maxHeight: '90%',
-              objectFit: 'contain'
-            }}
-          />
-        </div>
         <Providers>
           {children}
         </Providers>
