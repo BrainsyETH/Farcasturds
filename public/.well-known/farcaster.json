@@ -16,10 +16,6 @@
       "https://farcasturds.vercel.app/image.png"
     ],
     "ogTitle": "Farcasturds"
-  },
-  "accountAssociation": {
-    "header": "eyJmaWQiOjIyMDc1OCwidHlwZSI6ImF1dGgiLCJrZXkiOiIweDRhYjA3MGIxRGI1N2M0QTI2MEU1RUE5Rjk5NjU1M0NlMzBDRThiNzIifQ",
-    "payload": "eyJkb21haW4iOiJodHRwcyJ9",
-    "signature": "a6BbIWoioUMyr24ku0+aQV5yLZvkRkbl4btC+mFKGiM2RW8Mu8GVgKoq09Gie+C+47qVUU/U4onfxvYaVrgX7Rs="
   }
+
 }
