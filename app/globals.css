@@ -67,13 +67,7 @@ html, body {
   min-height: 100vh;
   margin: 0;
   padding: 0;
-  background: linear-gradient(
-    135deg,
-    rgb(81, 25, 116),
-    #1e2329,
-    #7c4bdb,
-    #6938c7
-  );
+  background: linear-gradient(135deg, #511974, #1e2329, #501f7b, #371479);
   background-size: 350% 350%;
   animation: gradientShift 12s ease infinite;
   background-attachment: fixed;
