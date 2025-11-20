@@ -435,7 +435,17 @@ export default function HomePage() {
       {/* Header / identity */}
       <section className="fc-section">
         <div className="fc-header-row">
-            <h1 className="fc-title fc-gradient-text">Farcasturd</h1>
+          <img
+            src="https://b4b0aaz7b39hhkor.public.blob.vercel-storage.com/Bold%20Purple%20and%20Brown%20Typography.png"
+            alt="Farcasturd"
+            style={{
+              maxWidth: "280px",
+              width: "100%",
+              height: "auto",
+              display: "block",
+              margin: "0 auto"
+            }}
+          />
         </div>
         <div className="fc-pill-row" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, flexWrap: "wrap" }}>
           {/* PFP in header */}
