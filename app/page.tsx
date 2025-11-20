@@ -552,11 +552,11 @@ export default function HomePage() {
         <div className="fc-card">
           <div style={{ textAlign: "center" }}>
             <h2 style={{ fontSize: "1.05rem", fontWeight: 600, margin: "0 0 8px 0" }}>
-              {alreadyMinted ? "Your Farcasturd" : hasGenerated ? "Ready to Mint!" : "Farcasturd"}
+              {alreadyMinted ? "Turd Secured" : hasGenerated ? "Secure your Turd!" : "Farcasturd"}
             </h2>
             <p style={{ fontSize: "0.9rem", color: "var(--fc-text-soft)", margin: "0 0 12px 0", lineHeight: 1.4 }}>
               {alreadyMinted
-                ? "Share your Farcasturd with the world!"
+                ? "Share your Farcasturd with the frens"
                 : hasGenerated
                 ? "Your Farcasturd is ready to mint on Base!"
                 : "Generate your unique turd now."}

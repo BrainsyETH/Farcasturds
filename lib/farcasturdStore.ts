@@ -70,7 +70,7 @@ export function buildOnchainMetadata(record: FarcasturdRecord) {
     external_url: externalUrl,
     attributes: [
       { trait_type: "FID", value: record.fid },
-      { trait_type: "Generation", value: "AI + Farcaster PFP" },
+      { trait_type: "Genesis", value: "Phase 1" },
     ],
   };
 }
