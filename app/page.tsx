@@ -5,7 +5,7 @@ import { sdk } from "@farcaster/miniapp-sdk";
 import { useAccount, useConnect, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { parseEther } from 'viem';
 import { MintModal } from '@/components/MintModal';
-import { farcasturdsAbi } from '@/abi/Farcasturds';
+import { farcasturdsV2Abi } from '@/abi/FarcasturdsV2';
 import { generateSiweMessage, generateNonce, verifySiweSignature } from '@/lib/auth';
 
 type MeResponse = {
@@ -464,7 +464,7 @@ export default function HomePage() {
 
       writeContract({
         address: CONTRACT_ADDRESS,
-        abi: farcasturdsAbi,
+        abi: farcasturdsV2Abi,
         functionName: 'mintFor',
         args: [address, BigInt(me.fid)],
         value: parseEther(priceInEth),

@@ -1,17 +1,17 @@
 // lib/wagmi.ts
 import { http, createConfig } from 'wagmi'
-import { baseSepolia } from 'wagmi/chains'
+import { base } from 'wagmi/chains'
 import { farcasterMiniApp } from '@farcaster/miniapp-wagmi-connector'
 
-// Wagmi configuration for Farcaster Mini App
+// Wagmi configuration for Farcaster Mini App on Base Mainnet
 export const config = createConfig({
-  chains: [baseSepolia],
+  chains: [base],
   transports: {
-    [baseSepolia.id]: http(),
+    [base.id]: http(),
   },
   connectors: [farcasterMiniApp()],
 })
 
 // Chain configuration export
-export const chains = [baseSepolia]
-export const defaultChain = baseSepolia
+export const chains = [base]
+export const defaultChain = base
