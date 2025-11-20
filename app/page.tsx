@@ -133,10 +133,11 @@ export default function HomePage() {
         }
 
         // Check environment for better error messages
-        const isDevelopment = 
-          window.location.hostname.includes('localhost') || 
+        // Exclude production domain (farcasturds.vercel.app) from development check
+        const isDevelopment =
+          window.location.hostname.includes('localhost') ||
           window.location.hostname.includes('127.0.0.1') ||
-          window.location.hostname.includes('vercel.app') ||
+          (window.location.hostname.includes('vercel.app') && window.location.hostname !== 'farcasturds.vercel.app') ||
           process.env.NODE_ENV === 'development';
 
         // Final validation
