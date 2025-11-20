@@ -757,7 +757,7 @@ export default function HomePage() {
       <section className="fc-section">
         <div className="fc-card">
           <h2 className="fc-card-title">
-            {meta ? meta.name : "Your Farcasturd"}
+            {meta ? meta.name : "Reveal your Farcasturd"}
           </h2>
 
           <div className="fc-nft-preview-wrap">
@@ -834,7 +834,7 @@ export default function HomePage() {
             <p className="fc-subtle">
               {hasGenerated
                 ? "Checking on your turd..."
-                : "A turd waiting just for you."}
+                : "A turd is waiting for you 💩"}
             </p>
           )}
         </div>
