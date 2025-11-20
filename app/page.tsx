@@ -2,6 +2,9 @@
 
 import React, { useEffect, useState } from "react";
 import { sdk } from "@farcaster/miniapp-sdk";
+import { useAccount, useConnect, useSignMessage } from 'wagmi';
+import { MintModal } from '@/components/MintModal';
+import { generateSiweMessage, generateNonce, verifySiweSignature } from '@/lib/auth';
 
 type MeResponse = {
   fid: number;
@@ -41,6 +44,14 @@ export default function HomePage() {
   const [hasGenerated, setHasGenerated] = useState(false);
   const [mintPrice, setMintPrice] = useState<string>("Free");
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [showMintModal, setShowMintModal] = useState(false);
+  const [authNonce, setAuthNonce] = useState<string | null>(null);
+
+  // Wagmi hooks
+  const { address, isConnected } = useAccount();
+  const { connect, connectors } = useConnect();
+  const { signMessageAsync } = useSignMessage();
 
   // Initialize SDK + load Farcaster user
   useEffect(() => {
@@ -138,6 +149,59 @@ export default function HomePage() {
     initializeApp();
   }, []);
 
+  // Auto-connect to Farcaster wallet
+  useEffect(() => {
+    if (!isConnected && connectors.length > 0) {
+      const farcasterConnector = connectors[0]; // Farcaster miniapp connector
+      connect({ connector: farcasterConnector });
+    }
+  }, [isConnected, connectors, connect]);
+
+  // Handle authentication when wallet connects
+  useEffect(() => {
+    async function authenticateUser() {
+      if (!address || !me?.fid || isAuthenticated) return;
+
+      try {
+        setStatus("Authenticating with Farcaster...");
+
+        const nonce = generateNonce();
+        setAuthNonce(nonce);
+
+        // Generate SIWE message
+        const message = generateSiweMessage({
+          address,
+          chainId: 84532, // Base Sepolia
+          nonce,
+          fid: me.fid
+        });
+
+        // Sign the message
+        const signature = await signMessageAsync({ message });
+
+        // Verify on backend
+        const result = await verifySiweSignature({ message, signature, nonce });
+
+        if (result.success) {
+          setIsAuthenticated(true);
+          setStatus("✓ Authenticated with Farcaster!");
+          setTimeout(() => setStatus(null), 3000);
+        } else {
+          setStatus(`⚠️ Authentication failed: ${result.error}`);
+        }
+      } catch (error: any) {
+        console.error('Authentication error:', error);
+        if (error.message.includes('User rejected')) {
+          setStatus("⚠️ Authentication cancelled");
+        } else {
+          setStatus("⚠️ Authentication failed. Please try again.");
+        }
+      }
+    }
+
+    authenticateUser();
+  }, [address, me?.fid, isAuthenticated, signMessageAsync]);
+
   // Load metadata preview for this fid
   useEffect(() => {
     async function fetchMetadata(fid: number) {
@@ -234,7 +298,7 @@ export default function HomePage() {
     }
   }
 
-  // Combined Generate & Mint function
+  // Combined Generate & Mint function (with auth check and modal)
   async function handleGenerateAndMint(e: React.FormEvent) {
     e.preventDefault();
     if (!me) return;
@@ -243,11 +307,15 @@ export default function HomePage() {
       return;
     }
 
+    // Check authentication
+    if (!isAuthenticated || !isConnected) {
+      setStatus("⚠️ Please authenticate with your Farcaster wallet first");
+      return;
+    }
+
     // Step 1: Generate
     setGenerating(true);
-    setMinting(false);
     setStatus("Making a turd just for you...💩");
-    setLastTxHash(null);
 
     try {
       // Generate the Farcasturd
@@ -276,44 +344,13 @@ export default function HomePage() {
       }
       setIsRefreshing(false);
 
-      // Step 2: Mint
-      setGenerating(false);
-      setMinting(true);
-      setStatus("Farcasturd created! Now minting on Base...💩");
+      // Step 2: Open Mint Modal
+      setStatus("✓ Farcasturd generated! Opening payment modal...");
+      setTimeout(() => {
+        setShowMintModal(true);
+        setStatus(null);
+      }, 1000);
 
-      const mintRes = await fetch("/api/mint", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fid: me.fid,
-          to: me.wallet,
-        }),
-      });
-
-      const mintData = await mintRes.json();
-
-      if (!mintRes.ok) {
-        const errorMsg = mintData.error || "Unknown error";
-        if (errorMsg.includes("already minted")) {
-          setStatus("This FID has already minted a Farcasturd.");
-        } else if (errorMsg.includes("configuration") || errorMsg.includes("Missing")) {
-          setStatus("⚠️ Minting service not configured. Please contact support.");
-        } else {
-          setStatus(`⚠️ Minting failed: ${errorMsg}`);
-        }
-        return;
-      }
-
-      // Update state atomically to prevent flickering
-      setIsRefreshing(true);
-      setLastTxHash(mintData.txHash);
-      localStorage.setItem(`farcasturd_tx_${me.fid}`, mintData.txHash);
-      setMe((prev) => (prev ? { ...prev, hasMinted: true } : prev));
-      setStatus(`✓ Success! Farcasturd minted for FID ${mintData.fid}`);
-
-      // Small delay to ensure smooth transition
-      await new Promise(resolve => setTimeout(resolve, 100));
-      setIsRefreshing(false);
     } catch (err: any) {
       const errorMsg = err.message || "Unknown error";
       if (errorMsg.includes("quota")) {
@@ -323,12 +360,11 @@ export default function HomePage() {
       } else if (errorMsg.includes("Generation failed")) {
         setStatus(`⚠️ Generation failed: ${errorMsg}`);
       } else {
-        setStatus(`⚠️ Process failed. Please try again.`);
+        setStatus(`⚠️ Generation failed. Please try again.`);
       }
-      console.error("Generate & Mint error:", err);
+      console.error("Generate error:", err);
     } finally {
       setGenerating(false);
-      setMinting(false);
     }
   }
 
@@ -344,50 +380,22 @@ export default function HomePage() {
       return;
     }
 
-    setMinting(true);
-    setStatus("Minting Farcasturd on Base...💩");
-    setLastTxHash(null);
-
-    try {
-      const res = await fetch("/api/mint", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fid: me.fid,
-          to: me.wallet,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        const errorMsg = data.error || "Unknown error";
-        if (errorMsg.includes("already minted")) {
-          setStatus("This FID has already minted a Farcasturd.");
-        } else if (errorMsg.includes("configuration") || errorMsg.includes("Missing")) {
-          setStatus("⚠️ Minting service not configured. Please contact support.");
-        } else {
-          setStatus(`⚠️ Minting failed: ${errorMsg}`);
-        }
-        return;
-      }
-
-      // Update state atomically to prevent flickering
-      setIsRefreshing(true);
-      setLastTxHash(data.txHash);
-      localStorage.setItem(`farcasturd_tx_${me.fid}`, data.txHash);
-      setMe((prev) => (prev ? { ...prev, hasMinted: true } : prev));
-      setStatus(`✓ Success! Farcasturd minted for FID ${data.fid}`);
-
-      // Small delay to ensure smooth transition
-      await new Promise(resolve => setTimeout(resolve, 100));
-      setIsRefreshing(false);
-    } catch (err: any) {
-      setStatus(`⚠️ Minting failed. Please try again.`);
-      console.error("Mint error:", err);
-    } finally {
-      setMinting(false);
+    // Check authentication
+    if (!isAuthenticated || !isConnected) {
+      setStatus("⚠️ Please authenticate with your Farcaster wallet first");
+      return;
     }
+
+    // Open the mint modal
+    setShowMintModal(true);
+  }
+
+  // Handle successful mint from modal
+  function handleMintSuccess(txHash: string) {
+    setLastTxHash(txHash);
+    localStorage.setItem(`farcasturd_tx_${me?.fid}`, txHash);
+    setMe((prev) => (prev ? { ...prev, hasMinted: true } : prev));
+    setStatus(`✓ Success! Farcasturd minted for FID ${me?.fid}`);
   }
 
   if (loading) {
@@ -712,6 +720,17 @@ export default function HomePage() {
           )}
         </div>
       </section>
+
+      {/* Mint Payment Modal */}
+      {me && meta?.image && (
+        <MintModal
+          isOpen={showMintModal}
+          onClose={() => setShowMintModal(false)}
+          fid={me.fid}
+          imageUrl={meta.image}
+          onSuccess={handleMintSuccess}
+        />
+      )}
     </main>
   );
 }
