@@ -1,5 +1,5 @@
 [profile.default]
-src = "contracts"
+src = "src"
 out = "out"
 libs = ["node_modules", "lib"]
 remappings = [
@@ -8,3 +8,4 @@ remappings = [
 
 [rpc_endpoints]
 base_sepolia = "${BASE_RPC_URL}"
+base_mainnet = "${BASE_RPC_URL}"
