@@ -104,26 +104,39 @@ export default function HomePage() {
 
         // Fallback: Check URL params (for testing in embed tool)
         if (!viewerFid) {
-  const params = new URLSearchParams(window.location.search);
-  const fidParam = params.get('fid');
-  
-  if (fidParam) {
-    viewerFid = parseInt(fidParam, 10);
-    console.log("[App] ✓ Using FID from URL param:", viewerFid);
-  } else {
-    // Only show the embed tool message for actual development
-    const isLocalDev = window.location.hostname.includes('localhost') || 
-                      window.location.hostname.includes('127.0.0.1');
-    
-    if (isLocalDev) {
-      throw new Error("No FID available. Add ?fid=YOUR_FID to test in the embed tool.");
-    } else {
-      // In production Warpcast, try to gracefully handle missing SDK context
-      console.warn("[App] No FID from SDK context in production frame");
-      throw new Error("Unable to identify user. Please try refreshing the frame.");
-    }
-  }
-}
+          const params = new URLSearchParams(window.location.search);
+          const fidParam = params.get('fid');
+          
+          if (fidParam) {
+            viewerFid = parseInt(fidParam, 10);
+            console.log("[App] ✓ Using FID from URL param:", viewerFid);
+          } else {
+            // Only show the embed tool message for actual development
+            const isLocalDev = window.location.hostname.includes('localhost') || 
+                              window.location.hostname.includes('127.0.0.1');
+            
+            if (isLocalDev) {
+              throw new Error("No FID available. Add ?fid=YOUR_FID to test in the embed tool.");
+            } else {
+              // In production Warpcast, try to gracefully handle missing SDK context
+              console.warn("[App] No FID from SDK context in production frame");
+              throw new Error("Unable to identify user. Please try refreshing the frame.");
+            }
+          }
+        }
+
+        // Final validation with environment-specific error messages
+        if (!viewerFid || isNaN(viewerFid)) {
+          const isLocalDev = window.location.hostname.includes('localhost') || 
+                            window.location.hostname.includes('127.0.0.1');
+          
+          if (isLocalDev) {
+            throw new Error("No FID available. Add ?fid=YOUR_FID to test in the embed tool.");
+          } else {
+            throw new Error("Unable to identify user. Please try refreshing the frame.");
+          }
+        }
+
         // Fetch user data from our API
         console.log("[App] Fetching user data for FID:", viewerFid);
         const res = await fetch(`/api/me?fid=${viewerFid}`);
@@ -619,8 +632,8 @@ export default function HomePage() {
               </div>
             ) : (
               <div className="fc-avatar" style={{
-                width: 260,
-                height: 260,
+                width: 300,
+                height: 300,
                 borderRadius: 24,
                 background: "white",
                 display: "flex",
