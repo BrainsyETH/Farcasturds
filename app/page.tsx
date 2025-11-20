@@ -552,14 +552,14 @@ export default function HomePage() {
         <div className="fc-card">
           <div style={{ textAlign: "center" }}>
             <h2 style={{ fontSize: "1.05rem", fontWeight: 600, margin: "0 0 8px 0" }}>
-              {alreadyMinted ? "Turd Secured" : hasGenerated ? "Secure your Turd!" : "Secure your Farcasturd!"}
+              {alreadyMinted ? "Turd Secured" : hasGenerated ? "Secure your Turd!" : "Secure your Farcasturd"}
             </h2>
             <p style={{ fontSize: "0.9rem", color: "var(--fc-text-soft)", margin: "0 0 12px 0", lineHeight: 1.4 }}>
               {alreadyMinted
                 ? "Share your Farcasturd with the frens"
                 : hasGenerated
                 ? "Your Farcasturd is ready to mint on Base!"
-                : "Generate your unique turd now."}
+                : ""}
             </p>
 
             {!hasGenerated && !alreadyMinted && (
@@ -616,7 +616,7 @@ export default function HomePage() {
           <div className="fc-nft-preview-wrap">
             {meta?.image && !meta.image.includes("placeholder") ? (
               <div className="fc-nft-preview">
-                <img src={meta.image} alt="Your Farcasturd" />
+                <img src={meta.image} alt="Mint to Reveal" />
               </div>
             ) : (
               <div className="fc-avatar" style={{
@@ -687,7 +687,7 @@ export default function HomePage() {
             <p className="fc-subtle">
               {hasGenerated
                 ? "Checking on your turd..."
-                : "A turd just for you."}
+                : "A turd waiting just for you."}
             </p>
           )}
         </div>
