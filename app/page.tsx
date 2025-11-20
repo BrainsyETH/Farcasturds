@@ -74,61 +74,65 @@ export default function HomePage() {
 
         let viewerFid: number | undefined;
 
-        // Retry logic for SDK context with exponential backoff
-        while (!viewerFid && retryCount < maxRetries && mounted) {
-          // Progressive wait times: 400ms, 600ms, 1000ms, 1600ms, 2400ms
-          const waitTime = 400 + (retryCount * 400) + (retryCount * retryCount * 100);
-          console.log(`[App] Waiting ${waitTime}ms before attempt ${retryCount + 1}...`);
-          await new Promise(resolve => setTimeout(resolve, waitTime));
+        // PRIORITY 1: Check URL params first (for testing and direct access)
+        const params = new URLSearchParams(window.location.search);
+        const fidParam = params.get('fid');
 
-          // Try to get context from SDK with multiple access patterns
-          try {
-            console.log(`[App] Attempt ${retryCount + 1}/${maxRetries}: Checking SDK context...`);
-            
-            // Try multiple ways to access the SDK context
-            const context = sdk.context || (sdk as any).farcasterContext || (window as any).farcasterContext;
-            console.log("[App] Context found:", !!context);
-            
-            if (context) {
-              console.log("[App] Context keys:", Object.keys(context));
-              console.log("[App] User object:", context.user);
-            }
-            
-            if (context?.user?.fid) {
-              const rawFid = context.user.fid;
-              console.log("[App] Raw FID value:", rawFid, "Type:", typeof rawFid);
-              
-              // Handle different FID types
-              if (typeof rawFid === 'number') {
-                viewerFid = rawFid;
-              } else if (typeof rawFid === 'bigint') {
-                viewerFid = Number(rawFid);
-              } else if (typeof rawFid === 'string') {
-                viewerFid = parseInt(rawFid, 10);
-              } else if (rawFid && typeof rawFid === 'object') {
-                viewerFid = Number(rawFid.toString());
-              }
-              
-              if (viewerFid && !isNaN(viewerFid)) {
-                console.log("[App] ✓ Loaded viewer FID from SDK context:", viewerFid);
-                break;
-              }
-            }
-          } catch (contextError) {
-            console.warn(`[App] Attempt ${retryCount + 1} error:`, contextError);
+        if (fidParam) {
+          viewerFid = parseInt(fidParam, 10);
+          if (!isNaN(viewerFid)) {
+            console.log("[App] ✓ Using FID from URL param:", viewerFid);
+          } else {
+            viewerFid = undefined;
           }
-
-          retryCount++;
         }
 
-        // Fallback: Check URL params
+        // PRIORITY 2: If no URL param, try SDK context with retry logic
         if (!viewerFid) {
-          const params = new URLSearchParams(window.location.search);
-          const fidParam = params.get('fid');
-          
-          if (fidParam) {
-            viewerFid = parseInt(fidParam, 10);
-            console.log("[App] ✓ Using FID from URL param:", viewerFid);
+          while (!viewerFid && retryCount < maxRetries && mounted) {
+            // Progressive wait times: 400ms, 600ms, 1000ms, 1600ms, 2400ms
+            const waitTime = 400 + (retryCount * 400) + (retryCount * retryCount * 100);
+            console.log(`[App] Waiting ${waitTime}ms before attempt ${retryCount + 1}...`);
+            await new Promise(resolve => setTimeout(resolve, waitTime));
+
+            // Try to get context from SDK with multiple access patterns
+            try {
+              console.log(`[App] Attempt ${retryCount + 1}/${maxRetries}: Checking SDK context...`);
+
+              // Try multiple ways to access the SDK context
+              const context = sdk.context || (sdk as any).farcasterContext || (window as any).farcasterContext;
+              console.log("[App] Context found:", !!context);
+
+              if (context) {
+                console.log("[App] Context keys:", Object.keys(context));
+                console.log("[App] User object:", context.user);
+              }
+
+              if (context?.user?.fid) {
+                const rawFid = context.user.fid;
+                console.log("[App] Raw FID value:", rawFid, "Type:", typeof rawFid);
+
+                // Handle different FID types
+                if (typeof rawFid === 'number') {
+                  viewerFid = rawFid;
+                } else if (typeof rawFid === 'bigint') {
+                  viewerFid = Number(rawFid);
+                } else if (typeof rawFid === 'string') {
+                  viewerFid = parseInt(rawFid, 10);
+                } else if (rawFid && typeof rawFid === 'object') {
+                  viewerFid = Number(rawFid.toString());
+                }
+
+                if (viewerFid && !isNaN(viewerFid)) {
+                  console.log("[App] ✓ Loaded viewer FID from SDK context:", viewerFid);
+                  break;
+                }
+              }
+            } catch (contextError) {
+              console.warn(`[App] Attempt ${retryCount + 1} error:`, contextError);
+            }
+
+            retryCount++;
           }
         }
 
