@@ -24,7 +24,7 @@ export const metadata: Metadata = {
           name: "Farcasturds",
           url: "https://farcasturds.vercel.app",
           splashImageUrl: "https://b4b0aaz7b39hhkor.public.blob.vercel-storage.com/icons/splash.png",
-          splashBackgroundColor: "#f5eee4"
+          splashBackgroundColor: "#6938c7"
         }
       }
     }),
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
           name: "Farcasturds",
           url: "https://farcasturds.vercel.app",
           splashImageUrl: "https://b4b0aaz7b39hhkor.public.blob.vercel-storage.com/icons/splash.png",
-          splashBackgroundColor: "#f5eee4"
+          splashBackgroundColor: "#6938c7"
         }
       }
     })

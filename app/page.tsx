@@ -39,6 +39,7 @@ export default function HomePage() {
   const [minting, setMinting] = useState(false);
   const [lastTxHash, setLastTxHash] = useState<string | null>(null);
   const [hasGenerated, setHasGenerated] = useState(false);
+  const [mintPrice, setMintPrice] = useState<string>("Free");
 
   // Initialize SDK + load Farcaster user
   useEffect(() => {
@@ -123,6 +124,7 @@ export default function HomePage() {
         
         const data = await res.json();
         console.log("[App] ✓ User data loaded:", data);
+        console.log("[App] PFP URL:", data.pfpUrl);
         setMe(data);
       } catch (err: any) {
         console.error("[App] Initialization error:", err);
@@ -166,6 +168,22 @@ export default function HomePage() {
       }
     }
   }, [me?.fid]);
+
+  // Fetch mint price configuration
+  useEffect(() => {
+    async function fetchMintPrice() {
+      try {
+        const res = await fetch('/api/config/mint-price');
+        if (res.ok) {
+          const data = await res.json();
+          setMintPrice(data.price === "0" || data.price === 0 ? "Free" : `${data.price} ETH`);
+        }
+      } catch (err) {
+        console.log("Could not fetch mint price, defaulting to Free");
+      }
+    }
+    fetchMintPrice();
+  }, []);
 
   async function handleGenerateFarcasturd() {
     if (!me?.fid) return;
@@ -439,9 +457,9 @@ export default function HomePage() {
       <section className="fc-section">
         <div className="fc-card" style={{ padding: "16px" }}>
           <div className="fc-mint-card-layout" style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
-            {/* PFP on the left - always show if available */}
-            {me.pfpUrl ? (
-              <div style={{ flexShrink: 0 }}>
+            {/* PFP on the left - always show */}
+            <div style={{ flexShrink: 0 }}>
+              {me.pfpUrl ? (
                 <img
                   src={me.pfpUrl}
                   alt={`${me.displayName || me.username} profile`}
@@ -453,9 +471,29 @@ export default function HomePage() {
                     border: "2px solid rgba(143, 91, 255, 0.3)",
                     display: "block"
                   }}
+                  onError={(e) => {
+                    console.log("[PFP] Image failed to load:", me.pfpUrl);
+                    (e.target as HTMLImageElement).style.display = 'none';
+                  }}
                 />
-              </div>
-            ) : null}
+              ) : (
+                <div
+                  style={{
+                    width: 80,
+                    height: 80,
+                    borderRadius: "50%",
+                    backgroundColor: "rgba(143, 91, 255, 0.2)",
+                    border: "2px solid rgba(143, 91, 255, 0.3)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: "2rem"
+                  }}
+                >
+                  {me.displayName?.[0] || me.username?.[0] || "👤"}
+                </div>
+              )}
+            </div>
 
             {/* Content on the right */}
             <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 6, minWidth: 0 }}>
@@ -511,7 +549,7 @@ export default function HomePage() {
               )}
 
               <p style={{ fontSize: "0.72rem", color: "var(--fc-text-muted)", margin: "4px 0 0 0", letterSpacing: "0.02em", textAlign: "left" }}>
-                Unique · Soulbound · No Dumping
+                Unique · Soulbound · No Dumping{mintPrice !== "Free" && ` · ${mintPrice}`}
               </p>
 
               {status && <p style={{ fontSize: "0.8rem", color: "var(--fc-text-muted)", margin: "4px 0 0 0", textAlign: "left" }}>{status}</p>}
