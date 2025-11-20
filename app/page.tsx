@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { sdk } from "@farcaster/miniapp-sdk";
 import { useAccount, useConnect, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { parseEther } from 'viem';
@@ -50,6 +50,9 @@ export default function HomePage() {
   const [showMintModal, setShowMintModal] = useState(false);
   const [authNonce, setAuthNonce] = useState<string | null>(null);
   const [sharing, setSharing] = useState(false);
+
+  // Track processed transaction hashes to prevent duplicate generation
+  const processedTxHashes = useRef<Set<string>>(new Set());
 
   // Wagmi hooks
   const { address, isConnected } = useAccount();
@@ -313,7 +316,16 @@ export default function HomePage() {
   // Handle successful mint
   useEffect(() => {
     if (isMintConfirmed && mintTxHash && me) {
+      // Prevent duplicate generation for the same transaction
+      if (processedTxHashes.current.has(mintTxHash)) {
+        console.log('[Mint] Transaction already processed, skipping generation:', mintTxHash);
+        return;
+      }
+
       console.log('[Mint] ✅ Transaction confirmed on-chain!', mintTxHash);
+
+      // Mark this transaction as processed
+      processedTxHashes.current.add(mintTxHash);
 
       // Call success handler directly to avoid circular dependency
       setLastTxHash(mintTxHash);
