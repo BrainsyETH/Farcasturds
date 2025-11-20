@@ -438,31 +438,31 @@ export default function HomePage() {
       {/* Generation & Mint section */}
       <section className="fc-section">
         <div className="fc-card" style={{ padding: "16px" }}>
-          <div className="fc-mint-card-layout" style={{ display: "flex", gap: 16, alignItems: "center" }}>
-            {/* PFP on the left */}
-            {me.pfpUrl && (
-              <div
-                style={{
-                  display: "flex",
-                  flexShrink: 0,
-                }}
-              >
-                <div style={{ width: 80, height: 80, minWidth: 80 }}>
-                  <img
-                    src={me.pfpUrl}
-                    alt={`${me.displayName || me.username} profile`}
-                    style={{ width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover", border: "2px solid rgba(143, 91, 255, 0.3)" }}
-                  />
-                </div>
+          <div className="fc-mint-card-layout" style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
+            {/* PFP on the left - always show if available */}
+            {me.pfpUrl ? (
+              <div style={{ flexShrink: 0 }}>
+                <img
+                  src={me.pfpUrl}
+                  alt={`${me.displayName || me.username} profile`}
+                  style={{
+                    width: 80,
+                    height: 80,
+                    borderRadius: "50%",
+                    objectFit: "cover",
+                    border: "2px solid rgba(143, 91, 255, 0.3)",
+                    display: "block"
+                  }}
+                />
               </div>
-            )}
+            ) : null}
 
             {/* Content on the right */}
-            <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 8, minWidth: 0, alignItems: "flex-start" }}>
-              <h2 style={{ fontSize: "1rem", fontWeight: 600, margin: 0 }}>
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 6, minWidth: 0 }}>
+              <h2 style={{ fontSize: "1rem", fontWeight: 600, margin: 0, textAlign: "left" }}>
                 {alreadyMinted ? "Your Farcasturd" : hasGenerated ? "Ready to Mint!" : "Generate Your 1:1 Farcasturd"}
               </h2>
-              <p style={{ fontSize: "0.85rem", color: "var(--fc-text-soft)", margin: 0, lineHeight: 1.3 }}>
+              <p style={{ fontSize: "0.85rem", color: "var(--fc-text-soft)", margin: 0, lineHeight: 1.3, textAlign: "left" }}>
                 {alreadyMinted
                   ? "You've already claimed your unique Farcasturd!"
                   : hasGenerated
@@ -470,53 +470,51 @@ export default function HomePage() {
                   : "Generate your unique turd now."}
               </p>
 
-              <div style={{ marginTop: 4, display: "flex", gap: 8, flexWrap: "wrap", width: "100%" }}>
-                {!hasGenerated && !alreadyMinted && (
-                  <form onSubmit={handleGenerateAndMint}>
-                    <button
-                      type="submit"
-                      disabled={generating || minting}
-                      className="fc-button"
-                      style={{ fontSize: "0.85rem", padding: "0.5rem 1rem" }}
-                    >
-                      {generating
-                        ? "Generating...💩"
-                        : minting
-                        ? "Minting...💩"
-                        : "Generate & Mint"}
-                    </button>
-                  </form>
-                )}
-
-                {hasGenerated && !alreadyMinted && (
-                  <form onSubmit={handleMint}>
-                    <button
-                      type="submit"
-                      disabled={minting}
-                      className="fc-button"
-                      style={{ fontSize: "0.85rem", padding: "0.5rem 1rem" }}
-                    >
-                      {minting ? "Minting... 💩" : "Mint Now"}
-                    </button>
-                  </form>
-                )}
-
-                {alreadyMinted && (
+              {!hasGenerated && !alreadyMinted && (
+                <form onSubmit={handleGenerateAndMint} style={{ marginTop: 4 }}>
                   <button
-                    disabled
+                    type="submit"
+                    disabled={generating || minting}
                     className="fc-button"
-                    style={{ fontSize: "0.85rem", padding: "0.5rem 1rem" }}
+                    style={{ fontSize: "0.85rem", padding: "0.5rem 1rem", margin: 0 }}
                   >
-                    Already Minted ✓
+                    {generating
+                      ? "Generating...💩"
+                      : minting
+                      ? "Minting...💩"
+                      : "Generate & Mint"}
                   </button>
-                )}
-              </div>
+                </form>
+              )}
 
-              <p style={{ fontSize: "0.72rem", color: "var(--fc-text-muted)", margin: "4px 0 0 0", letterSpacing: "0.02em", width: "100%" }}>
+              {hasGenerated && !alreadyMinted && (
+                <form onSubmit={handleMint} style={{ marginTop: 4 }}>
+                  <button
+                    type="submit"
+                    disabled={minting}
+                    className="fc-button"
+                    style={{ fontSize: "0.85rem", padding: "0.5rem 1rem", margin: 0 }}
+                  >
+                    {minting ? "Minting... 💩" : "Mint Now"}
+                  </button>
+                </form>
+              )}
+
+              {alreadyMinted && (
+                <button
+                  disabled
+                  className="fc-button"
+                  style={{ fontSize: "0.85rem", padding: "0.5rem 1rem", margin: "4px 0 0 0" }}
+                >
+                  Already Minted ✓
+                </button>
+              )}
+
+              <p style={{ fontSize: "0.72rem", color: "var(--fc-text-muted)", margin: "4px 0 0 0", letterSpacing: "0.02em", textAlign: "left" }}>
                 Unique · Soulbound · No Dumping
               </p>
 
-              {status && <p style={{ fontSize: "0.8rem", color: "var(--fc-text-muted)", margin: "4px 0 0 0", width: "100%" }}>{status}</p>}
+              {status && <p style={{ fontSize: "0.8rem", color: "var(--fc-text-muted)", margin: "4px 0 0 0", textAlign: "left" }}>{status}</p>}
             </div>
           </div>
         </div>
