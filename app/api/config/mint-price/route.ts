@@ -6,6 +6,6 @@ export async function GET() {
 
   return NextResponse.json({
     price: mintPriceEth,
-    isFree: mintPriceEth === "0" || parseFloat(mintPriceEth) === 0.0005,
+    isFree: mintPriceEth === "0" || parseFloat(mintPriceEth) === 0.001,
   });
 }
