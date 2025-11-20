@@ -9,7 +9,7 @@ interface MintModalProps {
   isOpen: boolean
   onClose: () => void
   fid: number
-  imageUrl: string
+  imageUrl?: string
   onSuccess: (txHash: string) => void
 }
 
@@ -141,16 +141,7 @@ export function MintModal({ isOpen, onClose, fid, imageUrl, onSuccess }: MintMod
           </button>
         </div>
 
-        {/* Image Preview */}
-        {imageUrl && (
-          <div className="mb-4 rounded-xl overflow-hidden border-2 border-purple-400">
-            <img
-              src={imageUrl}
-              alt="Your Farcasturd"
-              className="w-full h-auto"
-            />
-          </div>
-        )}
+        {/* Note: Image generates AFTER mint confirms */}
 
         {/* Price Display */}
         <div className="mb-4 bg-purple-800 bg-opacity-50 rounded-lg p-4">
@@ -230,11 +221,6 @@ export function MintModal({ isOpen, onClose, fid, imageUrl, onSuccess }: MintMod
               `Mint ${mintPrice === '0' ? 'Free' : `for ${mintPrice} ETH`}`
             )}
           </button>
-        </div>
-
-        {/* Info Note */}
-        <div className="mt-4 text-xs text-gray-400 text-center">
-          <p>🔒 One mint per FID • Transaction on Base Sepolia</p>
         </div>
       </div>
     </div>
