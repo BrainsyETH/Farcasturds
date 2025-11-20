@@ -12,14 +12,9 @@ const nextConfig = {
         source: '/:path*',
         headers: [
           {
-            // Allow embedding in Farcaster frames
+            // Allow embedding in Farcaster frames and other contexts
             key: 'X-Frame-Options',
             value: 'ALLOWALL'
-          },
-          {
-            // Required for Farcaster Mini App embedding
-            key: 'Content-Security-Policy',
-            value: "frame-ancestors 'self' https://*.farcaster.xyz https://warpcast.com"
           }
         ],
       },
