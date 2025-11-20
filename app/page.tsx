@@ -78,6 +78,16 @@ export default function HomePage() {
     let retryCount = 0;
     const maxRetries = 5; // Increased retries
 
+    // Helper to add timeout to any promise
+    function withTimeout<T>(promise: Promise<T>, timeoutMs: number, errorMsg: string): Promise<T> {
+      return Promise.race([
+        promise,
+        new Promise<T>((_, reject) =>
+          setTimeout(() => reject(new Error(errorMsg)), timeoutMs)
+        )
+      ]);
+    }
+
     async function initializeApp() {
       try {
         console.log("[App] Initializing Farcaster SDK...");
@@ -108,9 +118,13 @@ export default function HomePage() {
             try {
               console.log(`[App] Attempt ${retryCount + 1}/${maxRetries}: Fetching SDK context...`);
 
-              // CRITICAL: sdk.context is a Promise that must be awaited!
-              // Official docs: https://github.com/farcasterxyz/frames-v2-demo
-              const context = await sdk.context;
+              // CRITICAL: sdk.context is a Promise that must be awaited with timeout!
+              // Add 3 second timeout to prevent infinite hanging
+              const context = await withTimeout(
+                sdk.context,
+                3000,
+                `SDK context timeout after 3s (attempt ${retryCount + 1})`
+              );
               console.log("[App] ✓ Context loaded:", context);
 
               if (context?.user?.fid) {
@@ -162,19 +176,23 @@ export default function HomePage() {
 
         if (!mounted) return;
 
-        // Fetch user data from API
+        // Fetch user data from API with timeout
         console.log("[App] Fetching user data for FID:", viewerFid);
-        const res = await fetch(`/api/me?fid=${viewerFid}`);
-        
+        const res = await withTimeout(
+          fetch(`/api/me?fid=${viewerFid}`),
+          10000,
+          "API request timeout after 10s"
+        );
+
         if (!res.ok) {
           const errorText = await res.text();
           console.error("[App] API error:", res.status, errorText);
           throw new Error(`Failed to fetch user info (${res.status})`);
         }
-        
+
         const data = await res.json();
         console.log("[App] ✓ User data loaded:", data);
-        
+
         if (mounted) {
           setMe(data);
         }
@@ -198,10 +216,26 @@ export default function HomePage() {
       }
     }
 
+    // Start initialization
     initializeApp();
+
+    // Emergency timeout: ensure ready() is called even if initialization hangs
+    const emergencyTimeout = setTimeout(() => {
+      if (mounted) {
+        console.warn("[App] ⚠️  Emergency timeout - forcing ready() call after 20s");
+        try {
+          sdk.actions.ready();
+          setLoading(false);
+          setStatus("Loading took longer than expected. Please try refreshing.");
+        } catch (err) {
+          console.error("[App] Emergency ready() failed:", err);
+        }
+      }
+    }, 20000); // 20 second emergency timeout
 
     return () => {
       mounted = false;
+      clearTimeout(emergencyTimeout);
     };
   }, []);
 
