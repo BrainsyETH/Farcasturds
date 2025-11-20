@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState } from "react";
 import { sdk } from "@farcaster/miniapp-sdk";
 import { useAccount, useConnect, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { parseEther } from 'viem';
@@ -312,11 +312,59 @@ export default function HomePage() {
 
   // Handle successful mint
   useEffect(() => {
-    if (isMintConfirmed && mintTxHash) {
+    if (isMintConfirmed && mintTxHash && me) {
       console.log('[Mint] ✅ Transaction confirmed on-chain!', mintTxHash);
-      handleMintSuccess(mintTxHash);
+
+      // Call success handler directly to avoid circular dependency
+      setLastTxHash(mintTxHash);
+      localStorage.setItem(`farcasturd_tx_${me.fid}`, mintTxHash);
+      setMe((prev) => (prev ? { ...prev, hasMinted: true } : prev));
+
+      // Now generate the image AFTER successful mint
+      setStatus("✓ Mint successful! Generating your Farcasturd...💩");
+      setGenerating(true);
+      setMinting(false);
+
+      // Trigger generation
+      fetch("/api/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fid: me.fid }),
+      })
+        .then(async (genRes) => {
+          if (!genRes.ok) {
+            const error = await genRes.json();
+            throw new Error(error.error || "Generation failed");
+          }
+          return genRes.json();
+        })
+        .then(async () => {
+          setHasGenerated(true);
+
+          // Fetch metadata to show the generated image
+          setIsRefreshing(true);
+          const metaRes = await fetch(`/api/metadata/${me.fid}?t=${Date.now()}`, {
+            cache: 'no-store'
+          });
+          if (metaRes.ok) {
+            const metaData = await metaRes.json();
+            setMeta(metaData);
+          }
+          setIsRefreshing(false);
+
+          setStatus(`✓ Farcasturd minted and generated for FID ${me.fid}! 💩`);
+          setTimeout(() => setStatus(null), 3000);
+        })
+        .catch((err) => {
+          console.error("Generation after mint failed:", err);
+          setStatus("✓ Minted! But generation failed. Refresh to try again.");
+          setTimeout(() => setStatus(null), 5000);
+        })
+        .finally(() => {
+          setGenerating(false);
+        });
     }
-  }, [isMintConfirmed, mintTxHash, handleMintSuccess]);
+  }, [isMintConfirmed, mintTxHash, me]);
 
   // Handle mint errors
   useEffect(() => {
@@ -444,7 +492,7 @@ export default function HomePage() {
     setShowMintModal(true);
   }
 
-  const handleMintSuccess = useCallback(async (txHash: string) => {
+  async function handleMintSuccess(txHash: string) {
     if (!me) return;
 
     setLastTxHash(txHash);
@@ -491,7 +539,7 @@ export default function HomePage() {
     } finally {
       setGenerating(false);
     }
-  }, [me]);
+  }
 
   async function handleShareToFarcaster() {
     if (!me || !meta) return;
