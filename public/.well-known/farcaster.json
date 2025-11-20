@@ -2,9 +2,9 @@
   "frame": {
     "version": "1",
     "name": "Farcasturds",
-    "iconUrl": "https://farcasturds.vercel.app/icons/icon.png",
-    "imageUrl": "https://farcasturds.vercel.app/icons/preview.png",
-    "splashImageUrl": "https://farcasturds.vercel.app/icons/splash.png",
+    "iconUrl": "https://farcasturds.vercel.app/icon.png",
+    "imageUrl": "https://farcasturds.vercel.app/preview.png",
+    "splashImageUrl": "https://farcasturds.vercel.app/splash.png",
     "splashBackgroundColor": "#6938c7",
     "homeUrl": "https://farcasturds.vercel.app"
   }

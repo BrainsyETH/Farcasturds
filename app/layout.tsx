@@ -17,14 +17,14 @@ export const metadata: Metadata = {
     // Farcaster Mini App metadata
     'fc:miniapp': JSON.stringify({
       version: "1",
-      imageUrl: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://farcasturds.vercel.app'}/icons/preview.png`,
+      imageUrl: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://farcasturds.vercel.app'}/preview.png`,
       button: {
         title: "💩 Mint a Turd",
         action: {
           type: "launch_frame",
           name: "Farcasturds",
           url: process.env.NEXT_PUBLIC_BASE_URL || "https://farcasturds.vercel.app",
-          splashImageUrl: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://farcasturds.vercel.app'}/icons/splash.png`,
+          splashImageUrl: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://farcasturds.vercel.app'}/splash.png`,
           splashBackgroundColor: "#6938c7"
         }
       }
@@ -32,14 +32,14 @@ export const metadata: Metadata = {
     // Backward compatibility
     'fc:frame': JSON.stringify({
       version: "1",
-      imageUrl: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://farcasturds.vercel.app'}/icons/preview.png`,
+      imageUrl: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://farcasturds.vercel.app'}/preview.png`,
       button: {
         title: "💩 Mint a Turd",
         action: {
           type: "launch_frame",
           name: "Farcasturds",
           url: process.env.NEXT_PUBLIC_BASE_URL || "https://farcasturds.vercel.app",
-          splashImageUrl: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://farcasturds.vercel.app'}/icons/splash.png`,
+          splashImageUrl: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://farcasturds.vercel.app'}/splash.png`,
           splashBackgroundColor: "#6938c7"
         }
       }
