@@ -43,7 +43,7 @@ Color mood: warm, inviting colors with brown/tan base tones and a simple soft gr
 Create a single, clean 3D character portrait of a cute, charming cartoon poop emoji representing "${name}".
 
 The image must show:
-- One full-body purple poop emoji character, centered in the frame.
+- One full-body, purple-colored poop emoji character, centered in the frame.
 - Big or small expressive eyes and a friendly smile.
 - A dynamic, engaging pose that reflects ${personalityHints || "a friendly, approachable personality"}.
 - Modern 3D render quality, similar to high-end NFT/PFP characters.
