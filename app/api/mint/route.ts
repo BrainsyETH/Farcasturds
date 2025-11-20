@@ -1,6 +1,6 @@
 // app/api/mint/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { createWalletClient, createPublicClient, http } from "viem";
+import { createWalletClient, createPublicClient, http, isAddress } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { baseSepolia } from "viem/chains"; // ← Changed from 'base' to 'baseSepolia'
 import { farcasturdsAbi } from "@/abi/Farcasturds";
@@ -37,12 +37,36 @@ export async function POST(req: NextRequest) {
   try {
     const { fid, to } = await req.json();
 
+    // Input validation: Check types and values
     if (typeof fid !== "number" || !to) {
       return NextResponse.json(
         { error: "Expected payload: { fid: number, to: address }" },
         { status: 400 }
       );
     }
+
+    // Security: Validate FID is a positive integer
+    if (fid <= 0 || !Number.isInteger(fid)) {
+      return NextResponse.json(
+        { error: "FID must be a positive integer" },
+        { status: 400 }
+      );
+    }
+
+    // Security: Validate Ethereum address format
+    if (!isAddress(to)) {
+      return NextResponse.json(
+        { error: "Invalid Ethereum address" },
+        { status: 400 }
+      );
+    }
+
+    // Security Note: In production, implement FID ownership verification
+    // Options:
+    // 1. Verify Farcaster signature to prove FID ownership
+    // 2. Check wallet address matches FID's verified addresses from Neynar
+    // 3. Use Farcaster Auth or similar authentication mechanism
+    // Current implementation trusts the frontend - NOT SECURE for production
 
     // Initialize clients at request time
     const { CONTRACT, publicClient, walletClient } = getClients();

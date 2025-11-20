@@ -6,12 +6,27 @@ export async function POST(req: NextRequest) {
   try {
     const { fid } = await req.json();
 
+    // Input validation: Check type
     if (!fid || typeof fid !== "number") {
       return NextResponse.json(
         { error: "Valid FID required" },
         { status: 400 }
       );
     }
+
+    // Security: Validate FID is a positive integer
+    if (fid <= 0 || !Number.isInteger(fid)) {
+      return NextResponse.json(
+        { error: "FID must be a positive integer" },
+        { status: 400 }
+      );
+    }
+
+    // Security Note: In production, implement:
+    // 1. FID ownership verification (Farcaster Auth/signature)
+    // 2. Rate limiting per FID/IP to prevent API quota abuse
+    // 3. Check that user hasn't already generated (before calling ensureFarcasturd)
+    // Current implementation allows anyone to generate for any FID - NOT SECURE
 
     console.log(`[Generate] Starting generation for FID ${fid}`);
 

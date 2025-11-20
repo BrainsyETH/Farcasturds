@@ -521,7 +521,7 @@ export default function HomePage() {
         <div className="fc-card">
           <div style={{ textAlign: "center" }}>
             <h2 style={{ fontSize: "1.05rem", fontWeight: 600, margin: "0 0 8px 0" }}>
-              {alreadyMinted ? "Your Farcasturd" : hasGenerated ? "Ready to Mint!" : "Generate Your 1:1 Farcasturd"}
+              {alreadyMinted ? "Your Farcasturd" : hasGenerated ? "Ready to Mint!" : "Farcasturd"}
             </h2>
             <p style={{ fontSize: "0.9rem", color: "var(--fc-text-soft)", margin: "0 0 12px 0", lineHeight: 1.4 }}>
               {alreadyMinted
@@ -570,7 +570,7 @@ export default function HomePage() {
             )}
 
             <p className="fc-tagline">
-            ${mintPrice}`
+              {mintPrice}
             </p>
 
             {status && <p className="fc-status">{status}</p>}
