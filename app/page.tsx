@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { sdk } from "@farcaster/miniapp-sdk";
 import { useAccount, useConnect, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { parseEther } from 'viem';
@@ -297,6 +297,7 @@ export default function HomePage() {
   // Handle mint transaction status updates
   useEffect(() => {
     if (isMintPending) {
+      console.log('[Mint] Transaction pending - waiting for wallet confirmation');
       setMinting(true);
       setStatus("Please confirm the transaction in your wallet...");
     }
@@ -304,6 +305,7 @@ export default function HomePage() {
 
   useEffect(() => {
     if (isMintConfirming) {
+      console.log('[Mint] Transaction confirmed by wallet - waiting for blockchain confirmation');
       setStatus("Transaction submitted! Waiting for confirmation...");
     }
   }, [isMintConfirming]);
@@ -311,15 +313,26 @@ export default function HomePage() {
   // Handle successful mint
   useEffect(() => {
     if (isMintConfirmed && mintTxHash) {
+      console.log('[Mint] ✅ Transaction confirmed on-chain!', mintTxHash);
       handleMintSuccess(mintTxHash);
     }
-  }, [isMintConfirmed, mintTxHash]);
+  }, [isMintConfirmed, mintTxHash, handleMintSuccess]);
 
   // Handle mint errors
   useEffect(() => {
     if (isMintError && mintError) {
+      console.error('[Mint] ❌ Transaction error:', mintError);
       const errorMessage = mintError.message || 'Transaction failed';
-      setStatus(`⚠️ Mint failed: ${errorMessage}`);
+
+      // Check for common errors
+      if (errorMessage.includes('user rejected') || errorMessage.includes('User denied')) {
+        setStatus('⚠️ Transaction cancelled');
+      } else if (errorMessage.includes('insufficient funds')) {
+        setStatus('⚠️ Insufficient funds for transaction');
+      } else {
+        setStatus(`⚠️ Mint failed: ${errorMessage}`);
+      }
+
       setMinting(false);
       setTimeout(() => setStatus(null), 5000);
     }
@@ -431,7 +444,7 @@ export default function HomePage() {
     setShowMintModal(true);
   }
 
-  async function handleMintSuccess(txHash: string) {
+  const handleMintSuccess = useCallback(async (txHash: string) => {
     if (!me) return;
 
     setLastTxHash(txHash);
@@ -441,6 +454,7 @@ export default function HomePage() {
     // Now generate the image AFTER successful mint
     setStatus("✓ Mint successful! Generating your Farcasturd...💩");
     setGenerating(true);
+    setMinting(false); // Stop showing minting state
 
     try {
       const genRes = await fetch("/api/generate", {
@@ -477,7 +491,7 @@ export default function HomePage() {
     } finally {
       setGenerating(false);
     }
-  }
+  }, [me]);
 
   async function handleShareToFarcaster() {
     if (!me || !meta) return;
