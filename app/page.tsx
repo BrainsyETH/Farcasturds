@@ -95,108 +95,24 @@ export default function HomePage() {
             console.log(`[App] Waiting ${waitTime}ms before attempt ${retryCount + 1}...`);
             await new Promise(resolve => setTimeout(resolve, waitTime));
 
-            // Try to get context from SDK with multiple access patterns
             try {
-              console.log(`[App] Attempt ${retryCount + 1}/${maxRetries}: Checking SDK context...`);
+              console.log(`[App] Attempt ${retryCount + 1}/${maxRetries}: Fetching SDK context...`);
 
-              // Try multiple ways to access the SDK context
-              const context = sdk.context || (sdk as any).farcasterContext || (window as any).farcasterContext;
-              console.log("[App] Context found:", !!context);
+              // CRITICAL: sdk.context is a Promise that must be awaited!
+              // Official docs: https://github.com/farcasterxyz/frames-v2-demo
+              const context = await sdk.context;
+              console.log("[App] ✓ Context loaded:", context);
 
-              if (context) {
-                // First, let's safely inspect what's in the context without triggering Proxy errors
-                try {
-                  // Log the context type and constructor
-                  console.log("[App] Context type:", typeof context);
-                  console.log("[App] Context constructor:", context?.constructor?.name);
-
-                  // Try to get keys safely
-                  const keys = Object.keys(context);
-                  console.log("[App] Context keys:", keys);
-
-                  // Check if user exists
-                  if ('user' in context) {
-                    console.log("[App] user property exists");
-                    const userKeys = Object.keys(context.user || {});
-                    console.log("[App] User keys:", userKeys);
-                  }
-                } catch (inspectError) {
-                  console.warn("[App] Context inspection error:", inspectError);
-                }
-
-                // Method 1: Try JSON serialization first (safest, doesn't trigger Proxy)
-                try {
-                  const serialized = JSON.parse(JSON.stringify(context));
-                  console.log("[App] Serialized context:", serialized);
-
-                  if (serialized?.user?.fid && typeof serialized.user.fid === 'number') {
-                    viewerFid = serialized.user.fid;
-                    console.log("[App] ✓ FID from serialized context:", viewerFid);
-                  }
-                } catch (serializeError) {
-                  console.warn("[App] JSON serialization failed:", serializeError);
-                }
-
-                // Method 2: Try accessing through Reflect API (doesn't trigger Proxy apply)
-                if (!viewerFid) {
-                  try {
-                    if (Reflect.has(context, 'user')) {
-                      const user = Reflect.get(context, 'user');
-                      console.log("[App] User via Reflect:", user);
-
-                      if (user && Reflect.has(user, 'fid')) {
-                        const fid = Reflect.get(user, 'fid');
-                        console.log("[App] FID via Reflect:", fid, "Type:", typeof fid);
-
-                        // Try converting to number
-                        const numFid = Number(fid);
-                        if (!isNaN(numFid) && numFid > 0) {
-                          viewerFid = numFid;
-                          console.log("[App] ✓ FID from Reflect API:", viewerFid);
-                        }
-                      }
-                    }
-                  } catch (reflectError) {
-                    console.warn("[App] Reflect API failed:", reflectError);
-                  }
-                }
-
-                // Method 3: Try Object.entries to iterate safely
-                if (!viewerFid) {
-                  try {
-                    const entries = Object.entries(context);
-                    console.log("[App] Context entries:", entries);
-
-                    for (const [key, value] of entries) {
-                      if (key === 'user' && value && typeof value === 'object') {
-                        const userEntries = Object.entries(value);
-                        console.log("[App] User entries:", userEntries);
-
-                        for (const [userKey, userValue] of userEntries) {
-                          if (userKey === 'fid') {
-                            const numFid = Number(userValue);
-                            if (!isNaN(numFid) && numFid > 0) {
-                              viewerFid = numFid;
-                              console.log("[App] ✓ FID from entries iteration:", viewerFid);
-                              break;
-                            }
-                          }
-                        }
-                      }
-                    }
-                  } catch (entriesError) {
-                    console.warn("[App] Entries iteration failed:", entriesError);
-                  }
-                }
+              if (context?.user?.fid) {
+                viewerFid = context.user.fid;
+                console.log("[App] ✓ FID from SDK context:", viewerFid);
 
                 if (viewerFid && !isNaN(viewerFid) && viewerFid > 0) {
                   console.log("[App] ✓ Successfully loaded FID:", viewerFid);
                   break;
-                } else {
-                  console.warn("[App] No valid FID found in context");
                 }
               } else {
-                console.warn("[App] No context available");
+                console.warn("[App] No user.fid in context:", context);
               }
             } catch (contextError) {
               console.warn(`[App] Attempt ${retryCount + 1} error:`, contextError);
