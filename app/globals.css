@@ -297,6 +297,15 @@ h2.fc-title {
   }
 }
 
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
 /* Featured card with purple accent */
 .fc-card.fc-featured {
   border: 2px solid var(--fc-farcaster-purple);

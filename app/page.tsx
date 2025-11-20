@@ -571,9 +571,18 @@ export default function HomePage() {
     return (
       <main className="fc-shell">
         <section className="fc-section">
-          <div className="fc-card">
-            <p className="fc-subtle">Loading your Farcasturd...</p>
-            <p className="fc-subtle" style={{ fontSize: "0.85rem", marginTop: 8 }}>
+          <div className="fc-card" style={{ textAlign: 'center', padding: '2rem' }}>
+            <div style={{
+              fontSize: '4rem',
+              marginBottom: '1rem',
+              animation: 'bounce 1s ease-in-out infinite'
+            }}>
+              💩
+            </div>
+            <p className="fc-subtle" style={{ fontSize: '1rem', fontWeight: 500 }}>
+              Loading your Farcasturd...
+            </p>
+            <p className="fc-subtle" style={{ fontSize: "0.85rem", marginTop: 8, opacity: 0.7 }}>
               Connecting to Farcaster...
             </p>
           </div>
