@@ -330,7 +330,7 @@ h2.fc-title {
 /* Special styling for the reveal title */
 .fc-card-title-reveal {
   font-family: 'Comic Sans MS', 'Chalkboard SE', 'Bradley Hand', cursive;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: #9b4dff;
   text-shadow:
@@ -340,7 +340,7 @@ h2.fc-title {
   margin: 0 auto;
   text-align: center;
   display: block;
-  width: 80%;
+  width: 85%;
   letter-spacing: 0.5px;
   animation: glow 2s ease-in-out infinite;
 }

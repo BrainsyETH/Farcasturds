@@ -688,7 +688,7 @@ export default function HomePage() {
           </span>
           {isAuthenticated && (
             <span className="fc-pill" style={{ background: "rgba(76, 175, 80, 0.2)", color: "#2e7d32" }}>
-              ✓ Authenticated
+              ✓ Eligible
             </span>
           )}
         </div>
