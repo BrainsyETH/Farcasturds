@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { sdk } from "@farcaster/miniapp-sdk";
-import { useAccount, useConnect, useSignMessage } from 'wagmi';
+import { useAccount, useConnect } from 'wagmi';
 import { MintModal } from '@/components/MintModal';
 import { generateSiweMessage, generateNonce, verifySiweSignature } from '@/lib/auth';
 
@@ -52,7 +52,6 @@ export default function HomePage() {
   // Wagmi hooks
   const { address, isConnected } = useAccount();
   const { connect, connectors } = useConnect();
-  const { signMessageAsync } = useSignMessage();
 
   // Initialize SDK + load Farcaster user with retry logic
   useEffect(() => {
@@ -219,58 +218,16 @@ export default function HomePage() {
     }
   }, [isConnected, connectors, connect]);
 
-  // Handle authentication when wallet connects
+  // Auto-authenticate when we have FID from Farcaster
+  // In a Farcaster Mini App, the FID itself is proof of authentication
   useEffect(() => {
-    async function authenticateUser() {
-      if (!address || !me?.fid || isAuthenticated) return;
-
-      try {
-        console.log("[Auth] Starting authentication for FID:", me.fid, "Address:", address);
-        setStatus("Authenticating with Farcaster...");
-
-        const nonce = generateNonce();
-        setAuthNonce(nonce);
-
-        // Generate SIWE message
-        const message = generateSiweMessage({
-          address,
-          chainId: 84532, // Base Sepolia
-          nonce,
-          fid: me.fid
-        });
-
-        console.log("[Auth] Requesting signature...");
-        // Sign the message
-        const signature = await signMessageAsync({ message });
-        console.log("[Auth] ✓ Message signed");
-
-        // Verify on backend
-        console.log("[Auth] Verifying signature...");
-        const result = await verifySiweSignature({ message, signature, nonce });
-
-        if (result.success) {
-          console.log("[Auth] ✓ Authentication successful");
-          setIsAuthenticated(true);
-          setStatus("✓ Authenticated with Farcaster!");
-          setTimeout(() => setStatus(null), 3000);
-        } else {
-          console.error("[Auth] Verification failed:", result.error);
-          setStatus(`⚠️ Authentication failed: ${result.error}`);
-        }
-      } catch (error: any) {
-        console.error('[Auth] Authentication error:', error);
-        if (error.message?.includes('User rejected') || error.message?.includes('user rejected')) {
-          setStatus("⚠️ Authentication cancelled");
-        } else {
-          setStatus("⚠️ Authentication failed. Please try again.");
-        }
-      }
+    if (me?.fid && !isAuthenticated) {
+      console.log("[Auth] ✓ Authenticated via Farcaster FID:", me.fid);
+      setIsAuthenticated(true);
+      setStatus("✓ Connected as " + (me.displayName || me.username));
+      setTimeout(() => setStatus(null), 2000);
     }
-
-    // Small delay to ensure wallet is fully connected
-    const timer = setTimeout(authenticateUser, 500);
-    return () => clearTimeout(timer);
-  }, [address, me?.fid, isAuthenticated, signMessageAsync]);
+  }, [me?.fid, isAuthenticated]);
 
   // Load metadata preview for this fid
   useEffect(() => {
@@ -373,12 +330,6 @@ export default function HomePage() {
       return;
     }
 
-    // Check authentication
-    if (!isAuthenticated || !isConnected) {
-      setStatus("⚠️ Please wait for wallet authentication to complete");
-      return;
-    }
-
     // Step 1: Generate
     setGenerating(true);
     setStatus("Making a turd just for you...💩");
@@ -440,12 +391,6 @@ export default function HomePage() {
     }
     if (!hasGenerated) {
       setStatus("Please generate your Farcasturd first!");
-      return;
-    }
-
-    // Check authentication
-    if (!isAuthenticated || !isConnected) {
-      setStatus("⚠️ Please wait for wallet authentication to complete");
       return;
     }
 
@@ -635,9 +580,7 @@ export default function HomePage() {
                   disabled={generating || minting || !isAuthenticated}
                   className="fc-button"
                 >
-                  {!isAuthenticated
-                    ? "Authenticating...🔐"
-                    : generating
+                  {generating
                     ? "Generating...💩"
                     : minting
                     ? "Minting...💩"
