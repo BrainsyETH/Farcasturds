@@ -6,25 +6,25 @@ export const metadata: Metadata = {
   title: 'Farcasturds',
   description: 'Pumps, but mostly dumps.',
   icons: {
-    icon: '/icon.png',
+    icon: '/icons/icon.png',
   },
   openGraph: {
     title: 'Farcasturds',
     description: 'Your Number Two on Base',
-    images: ['/preview.png'],
+    images: ['/icons/preview.png'],
   },
   other: {
     // Farcaster Mini App metadata
     'fc:miniapp': JSON.stringify({
       version: "1",
-      imageUrl: "https://b4b0aaz7b39hhkor.public.blob.vercel-storage.com/icons/preview.png",
+      imageUrl: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://farcasturds.vercel.app'}/icons/preview.png`,
       button: {
         title: "💩 Mint a Turd",
         action: {
           type: "launch_frame",
           name: "Farcasturds",
-          url: "https://farcasturds.vercel.app",
-          splashImageUrl: "https://b4b0aaz7b39hhkor.public.blob.vercel-storage.com/icons/splash.png",
+          url: process.env.NEXT_PUBLIC_BASE_URL || "https://farcasturds.vercel.app",
+          splashImageUrl: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://farcasturds.vercel.app'}/icons/splash.png`,
           splashBackgroundColor: "#6938c7"
         }
       }
@@ -32,14 +32,14 @@ export const metadata: Metadata = {
     // Backward compatibility
     'fc:frame': JSON.stringify({
       version: "1",
-      imageUrl: "https://b4b0aaz7b39hhkor.public.blob.vercel-storage.com/icons/preview.png",
+      imageUrl: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://farcasturds.vercel.app'}/icons/preview.png`,
       button: {
         title: "💩 Mint a Turd",
         action: {
           type: "launch_frame",
           name: "Farcasturds",
-          url: "https://farcasturds.vercel.app",
-          splashImageUrl: "https://b4b0aaz7b39hhkor.public.blob.vercel-storage.com/icons/splash.png",
+          url: process.env.NEXT_PUBLIC_BASE_URL || "https://farcasturds.vercel.app",
+          splashImageUrl: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://farcasturds.vercel.app'}/icons/splash.png`,
           splashBackgroundColor: "#6938c7"
         }
       }
