@@ -582,7 +582,20 @@ export default function HomePage() {
               <div className="fc-meta-block">
                 <div style={{ textAlign: "center" }}>
                   <strong style={{ color: "var(--fc-text)" }}>Image URL:</strong>{" "}
-                  <span className="fc-code" style={{ color: "var(--fc-text)", opacity: 0.8 }}>{meta.image}</span>
+                  <a
+                    href={meta.image}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="fc-code"
+                    style={{
+                      color: "var(--fc-text)",
+                      opacity: 0.8,
+                      textDecoration: "underline",
+                      cursor: "pointer"
+                    }}
+                  >
+                    {meta.image}
+                  </a>
                 </div>
               </div>
 
@@ -622,14 +635,14 @@ export default function HomePage() {
 
           {hasActivity ? (
             <div className="fc-activity-item">
-              <div className="fc-activity-main">
+              <div className="fc-activity-main" style={{ textAlign: "center", justifyContent: "center" }}>
                 <span className="fc-activity-label">Farcasturd minted</span>
                 <span>for FID {me.fid}</span>
                 <span>→</span>
                 <span className="fc-code">{truncateAddress(me.wallet)}</span>
               </div>
 
-              <div className="fc-activity-time">
+              <div className="fc-activity-time" style={{ textAlign: "center", width: "100%" }}>
                 {lastTxHash ? (
                   <a
                     href={getBaseScanTxUrl(lastTxHash)}
