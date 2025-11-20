@@ -565,11 +565,25 @@ export default function HomePage() {
                 <img src={meta.image} alt="Your Farcasturd" />
               </div>
             ) : (
-              <div className="fc-avatar" style={{ width: 260, height: 260, borderRadius: 24 }}>
+              <div className="fc-avatar" style={{
+                width: 260,
+                height: 260,
+                borderRadius: 24,
+                background: "white",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                overflow: "hidden"
+              }}>
                 <img
                   src="https://b4b0aaz7b39hhkor.public.blob.vercel-storage.com/icons/poop_question.png"
                   alt="Generate your Farcasturd"
-                  style={{ width: "100%", height: "100%", objectFit: "contain" }}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "contain",
+                    display: "block"
+                  }}
                 />
               </div>
             )}
@@ -635,14 +649,20 @@ export default function HomePage() {
 
           {hasActivity ? (
             <div className="fc-activity-item">
-              <div className="fc-activity-main" style={{ textAlign: "center", justifyContent: "center" }}>
+              <p style={{
+                fontSize: "0.88rem",
+                color: "var(--fc-text-soft)",
+                margin: "0 auto 8px",
+                textAlign: "center",
+                maxWidth: "100%"
+              }}>
                 <span className="fc-activity-label">Farcasturd minted</span>
-                <span>for FID {me.fid}</span>
-                <span>→</span>
+                {" "}for FID {me.fid}
+                {" "}→{" "}
                 <span className="fc-code">{truncateAddress(me.wallet)}</span>
-              </div>
+              </p>
 
-              <div className="fc-activity-time" style={{ textAlign: "center", width: "100%" }}>
+              <div style={{ textAlign: "center", width: "100%" }}>
                 {lastTxHash ? (
                   <a
                     href={getBaseScanTxUrl(lastTxHash)}
@@ -653,7 +673,9 @@ export default function HomePage() {
                     View on BaseScan
                   </a>
                 ) : (
-                  "on-chain · existing"
+                  <span style={{ fontSize: "0.8rem", color: "var(--fc-text-muted)" }}>
+                    on-chain · existing
+                  </span>
                 )}
               </div>
             </div>
