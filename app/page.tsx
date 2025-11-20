@@ -47,6 +47,7 @@ export default function HomePage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showMintModal, setShowMintModal] = useState(false);
   const [authNonce, setAuthNonce] = useState<string | null>(null);
+  const [sharing, setSharing] = useState(false);
 
   // Wagmi hooks
   const { address, isConnected } = useAccount();
@@ -398,6 +399,34 @@ export default function HomePage() {
     setStatus(`✓ Success! Farcasturd minted for FID ${me?.fid}`);
   }
 
+  // Handle sharing to Farcaster
+  async function handleShareToFarcaster() {
+    if (!me || !meta) return;
+
+    try {
+      setSharing(true);
+      setStatus("Opening Farcaster composer...");
+
+      // Compose the cast with the Farcasturd image
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://farcasturds.vercel.app";
+      const shareText = `Just minted my Farcasturd NFT! 💩\n\n${meta.name}\n${baseUrl}`;
+
+      await sdk.actions.composeCast({
+        text: shareText,
+        embeds: [meta.image],
+      });
+
+      setStatus("✓ Cast composer opened!");
+      setTimeout(() => setStatus(null), 3000);
+    } catch (error: any) {
+      console.error('Share error:', error);
+      setStatus("⚠️ Failed to open cast composer");
+      setTimeout(() => setStatus(null), 3000);
+    } finally {
+      setSharing(false);
+    }
+  }
+
   if (loading) {
     return (
       <main className="fc-shell">
@@ -527,7 +556,7 @@ export default function HomePage() {
             </h2>
             <p style={{ fontSize: "0.9rem", color: "var(--fc-text-soft)", margin: "0 0 12px 0", lineHeight: 1.4 }}>
               {alreadyMinted
-                ? "You've already claimed your unique Farcasturd!"
+                ? "Share your Farcasturd with the world!"
                 : hasGenerated
                 ? "Your Farcasturd is ready to mint on Base!"
                 : "Generate your unique turd now."}
@@ -563,11 +592,12 @@ export default function HomePage() {
 
             {alreadyMinted && (
               <button
-                disabled
+                onClick={handleShareToFarcaster}
+                disabled={sharing}
                 className="fc-button"
                 style={{ marginBottom: 8 }}
               >
-                Already Minted ✓
+                {sharing ? "Sharing... 💩" : "Share Your Turd 💩"}
               </button>
             )}
 
