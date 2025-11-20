@@ -682,8 +682,8 @@ export default function HomePage() {
                 textAlign: "center",
                 maxWidth: "100%"
               }}>
-                <span className="fc-activity-label">Farcasturd minted</span>
-                {" "}for FID {me.fid}
+                <span className="fc-activity-label"></span>
+                {" "}FID {me.fid}
                 {" "}→{" "}
                 <span className="fc-code">{truncateAddress(me.wallet)}</span>
               </p>
