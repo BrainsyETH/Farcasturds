@@ -54,8 +54,12 @@ export default function HomePage() {
   const { connect, connectors } = useConnect();
   const { signMessageAsync } = useSignMessage();
 
-  // Initialize SDK + load Farcaster user
+  // Initialize SDK + load Farcaster user with retry logic
   useEffect(() => {
+    let mounted = true;
+    let retryCount = 0;
+    const maxRetries = 5; // Increased retries
+
     async function initializeApp() {
       try {
         console.log("[App] Initializing Farcaster SDK...");
@@ -63,46 +67,61 @@ export default function HomePage() {
         // Signal that the app is ready
         try {
           sdk.actions.ready();
+          console.log("[App] ✓ SDK ready signal sent");
         } catch (sdkError) {
           console.warn("[App] SDK ready() failed (expected in embed tool):", sdkError);
         }
 
-        // Wait for context to potentially be available
-        await new Promise(resolve => setTimeout(resolve, 300));
-
         let viewerFid: number | undefined;
 
-        // Try to get context from SDK
-        try {
-          console.log("[App] Checking SDK context...");
-          console.log("[App] SDK context available:", !!sdk.context);
-          console.log("[App] SDK context.user:", sdk.context?.user);
-          
-          if (sdk.context?.user?.fid) {
-            const rawFid = sdk.context.user.fid;
-            console.log("[App] Raw FID value:", rawFid, "Type:", typeof rawFid);
+        // Retry logic for SDK context with exponential backoff
+        while (!viewerFid && retryCount < maxRetries && mounted) {
+          // Progressive wait times: 400ms, 600ms, 1000ms, 1600ms, 2400ms
+          const waitTime = 400 + (retryCount * 400) + (retryCount * retryCount * 100);
+          console.log(`[App] Waiting ${waitTime}ms before attempt ${retryCount + 1}...`);
+          await new Promise(resolve => setTimeout(resolve, waitTime));
+
+          // Try to get context from SDK with multiple access patterns
+          try {
+            console.log(`[App] Attempt ${retryCount + 1}/${maxRetries}: Checking SDK context...`);
             
-            // Handle different FID types (number, BigInt, or object)
-            if (typeof rawFid === 'number') {
-              viewerFid = rawFid;
-            } else if (typeof rawFid === 'bigint') {
-              viewerFid = Number(rawFid);
-            } else if (typeof rawFid === 'string') {
-              viewerFid = parseInt(rawFid, 10);
-            } else if (rawFid && typeof rawFid === 'object') {
-              // Try to convert object to number
-              viewerFid = Number(rawFid.toString());
+            // Try multiple ways to access the SDK context
+            const context = sdk.context || (sdk as any).farcasterContext || (window as any).farcasterContext;
+            console.log("[App] Context found:", !!context);
+            
+            if (context) {
+              console.log("[App] Context keys:", Object.keys(context));
+              console.log("[App] User object:", context.user);
             }
             
-            if (viewerFid) {
-              console.log("[App] ✓ Loaded viewer FID from SDK context:", viewerFid);
+            if (context?.user?.fid) {
+              const rawFid = context.user.fid;
+              console.log("[App] Raw FID value:", rawFid, "Type:", typeof rawFid);
+              
+              // Handle different FID types
+              if (typeof rawFid === 'number') {
+                viewerFid = rawFid;
+              } else if (typeof rawFid === 'bigint') {
+                viewerFid = Number(rawFid);
+              } else if (typeof rawFid === 'string') {
+                viewerFid = parseInt(rawFid, 10);
+              } else if (rawFid && typeof rawFid === 'object') {
+                viewerFid = Number(rawFid.toString());
+              }
+              
+              if (viewerFid && !isNaN(viewerFid)) {
+                console.log("[App] ✓ Loaded viewer FID from SDK context:", viewerFid);
+                break;
+              }
             }
+          } catch (contextError) {
+            console.warn(`[App] Attempt ${retryCount + 1} error:`, contextError);
           }
-        } catch (contextError) {
-          console.warn("[App] Error accessing SDK context:", contextError);
+
+          retryCount++;
         }
 
-        // Fallback: Check URL params (for testing in embed tool)
+        // Fallback: Check URL params
         if (!viewerFid) {
           const params = new URLSearchParams(window.location.search);
           const fidParam = params.get('fid');
@@ -110,63 +129,102 @@ export default function HomePage() {
           if (fidParam) {
             viewerFid = parseInt(fidParam, 10);
             console.log("[App] ✓ Using FID from URL param:", viewerFid);
-          } else {
-            // Only show the embed tool message for actual development
-            const isLocalDev = window.location.hostname.includes('localhost') || 
-                              window.location.hostname.includes('127.0.0.1');
-            
-            if (isLocalDev) {
-              throw new Error("No FID available. Add ?fid=YOUR_FID to test in the embed tool.");
-            } else {
-              // In production Warpcast, try to gracefully handle missing SDK context
-              console.warn("[App] No FID from SDK context in production frame");
-              throw new Error("Unable to identify user. Please try refreshing the frame.");
-            }
           }
         }
 
-        // Final validation with environment-specific error messages
+        // Check environment for better error messages
+        const isDevelopment = 
+          window.location.hostname.includes('localhost') || 
+          window.location.hostname.includes('127.0.0.1') ||
+          window.location.hostname.includes('vercel.app') ||
+          process.env.NODE_ENV === 'development';
+
+        // Final validation
         if (!viewerFid || isNaN(viewerFid)) {
-          const isLocalDev = window.location.hostname.includes('localhost') || 
-                            window.location.hostname.includes('127.0.0.1');
-          
-          if (isLocalDev) {
-            throw new Error("No FID available. Add ?fid=YOUR_FID to test in the embed tool.");
+          if (isDevelopment) {
+            console.error("[App] Development mode: No FID available");
+            throw new Error(
+              "Testing mode: Add ?fid=YOUR_FID to the URL\n\n" +
+              "Example: " + window.location.origin + "?fid=198116"
+            );
           } else {
-            throw new Error("Unable to identify user. Please try refreshing the frame.");
+            console.error("[App] Production: No FID after", retryCount, "retries");
+            throw new Error(
+              "Unable to connect to Farcaster.\n\n" +
+              "Please try:\n" +
+              "1. Refreshing the frame\n" +
+              "2. Reopening the app\n" +
+              "3. Checking your Farcaster connection"
+            );
           }
         }
 
-        // Fetch user data from our API
+        if (!mounted) return;
+
+        // Fetch user data from API
         console.log("[App] Fetching user data for FID:", viewerFid);
         const res = await fetch(`/api/me?fid=${viewerFid}`);
         
         if (!res.ok) {
           const errorText = await res.text();
           console.error("[App] API error:", res.status, errorText);
-          throw new Error(`Failed to fetch user info: ${res.status}`);
+          throw new Error(`Failed to fetch user info (${res.status})`);
         }
         
         const data = await res.json();
         console.log("[App] ✓ User data loaded:", data);
-        console.log("[App] PFP URL:", data.pfpUrl);
-        setMe(data);
+        
+        if (mounted) {
+          setMe(data);
+        }
       } catch (err: any) {
         console.error("[App] Initialization error:", err);
-        setStatus(err.message || "Unable to load user info.");
+        if (mounted) {
+          setStatus(err.message || "Unable to load user info.");
+        }
       } finally {
-        setLoading(false);
+        if (mounted) {
+          setLoading(false);
+        }
       }
     }
 
     initializeApp();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
-  // Auto-connect to Farcaster wallet
+  // Auto-connect to Farcaster wallet with retry
   useEffect(() => {
+    let attempts = 0;
+    const maxAttempts = 3;
+
+    async function tryConnect() {
+      if (isConnected || !connectors.length || attempts >= maxAttempts) return;
+
+      try {
+        console.log(`[Wallet] Connection attempt ${attempts + 1}/${maxAttempts}`);
+        const farcasterConnector = connectors[0];
+        
+        if (farcasterConnector) {
+          await connect({ connector: farcasterConnector });
+          console.log("[Wallet] ✓ Connected successfully");
+        }
+      } catch (error) {
+        console.warn(`[Wallet] Connection attempt ${attempts + 1} failed:`, error);
+        attempts++;
+        
+        if (attempts < maxAttempts) {
+          // Retry after delay
+          setTimeout(tryConnect, 1000 * attempts);
+        }
+      }
+    }
+
     if (!isConnected && connectors.length > 0) {
-      const farcasterConnector = connectors[0]; // Farcaster miniapp connector
-      connect({ connector: farcasterConnector });
+      tryConnect();
     }
   }, [isConnected, connectors, connect]);
 
@@ -176,6 +234,7 @@ export default function HomePage() {
       if (!address || !me?.fid || isAuthenticated) return;
 
       try {
+        console.log("[Auth] Starting authentication for FID:", me.fid, "Address:", address);
         setStatus("Authenticating with Farcaster...");
 
         const nonce = generateNonce();
@@ -189,22 +248,27 @@ export default function HomePage() {
           fid: me.fid
         });
 
+        console.log("[Auth] Requesting signature...");
         // Sign the message
         const signature = await signMessageAsync({ message });
+        console.log("[Auth] ✓ Message signed");
 
         // Verify on backend
+        console.log("[Auth] Verifying signature...");
         const result = await verifySiweSignature({ message, signature, nonce });
 
         if (result.success) {
+          console.log("[Auth] ✓ Authentication successful");
           setIsAuthenticated(true);
           setStatus("✓ Authenticated with Farcaster!");
           setTimeout(() => setStatus(null), 3000);
         } else {
+          console.error("[Auth] Verification failed:", result.error);
           setStatus(`⚠️ Authentication failed: ${result.error}`);
         }
       } catch (error: any) {
-        console.error('Authentication error:', error);
-        if (error.message.includes('User rejected')) {
+        console.error('[Auth] Authentication error:', error);
+        if (error.message?.includes('User rejected') || error.message?.includes('user rejected')) {
           setStatus("⚠️ Authentication cancelled");
         } else {
           setStatus("⚠️ Authentication failed. Please try again.");
@@ -212,17 +276,17 @@ export default function HomePage() {
       }
     }
 
-    authenticateUser();
+    // Small delay to ensure wallet is fully connected
+    const timer = setTimeout(authenticateUser, 500);
+    return () => clearTimeout(timer);
   }, [address, me?.fid, isAuthenticated, signMessageAsync]);
 
   // Load metadata preview for this fid
   useEffect(() => {
     async function fetchMetadata(fid: number) {
-      // Don't refetch if we're in the middle of a refresh
       if (isRefreshing) return;
 
       try {
-        // FIXED: Bypass cache with cache-busting query param
         const res = await fetch(`/api/metadata/${fid}?t=${Date.now()}`, {
           cache: 'no-store'
         });
@@ -288,7 +352,6 @@ export default function HomePage() {
       setStatus(`✓ Farcasturd generated! Ready to mint on Base.`);
       setHasGenerated(true);
 
-      // FIXED: Bypass cache when refetching after generation
       const metaRes = await fetch(`/api/metadata/${me.fid}?t=${Date.now()}`, {
         cache: 'no-store'
       });
@@ -311,7 +374,6 @@ export default function HomePage() {
     }
   }
 
-  // Combined Generate & Mint function (with auth check and modal)
   async function handleGenerateAndMint(e: React.FormEvent) {
     e.preventDefault();
     if (!me) return;
@@ -322,7 +384,7 @@ export default function HomePage() {
 
     // Check authentication
     if (!isAuthenticated || !isConnected) {
-      setStatus("⚠️ Please authenticate with your Farcaster wallet first");
+      setStatus("⚠️ Please wait for wallet authentication to complete");
       return;
     }
 
@@ -331,7 +393,6 @@ export default function HomePage() {
     setStatus("Making a turd just for you...💩");
 
     try {
-      // Generate the Farcasturd
       const genRes = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -370,8 +431,6 @@ export default function HomePage() {
         setStatus("⚠️ Generation service temporarily unavailable. Please try again later.");
       } else if (errorMsg.includes("rate limit")) {
         setStatus("⚠️ Too many requests. Please wait a moment and try again.");
-      } else if (errorMsg.includes("Generation failed")) {
-        setStatus(`⚠️ Generation failed: ${errorMsg}`);
       } else {
         setStatus(`⚠️ Generation failed. Please try again.`);
       }
@@ -395,7 +454,7 @@ export default function HomePage() {
 
     // Check authentication
     if (!isAuthenticated || !isConnected) {
-      setStatus("⚠️ Please authenticate with your Farcaster wallet first");
+      setStatus("⚠️ Please wait for wallet authentication to complete");
       return;
     }
 
@@ -403,7 +462,6 @@ export default function HomePage() {
     setShowMintModal(true);
   }
 
-  // Handle successful mint from modal
   function handleMintSuccess(txHash: string) {
     setLastTxHash(txHash);
     localStorage.setItem(`farcasturd_tx_${me?.fid}`, txHash);
@@ -411,7 +469,6 @@ export default function HomePage() {
     setStatus(`✓ Success! Farcasturd minted for FID ${me?.fid}`);
   }
 
-  // Handle sharing to Farcaster
   async function handleShareToFarcaster() {
     if (!me || !meta) return;
 
@@ -419,7 +476,6 @@ export default function HomePage() {
       setSharing(true);
       setStatus("Opening Farcaster composer...");
 
-      // Compose the cast with the Farcasturd image
       const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://farcasturds.vercel.app";
       const shareText = `Just minted my Farcasturd NFT! 💩\n\n${meta.name}\n${baseUrl}`;
 
@@ -445,6 +501,9 @@ export default function HomePage() {
         <section className="fc-section">
           <div className="fc-card">
             <p className="fc-subtle">Loading your Farcasturd...</p>
+            <p className="fc-subtle" style={{ fontSize: "0.85rem", marginTop: 8 }}>
+              Connecting to Farcaster...
+            </p>
           </div>
         </section>
       </main>
@@ -457,7 +516,7 @@ export default function HomePage() {
         <section className="fc-section">
           <div className="fc-card">
             <h1 className="fc-title">Farcasturd</h1>
-            <p className="fc-status" style={{ marginBottom: 16 }}>
+            <p className="fc-status" style={{ marginBottom: 16, whiteSpace: "pre-wrap" }}>
               {status || "Unable to load user info"}
             </p>
             
@@ -467,24 +526,24 @@ export default function HomePage() {
               borderRadius: "12px",
               border: "1px solid rgba(255, 193, 7, 0.3)"
             }}>
-              <p style={{ fontWeight: 600, marginBottom: 8 }}>🧪 Testing in Embed Tool?</p>
+              <p style={{ fontWeight: 600, marginBottom: 8 }}>🔍 Troubleshooting</p>
               <p className="fc-subtle" style={{ fontSize: "0.9rem", marginBottom: 12 }}>
-                The Farcaster SDK can't access your FID in the embed tool. Add your FID to the URL:
+                If you see this error:
               </p>
+              <ul style={{ fontSize: "0.85rem", marginLeft: 20, marginBottom: 12 }}>
+                <li>In Warpcast: Try refreshing the frame or reopening the app</li>
+                <li>For testing: Add ?fid=YOUR_FID to the URL</li>
+              </ul>
               <div style={{ 
                 background: "white", 
                 padding: "10px", 
                 borderRadius: "8px",
                 fontFamily: "monospace",
                 fontSize: "0.85rem",
-                wordBreak: "break-all",
-                marginBottom: 12
+                wordBreak: "break-all"
               }}>
                 {window.location.origin}?fid=YOUR_FID
               </div>
-              <p className="fc-subtle" style={{ fontSize: "0.85rem" }}>
-                Replace YOUR_FID with your actual Farcaster ID number (e.g., ?fid=198116)
-              </p>
             </div>
           </div>
         </section>
@@ -513,7 +572,6 @@ export default function HomePage() {
           />
         </div>
         <div className="fc-pill-row" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, flexWrap: "wrap" }}>
-          {/* PFP in header */}
           {me.pfpUrl ? (
             <img
               src={me.pfpUrl}
@@ -556,6 +614,11 @@ export default function HomePage() {
           <span className="fc-pill">
             FID <strong>{me.fid}</strong>
           </span>
+          {isAuthenticated && (
+            <span className="fc-pill" style={{ background: "rgba(76, 175, 80, 0.2)", color: "#2e7d32" }}>
+              ✓ Authenticated
+            </span>
+          )}
         </div>
       </section>
 
@@ -578,10 +641,12 @@ export default function HomePage() {
               <form onSubmit={handleGenerateAndMint} style={{ marginBottom: 8 }}>
                 <button
                   type="submit"
-                  disabled={generating || minting}
+                  disabled={generating || minting || !isAuthenticated}
                   className="fc-button"
                 >
-                  {generating
+                  {!isAuthenticated
+                    ? "Authenticating...🔐"
+                    : generating
                     ? "Generating...💩"
                     : minting
                     ? "Minting...💩"
@@ -594,7 +659,7 @@ export default function HomePage() {
               <form onSubmit={handleMint} style={{ marginBottom: 8 }}>
                 <button
                   type="submit"
-                  disabled={minting}
+                  disabled={minting || !isAuthenticated}
                   className="fc-button"
                 >
                   {minting ? "Minting... 💩" : "Mint Now"}
