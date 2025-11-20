@@ -2,8 +2,10 @@
 
 import React, { useEffect, useState } from "react";
 import { sdk } from "@farcaster/miniapp-sdk";
-import { useAccount, useConnect } from 'wagmi';
+import { useAccount, useConnect, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
+import { parseEther } from 'viem';
 import { MintModal } from '@/components/MintModal';
+import { farcasturdsAbi } from '@/abi/Farcasturds';
 import { generateSiweMessage, generateNonce, verifySiweSignature } from '@/lib/auth';
 
 type MeResponse = {
@@ -52,6 +54,20 @@ export default function HomePage() {
   // Wagmi hooks
   const { address, isConnected } = useAccount();
   const { connect, connectors } = useConnect();
+
+  // Contract interaction hooks for direct minting
+  const {
+    data: mintTxHash,
+    writeContract,
+    isPending: isMintPending,
+    isError: isMintError,
+    error: mintError
+  } = useWriteContract();
+
+  const { isLoading: isMintConfirming, isSuccess: isMintConfirmed } =
+    useWaitForTransactionReceipt({
+      hash: mintTxHash,
+    });
 
   // Initialize SDK + load Farcaster user with retry logic
   useEffect(() => {
@@ -278,6 +294,37 @@ export default function HomePage() {
     fetchMintPrice();
   }, []);
 
+  // Handle mint transaction status updates
+  useEffect(() => {
+    if (isMintPending) {
+      setMinting(true);
+      setStatus("Please confirm the transaction in your wallet...");
+    }
+  }, [isMintPending]);
+
+  useEffect(() => {
+    if (isMintConfirming) {
+      setStatus("Transaction submitted! Waiting for confirmation...");
+    }
+  }, [isMintConfirming]);
+
+  // Handle successful mint
+  useEffect(() => {
+    if (isMintConfirmed && mintTxHash) {
+      handleMintSuccess(mintTxHash);
+    }
+  }, [isMintConfirmed, mintTxHash]);
+
+  // Handle mint errors
+  useEffect(() => {
+    if (isMintError && mintError) {
+      const errorMessage = mintError.message || 'Transaction failed';
+      setStatus(`⚠️ Mint failed: ${errorMessage}`);
+      setMinting(false);
+      setTimeout(() => setStatus(null), 5000);
+    }
+  }, [isMintError, mintError]);
+
   async function handleGenerateFarcasturd() {
     if (!me?.fid) return;
 
@@ -325,13 +372,43 @@ export default function HomePage() {
   async function handleGenerateAndMint(e: React.FormEvent) {
     e.preventDefault();
     if (!me) return;
+    if (!address) {
+      setStatus("⚠️ No wallet connected");
+      return;
+    }
     if (me.hasMinted) {
       setStatus("This FID has already minted a Farcasturd.");
       return;
     }
 
-    // Open mint modal immediately - generation happens AFTER mint confirms
-    setShowMintModal(true);
+    // Trigger mint transaction directly - generation happens AFTER mint confirms
+    try {
+      const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_FARCASTURDS_ADDRESS as `0x${string}`;
+
+      if (!CONTRACT_ADDRESS) {
+        throw new Error('Contract address not configured');
+      }
+
+      // Get the actual mint price value (strip "Free" or "ETH" text)
+      let priceInEth = '0';
+      if (mintPrice !== "Free") {
+        priceInEth = mintPrice.replace(' ETH', '').trim();
+      }
+
+      setStatus("Preparing transaction...");
+
+      writeContract({
+        address: CONTRACT_ADDRESS,
+        abi: farcasturdsAbi,
+        functionName: 'mintFor',
+        args: [address, BigInt(me.fid)],
+        value: parseEther(priceInEth),
+      });
+    } catch (err: any) {
+      console.error('Mint error:', err);
+      setStatus(`⚠️ Failed to initiate transaction: ${err.message}`);
+      setTimeout(() => setStatus(null), 5000);
+    }
   }
 
   async function handleMint(e: React.FormEvent) {
