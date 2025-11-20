@@ -40,6 +40,7 @@ export default function HomePage() {
   const [lastTxHash, setLastTxHash] = useState<string | null>(null);
   const [hasGenerated, setHasGenerated] = useState(false);
   const [mintPrice, setMintPrice] = useState<string>("Free");
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Initialize SDK + load Farcaster user
   useEffect(() => {
@@ -140,6 +141,9 @@ export default function HomePage() {
   // Load metadata preview for this fid
   useEffect(() => {
     async function fetchMetadata(fid: number) {
+      // Don't refetch if we're in the middle of a refresh
+      if (isRefreshing) return;
+
       try {
         // FIXED: Bypass cache with cache-busting query param
         const res = await fetch(`/api/metadata/${fid}?t=${Date.now()}`, {
@@ -158,7 +162,7 @@ export default function HomePage() {
       }
     }
 
-    if (me?.fid) {
+    if (me?.fid && !isRefreshing) {
       fetchMetadata(me.fid);
 
       // Load transaction hash from localStorage
@@ -167,7 +171,7 @@ export default function HomePage() {
         setLastTxHash(storedTxHash);
       }
     }
-  }, [me?.fid]);
+  }, [me?.fid, isRefreshing]);
 
   // Fetch mint price configuration
   useEffect(() => {
@@ -262,6 +266,7 @@ export default function HomePage() {
       setHasGenerated(true);
 
       // Fetch metadata to confirm generation
+      setIsRefreshing(true);
       const metaRes = await fetch(`/api/metadata/${me.fid}?t=${Date.now()}`, {
         cache: 'no-store'
       });
@@ -269,6 +274,7 @@ export default function HomePage() {
         const metaData = await metaRes.json();
         setMeta(metaData);
       }
+      setIsRefreshing(false);
 
       // Step 2: Mint
       setGenerating(false);
@@ -298,11 +304,16 @@ export default function HomePage() {
         return;
       }
 
+      // Update state atomically to prevent flickering
+      setIsRefreshing(true);
       setLastTxHash(mintData.txHash);
-      // Store transaction hash in localStorage for persistence
       localStorage.setItem(`farcasturd_tx_${me.fid}`, mintData.txHash);
-      setStatus(`✓ Success! Farcasturd minted for FID ${mintData.fid}`);
       setMe((prev) => (prev ? { ...prev, hasMinted: true } : prev));
+      setStatus(`✓ Success! Farcasturd minted for FID ${mintData.fid}`);
+
+      // Small delay to ensure smooth transition
+      await new Promise(resolve => setTimeout(resolve, 100));
+      setIsRefreshing(false);
     } catch (err: any) {
       const errorMsg = err.message || "Unknown error";
       if (errorMsg.includes("quota")) {
@@ -361,11 +372,16 @@ export default function HomePage() {
         return;
       }
 
+      // Update state atomically to prevent flickering
+      setIsRefreshing(true);
       setLastTxHash(data.txHash);
-      // Store transaction hash in localStorage for persistence
       localStorage.setItem(`farcasturd_tx_${me.fid}`, data.txHash);
-      setStatus(`✓ Success! Farcasturd minted for FID ${data.fid}`);
       setMe((prev) => (prev ? { ...prev, hasMinted: true } : prev));
+      setStatus(`✓ Success! Farcasturd minted for FID ${data.fid}`);
+
+      // Small delay to ensure smooth transition
+      await new Promise(resolve => setTimeout(resolve, 100));
+      setIsRefreshing(false);
     } catch (err: any) {
       setStatus(`⚠️ Minting failed. Please try again.`);
       console.error("Mint error:", err);
