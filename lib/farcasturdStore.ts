@@ -65,7 +65,7 @@ export function buildOnchainMetadata(record: FarcasturdRecord) {
   return {
     name: `Farcasturd #${record.fid}`,
     description:
-      "Your 1:1 Farcasturd on Base — non-transferable poop tied to your Farcaster ID. Generated once from a single Farcasturd prompt using the holder's Farcaster profile.",
+      "Your 1:1 Farcasturd. A unique turd tied to your Farcaster account.",
     image: record.imageUrl,
     external_url: externalUrl,
     attributes: [
@@ -81,7 +81,7 @@ export function buildPlaceholderMetadata(fid: number) {
 
   return {
     name: `Farcasturd #${fid}`,
-    description: "Generate your unique Farcasturd! Unique poop tied to your Farcaster ID.",
+    description: "Generate your unique Farcasturd! Unique poop tied to your Farcaster.",
     image: "/placeholder.png", // Add a placeholder image to your public folder
     external_url: externalUrl,
     attributes: [

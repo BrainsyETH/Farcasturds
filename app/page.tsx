@@ -687,7 +687,7 @@ export default function HomePage() {
             <p className="fc-subtle">
               {hasGenerated
                 ? "Checking on your turd..."
-                : "Generate your unique Farcasturd to get started!"}
+                : "A unique turd tied to your Farcaster.!"}
             </p>
           )}
         </div>
