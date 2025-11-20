@@ -104,70 +104,81 @@ export default function HomePage() {
               console.log("[App] Context found:", !!context);
 
               if (context) {
-                console.log("[App] Context keys:", Object.keys(context));
-                console.log("[App] User object:", context.user);
-
-                // Debug: Try to access FID from different paths
-                if (context.user) {
-                  console.log("[App] User keys:", Object.keys(context.user));
-                  console.log("[App] context.user.fid:", context.user.fid);
-                  console.log("[App] context.user.fid type:", typeof context.user.fid);
-                }
-              }
-
-              if (context?.user?.fid) {
-                let rawFid = context.user.fid;
-                console.log("[App] Raw FID value:", rawFid, "Type:", typeof rawFid);
-
-                // Try awaiting in case it's a Promise wrapped in Proxy
-                if (rawFid && typeof rawFid === 'object' && typeof rawFid.then === 'function') {
-                  try {
-                    rawFid = await rawFid;
-                    console.log("[App] Awaited FID:", rawFid);
-                  } catch (err) {
-                    console.warn("[App] Could not await FID:", err);
+                // Method 1: Try JSON.parse(JSON.stringify()) to unwrap Proxies
+                try {
+                  const serialized = JSON.parse(JSON.stringify(context));
+                  console.log("[App] Serialized context:", serialized);
+                  if (serialized?.user?.fid && typeof serialized.user.fid === 'number') {
+                    viewerFid = serialized.user.fid;
+                    console.log("[App] ✓ FID from serialized context:", viewerFid);
                   }
+                } catch (serializeError) {
+                  console.warn("[App] Could not serialize context:", serializeError);
                 }
 
-                // Handle different FID types
-                if (typeof rawFid === 'number') {
-                  viewerFid = rawFid;
-                } else if (typeof rawFid === 'bigint') {
-                  viewerFid = Number(rawFid);
-                } else if (typeof rawFid === 'string') {
-                  viewerFid = parseInt(rawFid, 10);
-                } else if (typeof rawFid === 'function') {
-                  // Handle Proxy(function) or callable FID
+                // Method 2: Try direct numeric conversion (works with Proxies)
+                if (!viewerFid && context.user) {
                   try {
-                    const called = rawFid();
-                    console.log("[App] Called FID function, result:", called, "Type:", typeof called);
-
-                    // Check if result is a Promise
-                    if (called && typeof called === 'object' && typeof called.then === 'function') {
-                      const awaited = await called;
-                      viewerFid = Number(awaited);
-                      console.log("[App] FID from awaited function call:", viewerFid);
-                    } else {
-                      viewerFid = Number(called);
-                      console.log("[App] FID from function call:", viewerFid);
+                    // Force numeric conversion - this often unwraps Proxies
+                    const fidValue = +context.user.fid;  // Unary plus operator
+                    if (!isNaN(fidValue) && fidValue > 0) {
+                      viewerFid = fidValue;
+                      console.log("[App] ✓ FID from unary conversion:", viewerFid);
                     }
-                  } catch (err) {
-                    console.warn("[App] Could not call FID function:", err);
-                  }
-                } else if (rawFid && typeof rawFid === 'object') {
-                  // Try valueOf(), toString(), or direct conversion
-                  try {
-                    if (typeof rawFid.valueOf === 'function') {
-                      viewerFid = Number(rawFid.valueOf());
-                    } else {
-                      viewerFid = Number(rawFid.toString());
-                    }
-                  } catch (err) {
-                    console.warn("[App] Could not convert object FID:", err);
+                  } catch (conversionError) {
+                    console.warn("[App] Unary conversion failed:", conversionError);
                   }
                 }
 
-                if (viewerFid && !isNaN(viewerFid)) {
+                // Method 3: Try accessing via Object.getOwnPropertyDescriptor
+                if (!viewerFid && context.user) {
+                  try {
+                    const descriptor = Object.getOwnPropertyDescriptor(context.user, 'fid');
+                    console.log("[App] FID descriptor:", descriptor);
+                    if (descriptor?.value && typeof descriptor.value === 'number') {
+                      viewerFid = descriptor.value;
+                      console.log("[App] ✓ FID from descriptor:", viewerFid);
+                    }
+                  } catch (descriptorError) {
+                    console.warn("[App] Descriptor access failed:", descriptorError);
+                  }
+                }
+
+                // Method 4: Original complex type handling as fallback
+                if (!viewerFid && context?.user?.fid) {
+                  let rawFid = context.user.fid;
+                  console.log("[App] Raw FID value:", rawFid, "Type:", typeof rawFid);
+
+                  // Handle different FID types
+                  if (typeof rawFid === 'number') {
+                    viewerFid = rawFid;
+                  } else if (typeof rawFid === 'bigint') {
+                    viewerFid = Number(rawFid);
+                  } else if (typeof rawFid === 'string') {
+                    viewerFid = parseInt(rawFid, 10);
+                  } else if (typeof rawFid === 'function') {
+                    // Try calling without await first
+                    try {
+                      const result = rawFid();
+                      console.log("[App] Function result:", result, "Type:", typeof result);
+                      // Don't await here - just try direct conversion
+                      viewerFid = Number(result);
+                      if (isNaN(viewerFid)) viewerFid = undefined;
+                    } catch (err) {
+                      console.warn("[App] Could not call FID function:", err);
+                    }
+                  } else if (rawFid && typeof rawFid === 'object') {
+                    // Try valueOf() for objects
+                    try {
+                      viewerFid = Number(rawFid.valueOf ? rawFid.valueOf() : rawFid);
+                      if (isNaN(viewerFid)) viewerFid = undefined;
+                    } catch (err) {
+                      console.warn("[App] Could not convert object FID:", err);
+                    }
+                  }
+                }
+
+                if (viewerFid && !isNaN(viewerFid) && viewerFid > 0) {
                   console.log("[App] ✓ Loaded viewer FID from SDK context:", viewerFid);
                   break;
                 }
