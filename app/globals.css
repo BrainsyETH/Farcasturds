@@ -63,19 +63,24 @@ body {
 
 
 
-.fc-root {
+html, body {
   min-height: 100vh;
-
+  margin: 0;
+  padding: 0;
   background: linear-gradient(
     135deg,
-    #7a32ff,
-    #9b68ff,
-    #7b25d9,
-    #5a14ad
+    #8f5bff,
+    #a76dff,
+    #7c4bdb,
+    #6938c7
   );
   background-size: 350% 350%;
   animation: gradientShift 12s ease infinite;
+  background-attachment: fixed;
+}
 
+.fc-root {
+  min-height: 100vh;
   color: var(--fc-text);
   font-family: system-ui, -apple-system, BlinkMacSystemFont,
     "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
@@ -90,11 +95,12 @@ body {
   50% { background-position: 100% 50%; }
 }
 
-.fc-root::before {
+html::before {
   content: "";
   position: fixed;
   inset: 0;
   pointer-events: none;
+  z-index: 0;
 
   /* soft white sparkle overlay */
   background-image: radial-gradient(
@@ -106,7 +112,6 @@ body {
 
   opacity: 0.18;
 }
-
 
 /* Use Baloo only for titles */
 .fc-title,
@@ -125,6 +130,8 @@ h2.fc-title {
   width: 100%;
   margin: 0 auto;
   padding: 24px 20px 48px;
+  position: relative;
+  z-index: 1;
 }
 
 /* vertical rhythm */
@@ -719,23 +726,23 @@ h2.fc-title {
   }
 
   /* Mobile: Stack the mint card vertically */
-  .fc-card > div {
+  .fc-mint-card-layout {
     flex-direction: column !important;
     align-items: center !important;
     gap: 16px !important;
   }
 
-  .fc-card > div > div {
+  .fc-mint-card-layout > div {
     padding-top: 0 !important;
     width: 100%;
   }
 
-  .fc-card > div > div:first-child {
+  .fc-mint-card-layout > div:first-child {
     order: 1;
     margin-bottom: 8px;
   }
 
-  .fc-card > div > div:last-child {
+  .fc-mint-card-layout > div:last-child {
     order: 2;
   }
 

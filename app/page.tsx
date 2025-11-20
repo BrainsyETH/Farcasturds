@@ -427,35 +427,32 @@ export default function HomePage() {
 
       {/* Generation & Mint section */}
       <section className="fc-section">
-        <div className="fc-card">
-          <div style={{ display: "flex", gap: 20, alignItems: "center" }}>
+        <div className="fc-card" style={{ padding: "16px" }}>
+          <div className="fc-mint-card-layout" style={{ display: "flex", gap: 16, alignItems: "center" }}>
             {/* PFP on the left */}
             {me.pfpUrl && (
               <div
                 style={{
                   display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  gap: 8,
+                  flexShrink: 0,
                 }}
               >
-                <div className="fc-pfp-wrapper" style={{ width: 100, height: 100, minWidth: 100 }}>
+                <div style={{ width: 80, height: 80, minWidth: 80 }}>
                   <img
                     src={me.pfpUrl}
                     alt={`${me.displayName || me.username} profile`}
-                    className="fc-pfp"
-                    style={{ width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover" }}
+                    style={{ width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover", border: "2px solid rgba(143, 91, 255, 0.3)" }}
                   />
                 </div>
               </div>
             )}
 
             {/* Content on the right */}
-            <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 10 }}>
-              <h2 className="fc-card-title">
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 8, minWidth: 0 }}>
+              <h2 style={{ fontSize: "1rem", fontWeight: 600, margin: 0, textAlign: "left" }}>
                 {alreadyMinted ? "Your Farcasturd" : hasGenerated ? "Ready to Mint!" : "Generate Your 1:1 Farcasturd"}
               </h2>
-              <p className="fc-subtle">
+              <p style={{ fontSize: "0.85rem", color: "var(--fc-text-soft)", margin: 0, textAlign: "left", lineHeight: 1.3 }}>
                 {alreadyMinted
                   ? "You've already claimed your unique Farcasturd!"
                   : hasGenerated
@@ -463,13 +460,14 @@ export default function HomePage() {
                   : "Generate your unique turd now."}
               </p>
 
-              <div style={{ marginTop: 4, display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center" }}>
+              <div style={{ marginTop: 4, display: "flex", gap: 8, flexWrap: "wrap" }}>
                 {!hasGenerated && !alreadyMinted && (
                   <form onSubmit={handleGenerateAndMint}>
                     <button
                       type="submit"
                       disabled={generating || minting}
                       className="fc-button"
+                      style={{ fontSize: "0.85rem", padding: "0.5rem 1rem" }}
                     >
                       {generating
                         ? "Generating...💩"
@@ -486,6 +484,7 @@ export default function HomePage() {
                       type="submit"
                       disabled={minting}
                       className="fc-button"
+                      style={{ fontSize: "0.85rem", padding: "0.5rem 1rem" }}
                     >
                       {minting ? "Minting... 💩" : "Mint Now"}
                     </button>
@@ -496,17 +495,18 @@ export default function HomePage() {
                   <button
                     disabled
                     className="fc-button"
+                    style={{ fontSize: "0.85rem", padding: "0.5rem 1rem" }}
                   >
                     Already Minted ✓
                   </button>
                 )}
               </div>
 
-              <p className="fc-tagline" style={{ textAlign: "center" }}>
+              <p style={{ fontSize: "0.72rem", color: "var(--fc-text-muted)", margin: "4px 0 0 0", letterSpacing: "0.02em" }}>
                 Unique · Soulbound · No Dumping
               </p>
 
-              {status && <p className="fc-status" style={{ textAlign: "center" }}>{status}</p>}
+              {status && <p style={{ fontSize: "0.8rem", color: "var(--fc-text-muted)", margin: "4px 0 0 0" }}>{status}</p>}
             </div>
           </div>
         </div>
