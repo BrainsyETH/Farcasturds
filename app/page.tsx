@@ -756,7 +756,7 @@ export default function HomePage() {
       {/* Your Farcasturd preview */}
       <section className="fc-section">
         <div className="fc-card">
-          <h2 className="fc-card-title">
+          <h2 className={meta ? "fc-card-title" : "fc-card-title-reveal"}>
             {meta ? meta.name : "Reveal your Farcasturd"}
           </h2>
 
