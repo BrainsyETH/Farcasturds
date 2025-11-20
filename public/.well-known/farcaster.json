@@ -17,5 +17,11 @@
     ],
     "ogTitle": "Farcasturds"
   }
-
+{
+  "accountAssociation": {
+    "header": "eyJmaWQiOjIyMDc1OCwidHlwZSI6ImF1dGgiLCJrZXkiOiIweDRhYjA3MGIxRGI1N2M0QTI2MEU1RUE5Rjk5NjU1M0NlMzBDRThiNzIifQ",
+    "payload": "eyJkb21haW4iOiJmYXJjYXN0dXJkcy52ZXJjZWwuYXBwIn0",
+    "signature": "FkdhtPTH6ZBXx1qouEamjbckKdfo5la8SeAVlXzNy8VgAVYroy0sFT8+3Wi3VKJo9Wvl46BQfc/nLn4ixZvBfBs="
+  }
+}
 }
