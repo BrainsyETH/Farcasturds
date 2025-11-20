@@ -437,7 +437,44 @@ export default function HomePage() {
         <div className="fc-header-row">
             <h1 className="fc-title fc-gradient-text">Farcasturd</h1>
         </div>
-        <div className="fc-pill-row">
+        <div className="fc-pill-row" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, flexWrap: "wrap" }}>
+          {/* PFP in header */}
+          {me.pfpUrl ? (
+            <img
+              src={me.pfpUrl}
+              alt={`${me.displayName || me.username} profile`}
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: "50%",
+                objectFit: "cover",
+                border: "1px solid rgba(255, 255, 255, 0.3)",
+                display: "inline-block",
+                verticalAlign: "middle"
+              }}
+              onError={(e) => {
+                console.log("[PFP] Image failed to load:", me.pfpUrl);
+                (e.target as HTMLImageElement).style.display = 'none';
+              }}
+            />
+          ) : (
+            <div
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: "50%",
+                backgroundColor: "rgba(255, 255, 255, 0.2)",
+                border: "1px solid rgba(255, 255, 255, 0.3)",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "1rem",
+                verticalAlign: "middle"
+              }}
+            >
+              {me.displayName?.[0] || me.username?.[0] || "👤"}
+            </div>
+          )}
           <span className="fc-pill">
             Logged in as <strong>{me.displayName || me.username}</strong>
           </span>
@@ -455,105 +492,62 @@ export default function HomePage() {
 
       {/* Generation & Mint section */}
       <section className="fc-section">
-        <div className="fc-card" style={{ padding: "16px" }}>
-          <div className="fc-mint-card-layout" style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
-            {/* PFP on the left - always show */}
-            <div style={{ flexShrink: 0 }}>
-              {me.pfpUrl ? (
-                <img
-                  src={me.pfpUrl}
-                  alt={`${me.displayName || me.username} profile`}
-                  style={{
-                    width: 80,
-                    height: 80,
-                    borderRadius: "50%",
-                    objectFit: "cover",
-                    border: "2px solid rgba(143, 91, 255, 0.3)",
-                    display: "block"
-                  }}
-                  onError={(e) => {
-                    console.log("[PFP] Image failed to load:", me.pfpUrl);
-                    (e.target as HTMLImageElement).style.display = 'none';
-                  }}
-                />
-              ) : (
-                <div
-                  style={{
-                    width: 80,
-                    height: 80,
-                    borderRadius: "50%",
-                    backgroundColor: "rgba(143, 91, 255, 0.2)",
-                    border: "2px solid rgba(143, 91, 255, 0.3)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: "2rem"
-                  }}
-                >
-                  {me.displayName?.[0] || me.username?.[0] || "👤"}
-                </div>
-              )}
-            </div>
+        <div className="fc-card">
+          <div style={{ textAlign: "center" }}>
+            <h2 style={{ fontSize: "1.05rem", fontWeight: 600, margin: "0 0 8px 0" }}>
+              {alreadyMinted ? "Your Farcasturd" : hasGenerated ? "Ready to Mint!" : "Generate Your 1:1 Farcasturd"}
+            </h2>
+            <p style={{ fontSize: "0.9rem", color: "var(--fc-text-soft)", margin: "0 0 12px 0", lineHeight: 1.4 }}>
+              {alreadyMinted
+                ? "You've already claimed your unique Farcasturd!"
+                : hasGenerated
+                ? "Your Farcasturd is ready to mint on Base!"
+                : "Generate your unique turd now."}
+            </p>
 
-            {/* Content on the right */}
-            <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 6, minWidth: 0 }}>
-              <h2 style={{ fontSize: "1rem", fontWeight: 600, margin: 0, textAlign: "left" }}>
-                {alreadyMinted ? "Your Farcasturd" : hasGenerated ? "Ready to Mint!" : "Generate Your 1:1 Farcasturd"}
-              </h2>
-              <p style={{ fontSize: "0.85rem", color: "var(--fc-text-soft)", margin: 0, lineHeight: 1.3, textAlign: "left" }}>
-                {alreadyMinted
-                  ? "You've already claimed your unique Farcasturd!"
-                  : hasGenerated
-                  ? "Your Farcasturd is ready to mint on Base!"
-                  : "Generate your unique turd now."}
-              </p>
-
-              {!hasGenerated && !alreadyMinted && (
-                <form onSubmit={handleGenerateAndMint} style={{ marginTop: 4 }}>
-                  <button
-                    type="submit"
-                    disabled={generating || minting}
-                    className="fc-button"
-                    style={{ fontSize: "0.85rem", padding: "0.5rem 1rem", margin: 0 }}
-                  >
-                    {generating
-                      ? "Generating...💩"
-                      : minting
-                      ? "Minting...💩"
-                      : "Generate & Mint"}
-                  </button>
-                </form>
-              )}
-
-              {hasGenerated && !alreadyMinted && (
-                <form onSubmit={handleMint} style={{ marginTop: 4 }}>
-                  <button
-                    type="submit"
-                    disabled={minting}
-                    className="fc-button"
-                    style={{ fontSize: "0.85rem", padding: "0.5rem 1rem", margin: 0 }}
-                  >
-                    {minting ? "Minting... 💩" : "Mint Now"}
-                  </button>
-                </form>
-              )}
-
-              {alreadyMinted && (
+            {!hasGenerated && !alreadyMinted && (
+              <form onSubmit={handleGenerateAndMint} style={{ marginBottom: 8 }}>
                 <button
-                  disabled
+                  type="submit"
+                  disabled={generating || minting}
                   className="fc-button"
-                  style={{ fontSize: "0.85rem", padding: "0.5rem 1rem", margin: "4px 0 0 0" }}
                 >
-                  Already Minted ✓
+                  {generating
+                    ? "Generating...💩"
+                    : minting
+                    ? "Minting...💩"
+                    : "Generate & Mint"}
                 </button>
-              )}
+              </form>
+            )}
 
-              <p style={{ fontSize: "0.72rem", color: "var(--fc-text-muted)", margin: "4px 0 0 0", letterSpacing: "0.02em", textAlign: "left" }}>
-                Unique · Soulbound · No Dumping{mintPrice !== "Free" && ` · ${mintPrice}`}
-              </p>
+            {hasGenerated && !alreadyMinted && (
+              <form onSubmit={handleMint} style={{ marginBottom: 8 }}>
+                <button
+                  type="submit"
+                  disabled={minting}
+                  className="fc-button"
+                >
+                  {minting ? "Minting... 💩" : "Mint Now"}
+                </button>
+              </form>
+            )}
 
-              {status && <p style={{ fontSize: "0.8rem", color: "var(--fc-text-muted)", margin: "4px 0 0 0", textAlign: "left" }}>{status}</p>}
-            </div>
+            {alreadyMinted && (
+              <button
+                disabled
+                className="fc-button"
+                style={{ marginBottom: 8 }}
+              >
+                Already Minted ✓
+              </button>
+            )}
+
+            <p className="fc-tagline">
+              Unique · Soulbound · No Dumping{mintPrice !== "Free" && ` · ${mintPrice}`}
+            </p>
+
+            {status && <p className="fc-status">{status}</p>}
           </div>
         </div>
       </section>
@@ -571,7 +565,13 @@ export default function HomePage() {
                 <img src={meta.image} alt="Your Farcasturd" />
               </div>
             ) : (
-              <div className="fc-avatar">💩</div>
+              <div className="fc-avatar" style={{ width: 260, height: 260, borderRadius: 24 }}>
+                <img
+                  src="https://b4b0aaz7b39hhkor.public.blob.vercel-storage.com/icons/poop_question.png"
+                  alt="Generate your Farcasturd"
+                  style={{ width: "100%", height: "100%", objectFit: "contain" }}
+                />
+              </div>
             )}
           </div>
 
@@ -580,9 +580,9 @@ export default function HomePage() {
               <p className="fc-subtle">{meta.description}</p>
 
               <div className="fc-meta-block">
-                <div>
-                  <strong>Image URL:</strong>{" "}
-                  <span className="fc-code">{meta.image}</span>
+                <div style={{ textAlign: "center" }}>
+                  <strong style={{ color: "var(--fc-text)" }}>Image URL:</strong>{" "}
+                  <span className="fc-code" style={{ color: "var(--fc-text)", opacity: 0.8 }}>{meta.image}</span>
                 </div>
               </div>
 
