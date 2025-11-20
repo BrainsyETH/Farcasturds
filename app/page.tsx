@@ -570,7 +570,7 @@ export default function HomePage() {
             )}
 
             <p className="fc-tagline">
-              Unique · Soulbound · No Dumping{mintPrice !== "Free" && ` · ${mintPrice}`}
+            ${mintPrice}`
             </p>
 
             {status && <p className="fc-status">{status}</p>}
@@ -659,7 +659,6 @@ export default function HomePage() {
             <p className="fc-subtle">
               {hasGenerated
                 ? "Dumping your Farcasturd..."
-                : "Generate your Farcasturd to see it here!"}
             </p>
           )}
         </div>

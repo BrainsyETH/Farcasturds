@@ -2,7 +2,7 @@
 import { NextResponse } from "next/server";
 
 export async function GET() {
-  const mintPriceEth = process.env.MINT_PRICE_ETH || "0";
+  const mintPriceEth = process.env.MINT_PRICE_ETH || ".0005";
 
   return NextResponse.json({
     price: mintPriceEth,
