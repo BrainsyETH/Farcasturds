@@ -3,9 +3,19 @@
     "version": "1",
     "name": "Farcasturds",
     "iconUrl": "https://farcasturds.vercel.app/icon.png",
+    "homeUrl": "https://farcasturds.vercel.app/",
     "imageUrl": "https://farcasturds.vercel.app/preview.png",
     "splashImageUrl": "https://farcasturds.vercel.app/splash.png",
     "splashBackgroundColor": "#6938c7",
-    "homeUrl": "https://farcasturds.vercel.app"
+    "webhookUrl": "https://farcasturds.vercel.app/api/webhook",
+    "subtitle": "Unique poo just for you",
+    "description": "A 1:1 Souldbound turd tied to your Farcaster account. ",
+    "primaryCategory": "social",
+    "ogImageUrl": "https://farcasturds.vercel.app/preview.png"
+  },
+  "accountAssociation": {
+    "header": "eyJmaWQiOjIyMDc1OCwidHlwZSI6ImF1dGgiLCJrZXkiOiIweDRhYjA3MGIxRGI1N2M0QTI2MEU1RUE5Rjk5NjU1M0NlMzBDRThiNzIifQ",
+    "payload": "eyJkb21haW4iOiJodHRwcyJ9",
+    "signature": "a6BbIWoioUMyr24ku0+aQV5yLZvkRkbl4btC+mFKGiM2RW8Mu8GVgKoq09Gie+C+47qVUU/U4onfxvYaVrgX7Rs="
   }
 }
