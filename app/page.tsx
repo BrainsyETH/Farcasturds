@@ -658,7 +658,7 @@ export default function HomePage() {
           ) : (
             <p className="fc-subtle">
               {hasGenerated
-                ? "Dumping your Farcasturd..."
+                ? "Checking on your turd..."
             </p>
           )}
         </div>
