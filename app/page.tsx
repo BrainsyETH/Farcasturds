@@ -191,6 +191,14 @@ export default function HomePage() {
       } finally {
         if (mounted) {
           setLoading(false);
+          // Hide splash screen
+          const splash = document.getElementById('splash-screen');
+          if (splash) {
+            splash.style.opacity = '0';
+            setTimeout(() => {
+              splash.style.display = 'none';
+            }, 300);
+          }
         }
       }
     }
@@ -568,18 +576,8 @@ export default function HomePage() {
   }
 
   if (loading) {
-    return (
-      <main className="fc-shell">
-        <section className="fc-section">
-          <div className="fc-card">
-            <p className="fc-subtle">Loading your Farcasturd...</p>
-            <p className="fc-subtle" style={{ fontSize: "0.85rem", marginTop: 8 }}>
-              Connecting to Farcaster...
-            </p>
-          </div>
-        </section>
-      </main>
-    );
+    // Splash screen in layout.tsx handles loading display
+    return null;
   }
 
   if (!me) {
