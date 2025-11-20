@@ -28,8 +28,8 @@ contract DeployV2 is Script {
         // Verify we're on Base Mainnet
         require(block.chainid == 8453, "Must deploy to Base Mainnet (chain ID 8453)");
 
-        // Verify deployer has enough ETH
-        require(deployer.balance >= 0.01 ether, "Insufficient ETH for deployment");
+        // Verify deployer has enough ETH (0.005 ETH should be sufficient for Base deployment)
+        require(deployer.balance >= 0.005 ether, "Insufficient ETH for deployment");
 
         vm.startBroadcast(deployerPrivateKey);
 
