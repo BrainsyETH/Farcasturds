@@ -158,6 +158,12 @@ export default function HomePage() {
 
     if (me?.fid) {
       fetchMetadata(me.fid);
+
+      // Load transaction hash from localStorage
+      const storedTxHash = localStorage.getItem(`farcasturd_tx_${me.fid}`);
+      if (storedTxHash) {
+        setLastTxHash(storedTxHash);
+      }
     }
   }, [me?.fid]);
 
@@ -275,6 +281,8 @@ export default function HomePage() {
       }
 
       setLastTxHash(mintData.txHash);
+      // Store transaction hash in localStorage for persistence
+      localStorage.setItem(`farcasturd_tx_${me.fid}`, mintData.txHash);
       setStatus(`✓ Success! Farcasturd minted for FID ${mintData.fid}`);
       setMe((prev) => (prev ? { ...prev, hasMinted: true } : prev));
     } catch (err: any) {
@@ -336,6 +344,8 @@ export default function HomePage() {
       }
 
       setLastTxHash(data.txHash);
+      // Store transaction hash in localStorage for persistence
+      localStorage.setItem(`farcasturd_tx_${me.fid}`, data.txHash);
       setStatus(`✓ Success! Farcasturd minted for FID ${data.fid}`);
       setMe((prev) => (prev ? { ...prev, hasMinted: true } : prev));
     } catch (err: any) {
@@ -448,11 +458,11 @@ export default function HomePage() {
             )}
 
             {/* Content on the right */}
-            <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 8, minWidth: 0 }}>
-              <h2 style={{ fontSize: "1rem", fontWeight: 600, margin: 0, textAlign: "left" }}>
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 8, minWidth: 0, alignItems: "flex-start" }}>
+              <h2 style={{ fontSize: "1rem", fontWeight: 600, margin: 0 }}>
                 {alreadyMinted ? "Your Farcasturd" : hasGenerated ? "Ready to Mint!" : "Generate Your 1:1 Farcasturd"}
               </h2>
-              <p style={{ fontSize: "0.85rem", color: "var(--fc-text-soft)", margin: 0, textAlign: "left", lineHeight: 1.3 }}>
+              <p style={{ fontSize: "0.85rem", color: "var(--fc-text-soft)", margin: 0, lineHeight: 1.3 }}>
                 {alreadyMinted
                   ? "You've already claimed your unique Farcasturd!"
                   : hasGenerated
@@ -460,7 +470,7 @@ export default function HomePage() {
                   : "Generate your unique turd now."}
               </p>
 
-              <div style={{ marginTop: 4, display: "flex", gap: 8, flexWrap: "wrap" }}>
+              <div style={{ marginTop: 4, display: "flex", gap: 8, flexWrap: "wrap", width: "100%" }}>
                 {!hasGenerated && !alreadyMinted && (
                   <form onSubmit={handleGenerateAndMint}>
                     <button
@@ -502,11 +512,11 @@ export default function HomePage() {
                 )}
               </div>
 
-              <p style={{ fontSize: "0.72rem", color: "var(--fc-text-muted)", margin: "4px 0 0 0", letterSpacing: "0.02em" }}>
+              <p style={{ fontSize: "0.72rem", color: "var(--fc-text-muted)", margin: "4px 0 0 0", letterSpacing: "0.02em", width: "100%" }}>
                 Unique · Soulbound · No Dumping
               </p>
 
-              {status && <p style={{ fontSize: "0.8rem", color: "var(--fc-text-muted)", margin: "4px 0 0 0" }}>{status}</p>}
+              {status && <p style={{ fontSize: "0.8rem", color: "var(--fc-text-muted)", margin: "4px 0 0 0", width: "100%" }}>{status}</p>}
             </div>
           </div>
         </div>
