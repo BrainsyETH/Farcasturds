@@ -499,7 +499,7 @@ h2.fc-title {
   width: 7px;
   height: 7px;
   border-radius: 999px;
-  background: linear-gradient(135deg, #22c55e, #84cc16);
+  background: linear-gradient(135deg, #7e1ba5, #631192);
   animation: pulse 2s ease-in-out infinite;
 }
 
