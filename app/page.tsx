@@ -570,7 +570,7 @@ export default function HomePage() {
             )}
 
             <p className="fc-tagline">
-            ${mintPrice}`
+              {mintPrice}
             </p>
 
             {status && <p className="fc-status">{status}</p>}
@@ -659,6 +659,7 @@ export default function HomePage() {
             <p className="fc-subtle">
               {hasGenerated
                 ? "Checking on your turd..."
+                : "Generate your unique Farcasturd to get started!"}
             </p>
           )}
         </div>
