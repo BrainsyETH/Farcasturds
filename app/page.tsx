@@ -576,7 +576,7 @@ export default function HomePage() {
                 overflow: "hidden"
               }}>
                 <img
-                  src="https://b4b0aaz7b39hhkor.public.blob.vercel-storage.com/icons/poop_question.png"
+                  src="https://b4b0aaz7b39hhkor.public.blob.vercel-storage.com/poop_questionv2.png"
                   alt="Generate your Farcasturd"
                   style={{
                     width: "100%",
