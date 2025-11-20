@@ -699,7 +699,7 @@ export default function HomePage() {
         <div className="fc-card">
           <div style={{ textAlign: "center" }}>
             <h2 style={{ fontSize: "1.05rem", fontWeight: 600, margin: "0 0 8px 0" }}>
-              {alreadyMinted ? "Turd Secured" : hasGenerated ? "Secure your Turd!" : "Secure your Farcasturd"}
+              {alreadyMinted ? "Turd Secured" : hasGenerated ? "Secure your Turd!" : ""}
             </h2>
             <p style={{ fontSize: "0.9rem", color: "var(--fc-text-soft)", margin: "0 0 12px 0", lineHeight: 1.4 }}>
               {alreadyMinted
