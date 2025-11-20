@@ -18,7 +18,6 @@ export function MintModal({ isOpen, onClose, fid, imageUrl, onSuccess }: MintMod
   const [mintPrice, setMintPrice] = useState<string>('0')
   const [status, setStatus] = useState<string>('')
   const [error, setError] = useState<string>('')
-  const [autoMintTriggered, setAutoMintTriggered] = useState(false)
 
   const {
     data: hash,
@@ -48,8 +47,6 @@ export function MintModal({ isOpen, onClose, fid, imageUrl, onSuccess }: MintMod
     }
     if (isOpen) {
       fetchPrice()
-      // Reset auto-mint flag when modal opens
-      setAutoMintTriggered(false)
     }
   }, [isOpen])
 
@@ -110,19 +107,6 @@ export function MintModal({ isOpen, onClose, fid, imageUrl, onSuccess }: MintMod
       setStatus('Transaction submitted! Waiting for confirmation...')
     }
   }, [isConfirming])
-
-  // Auto-trigger mint when modal opens (for "Generate & Mint" flow)
-  useEffect(() => {
-    if (isOpen && address && mintPrice !== null && !autoMintTriggered && !isPending && !isConfirmed) {
-      // Small delay to ensure modal is visible
-      const timer = setTimeout(() => {
-        console.log('[MintModal] Auto-triggering mint transaction')
-        handleMint()
-        setAutoMintTriggered(true)
-      }, 500)
-      return () => clearTimeout(timer)
-    }
-  }, [isOpen, address, mintPrice, autoMintTriggered, isPending, isConfirmed, handleMint])
 
   if (!isOpen) return null
 
