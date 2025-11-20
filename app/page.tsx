@@ -515,12 +515,6 @@ export default function HomePage() {
           <span className="fc-pill">
             FID <strong>{me.fid}</strong>
           </span>
-          <span className="fc-pill">
-            Wallet{" "}
-            <span className="fc-code">
-              {truncateAddress(me.wallet) || "0x0000…0000"}
-            </span>
-          </span>
         </div>
       </section>
 
@@ -576,10 +570,6 @@ export default function HomePage() {
                 Already Minted ✓
               </button>
             )}
-
-            <p className="fc-tagline">
-              {mintPrice}
-            </p>
 
             {status && <p className="fc-status">{status}</p>}
           </div>
