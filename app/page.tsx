@@ -489,7 +489,7 @@ export default function HomePage() {
       <section className="fc-section">
         <div className="fc-header-row">
           <img
-            src="public/farcasturdsv3.png"
+            src="https://farcasturds.vercel.app'}/farcasturdv3.png"
             alt="Farcasturd"
             style={{
               maxWidth: "280px",
