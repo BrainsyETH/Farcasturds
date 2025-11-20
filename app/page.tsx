@@ -104,84 +104,99 @@ export default function HomePage() {
               console.log("[App] Context found:", !!context);
 
               if (context) {
-                // Method 1: Try JSON.parse(JSON.stringify()) to unwrap Proxies
+                // First, let's safely inspect what's in the context without triggering Proxy errors
+                try {
+                  // Log the context type and constructor
+                  console.log("[App] Context type:", typeof context);
+                  console.log("[App] Context constructor:", context?.constructor?.name);
+
+                  // Try to get keys safely
+                  const keys = Object.keys(context);
+                  console.log("[App] Context keys:", keys);
+
+                  // Check if user exists
+                  if ('user' in context) {
+                    console.log("[App] user property exists");
+                    const userKeys = Object.keys(context.user || {});
+                    console.log("[App] User keys:", userKeys);
+                  }
+                } catch (inspectError) {
+                  console.warn("[App] Context inspection error:", inspectError);
+                }
+
+                // Method 1: Try JSON serialization first (safest, doesn't trigger Proxy)
                 try {
                   const serialized = JSON.parse(JSON.stringify(context));
                   console.log("[App] Serialized context:", serialized);
+
                   if (serialized?.user?.fid && typeof serialized.user.fid === 'number') {
                     viewerFid = serialized.user.fid;
                     console.log("[App] ✓ FID from serialized context:", viewerFid);
                   }
                 } catch (serializeError) {
-                  console.warn("[App] Could not serialize context:", serializeError);
+                  console.warn("[App] JSON serialization failed:", serializeError);
                 }
 
-                // Method 2: Try direct numeric conversion (works with Proxies)
-                if (!viewerFid && context.user) {
+                // Method 2: Try accessing through Reflect API (doesn't trigger Proxy apply)
+                if (!viewerFid) {
                   try {
-                    // Force numeric conversion - this often unwraps Proxies
-                    const fidValue = +context.user.fid;  // Unary plus operator
-                    if (!isNaN(fidValue) && fidValue > 0) {
-                      viewerFid = fidValue;
-                      console.log("[App] ✓ FID from unary conversion:", viewerFid);
+                    if (Reflect.has(context, 'user')) {
+                      const user = Reflect.get(context, 'user');
+                      console.log("[App] User via Reflect:", user);
+
+                      if (user && Reflect.has(user, 'fid')) {
+                        const fid = Reflect.get(user, 'fid');
+                        console.log("[App] FID via Reflect:", fid, "Type:", typeof fid);
+
+                        // Try converting to number
+                        const numFid = Number(fid);
+                        if (!isNaN(numFid) && numFid > 0) {
+                          viewerFid = numFid;
+                          console.log("[App] ✓ FID from Reflect API:", viewerFid);
+                        }
+                      }
                     }
-                  } catch (conversionError) {
-                    console.warn("[App] Unary conversion failed:", conversionError);
+                  } catch (reflectError) {
+                    console.warn("[App] Reflect API failed:", reflectError);
                   }
                 }
 
-                // Method 3: Try accessing via Object.getOwnPropertyDescriptor
-                if (!viewerFid && context.user) {
+                // Method 3: Try Object.entries to iterate safely
+                if (!viewerFid) {
                   try {
-                    const descriptor = Object.getOwnPropertyDescriptor(context.user, 'fid');
-                    console.log("[App] FID descriptor:", descriptor);
-                    if (descriptor?.value && typeof descriptor.value === 'number') {
-                      viewerFid = descriptor.value;
-                      console.log("[App] ✓ FID from descriptor:", viewerFid);
-                    }
-                  } catch (descriptorError) {
-                    console.warn("[App] Descriptor access failed:", descriptorError);
-                  }
-                }
+                    const entries = Object.entries(context);
+                    console.log("[App] Context entries:", entries);
 
-                // Method 4: Original complex type handling as fallback
-                if (!viewerFid && context?.user?.fid) {
-                  let rawFid = context.user.fid;
-                  console.log("[App] Raw FID value:", rawFid, "Type:", typeof rawFid);
+                    for (const [key, value] of entries) {
+                      if (key === 'user' && value && typeof value === 'object') {
+                        const userEntries = Object.entries(value);
+                        console.log("[App] User entries:", userEntries);
 
-                  // Handle different FID types
-                  if (typeof rawFid === 'number') {
-                    viewerFid = rawFid;
-                  } else if (typeof rawFid === 'bigint') {
-                    viewerFid = Number(rawFid);
-                  } else if (typeof rawFid === 'string') {
-                    viewerFid = parseInt(rawFid, 10);
-                  } else if (typeof rawFid === 'function') {
-                    // Try calling without await first
-                    try {
-                      const result = rawFid();
-                      console.log("[App] Function result:", result, "Type:", typeof result);
-                      // Don't await here - just try direct conversion
-                      viewerFid = Number(result);
-                      if (isNaN(viewerFid)) viewerFid = undefined;
-                    } catch (err) {
-                      console.warn("[App] Could not call FID function:", err);
+                        for (const [userKey, userValue] of userEntries) {
+                          if (userKey === 'fid') {
+                            const numFid = Number(userValue);
+                            if (!isNaN(numFid) && numFid > 0) {
+                              viewerFid = numFid;
+                              console.log("[App] ✓ FID from entries iteration:", viewerFid);
+                              break;
+                            }
+                          }
+                        }
+                      }
                     }
-                  } else if (rawFid && typeof rawFid === 'object') {
-                    // Try valueOf() for objects
-                    try {
-                      viewerFid = Number(rawFid.valueOf ? rawFid.valueOf() : rawFid);
-                      if (isNaN(viewerFid)) viewerFid = undefined;
-                    } catch (err) {
-                      console.warn("[App] Could not convert object FID:", err);
-                    }
+                  } catch (entriesError) {
+                    console.warn("[App] Entries iteration failed:", entriesError);
                   }
                 }
 
                 if (viewerFid && !isNaN(viewerFid) && viewerFid > 0) {
-                  console.log("[App] ✓ Loaded viewer FID from SDK context:", viewerFid);
+                  console.log("[App] ✓ Successfully loaded FID:", viewerFid);
                   break;
+                } else {
+                  console.warn("[App] No valid FID found in context");
                 }
+              } else {
+                console.warn("[App] No context available");
               }
             } catch (contextError) {
               console.warn(`[App] Attempt ${retryCount + 1} error:`, contextError);
