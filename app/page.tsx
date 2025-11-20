@@ -595,7 +595,7 @@ export default function HomePage() {
       setStatus("Opening Farcaster composer...");
 
       const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://farcasturds.vercel.app";
-      const shareText = `Just minted my Farcasturd NFT! 💩\n\n${meta.name}\n${baseUrl}`;
+      const shareText = `Just paid for poop 💩\n\n${meta.name}\n${baseUrl}`;
 
       await sdk.actions.composeCast({
         text: shareText,
@@ -736,11 +736,11 @@ export default function HomePage() {
         <div className="fc-card">
           <div style={{ textAlign: "center" }}>
             <h2 style={{ fontSize: "1.05rem", fontWeight: 600, margin: "0 0 8px 0" }}>
-              {alreadyMinted ? "Turd Secured" : hasGenerated ? "Secure your Turd!" : ""}
+              {alreadyMinted ? "" : hasGenerated ? "Secure your Turd!" : ""}
             </h2>
             <p style={{ fontSize: "0.9rem", color: "var(--fc-text-soft)", margin: "0 0 12px 0", lineHeight: 1.4 }}>
               {alreadyMinted
-                ? "Share your Farcasturd with the frens"
+                ? "Share your Farcasturd with frens"
                 : hasGenerated
                 ? "Your Farcasturd is ready to mint on Base!"
                 : ""}
@@ -784,8 +784,6 @@ export default function HomePage() {
                 {sharing ? "Sharing... 💩" : "Share Your Turd 💩"}
               </button>
             )}
-
-            {status && <p className="fc-status">{status}</p>}
           </div>
         </div>
       </section>
