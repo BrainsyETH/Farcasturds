@@ -347,7 +347,7 @@ export default function HomePage() {
     }
   }, [isMintConfirming]);
 
-  // Handle successful mint
+  // Handle successful mint from direct wagmi flow (Generate & Mint button)
   useEffect(() => {
     if (isMintConfirmed && mintTxHash && me) {
       // Prevent duplicate generation for the same transaction
@@ -358,57 +358,16 @@ export default function HomePage() {
 
       console.log('[Mint] ✅ Transaction confirmed on-chain!', mintTxHash);
 
-      // Mark this transaction as processed
+      // Mark this transaction as processed FIRST to prevent any race conditions
       processedTxHashes.current.add(mintTxHash);
 
-      // Call success handler directly to avoid circular dependency
+      // Update state
       setLastTxHash(mintTxHash);
       localStorage.setItem(`farcasturd_tx_${me.fid}`, mintTxHash);
       setMe((prev) => (prev ? { ...prev, hasMinted: true } : prev));
 
-      // Now generate the image AFTER successful mint
-      setStatus("✓ Mint successful! Generating your Farcasturd...💩");
-      setGenerating(true);
-      setMinting(false);
-
-      // Trigger generation
-      fetch("/api/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fid: me.fid }),
-      })
-        .then(async (genRes) => {
-          if (!genRes.ok) {
-            const error = await genRes.json();
-            throw new Error(error.error || "Generation failed");
-          }
-          return genRes.json();
-        })
-        .then(async () => {
-          setHasGenerated(true);
-
-          // Fetch metadata to show the generated image
-          setIsRefreshing(true);
-          const metaRes = await fetch(`/api/metadata/${me.fid}?t=${Date.now()}`, {
-            cache: 'no-store'
-          });
-          if (metaRes.ok) {
-            const metaData = await metaRes.json();
-            setMeta(metaData);
-          }
-          setIsRefreshing(false);
-
-          setStatus(`✓ Farcasturd minted and generated for FID ${me.fid}! 💩`);
-          setTimeout(() => setStatus(null), 3000);
-        })
-        .catch((err) => {
-          console.error("Generation after mint failed:", err);
-          setStatus("✓ Minted! But generation failed. Refresh to try again.");
-          setTimeout(() => setStatus(null), 5000);
-        })
-        .finally(() => {
-          setGenerating(false);
-        });
+      // Trigger generation after mint
+      generateImageAfterMint(me.fid);
     }
   }, [isMintConfirmed, mintTxHash, me]);
 
@@ -431,6 +390,50 @@ export default function HomePage() {
       setTimeout(() => setStatus(null), 5000);
     }
   }, [isMintError, mintError]);
+
+  // Consolidated function to generate image after successful mint
+  // This prevents duplicate API calls by centralizing the generation logic
+  async function generateImageAfterMint(fid: number) {
+    setStatus("✓ Mint successful! Generating your Farcasturd...💩");
+    setGenerating(true);
+    setMinting(false);
+
+    try {
+      const genRes = await fetch("/api/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fid }),
+      });
+
+      if (!genRes.ok) {
+        const error = await genRes.json();
+        throw new Error(error.error || "Generation failed");
+      }
+
+      await genRes.json();
+      setHasGenerated(true);
+
+      // Fetch metadata to show the generated image
+      setIsRefreshing(true);
+      const metaRes = await fetch(`/api/metadata/${fid}?t=${Date.now()}`, {
+        cache: 'no-store'
+      });
+      if (metaRes.ok) {
+        const metaData = await metaRes.json();
+        setMeta(metaData);
+      }
+      setIsRefreshing(false);
+
+      setStatus(`✓ Farcasturd minted and generated for FID ${fid}! 💩`);
+      setTimeout(() => setStatus(null), 3000);
+    } catch (err: any) {
+      console.error("Generation after mint failed:", err);
+      setStatus("✓ Minted! But generation failed. Refresh to try again.");
+      setTimeout(() => setStatus(null), 5000);
+    } finally {
+      setGenerating(false);
+    }
+  }
 
   async function handleGenerateFarcasturd() {
     if (!me?.fid) return;
@@ -541,50 +544,24 @@ export default function HomePage() {
   async function handleMintSuccess(txHash: string) {
     if (!me) return;
 
+    // Prevent duplicate generation - check if this tx was already processed
+    if (processedTxHashes.current.has(txHash)) {
+      console.log('[MintModal] Transaction already processed by main flow, skipping:', txHash);
+      return;
+    }
+
+    console.log('[MintModal] Processing mint success:', txHash);
+
+    // Mark this transaction as processed FIRST to prevent race conditions
+    processedTxHashes.current.add(txHash);
+
+    // Update state
     setLastTxHash(txHash);
     localStorage.setItem(`farcasturd_tx_${me.fid}`, txHash);
     setMe((prev) => (prev ? { ...prev, hasMinted: true } : prev));
 
-    // Now generate the image AFTER successful mint
-    setStatus("✓ Mint successful! Generating your Farcasturd...💩");
-    setGenerating(true);
-    setMinting(false); // Stop showing minting state
-
-    try {
-      const genRes = await fetch("/api/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fid: me.fid }),
-      });
-
-      if (!genRes.ok) {
-        const error = await genRes.json();
-        throw new Error(error.error || "Generation failed");
-      }
-
-      await genRes.json();
-      setHasGenerated(true);
-
-      // Fetch metadata to show the generated image
-      setIsRefreshing(true);
-      const metaRes = await fetch(`/api/metadata/${me.fid}?t=${Date.now()}`, {
-        cache: 'no-store'
-      });
-      if (metaRes.ok) {
-        const metaData = await metaRes.json();
-        setMeta(metaData);
-      }
-      setIsRefreshing(false);
-
-      setStatus(`✓ Farcasturd minted and generated for FID ${me.fid}! 💩`);
-      setTimeout(() => setStatus(null), 3000);
-    } catch (err: any) {
-      console.error("Generation after mint failed:", err);
-      setStatus("✓ Minted! But generation failed. Refresh to try again.");
-      setTimeout(() => setStatus(null), 5000);
-    } finally {
-      setGenerating(false);
-    }
+    // Use consolidated generation function
+    await generateImageAfterMint(me.fid);
   }
 
   async function handleShareToFarcaster() {
