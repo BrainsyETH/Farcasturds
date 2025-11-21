@@ -894,7 +894,7 @@ export default function HomePage() {
             </div>
           ) : (
             <p className="fc-subtle" style={{ fontSize: "0.85rem" }}>
-              No activity yet.
+              You haven't minted yet.
             </p>
           )}
         </div>
