@@ -110,9 +110,9 @@ export default function Leaderboard({ userFid }: LeaderboardProps) {
       {/* Leaderboard Section */}
       <section className="fc-section">
         <div className="fc-card">
-          <h2 className="fc-card-title">🏆 Top Turd Recipients</h2>
+          <h2 className="fc-card-title">🏆 Stinkiest Offenders</h2>
           <p className="fc-subtle" style={{ marginBottom: '1rem' }}>
-            Hall of shame for the most turds received
+            Hall of of porcelain thrones
           </p>
 
           <div className="fc-leaderboard">
