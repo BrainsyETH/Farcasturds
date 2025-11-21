@@ -50,13 +50,25 @@ export async function processTurdCommand(cast: any): Promise<TurdCommand | null>
   // We need to fetch the parent cast to get the author
   const parentAuthor = cast.parent_author;
 
-  if (!parentAuthor) {
+  if (!parentAuthor || !parentAuthor.fid) {
     console.log('No parent author found in cast');
     return null;
   }
 
   const targetFid = parentAuthor.fid;
-  const targetUsername = parentAuthor.username;
+  let targetUsername = parentAuthor.username;
+
+  // If username is not provided in webhook payload, fetch it
+  if (!targetUsername) {
+    console.log(`Parent author username missing, fetching for FID ${targetFid}...`);
+    const userInfo = await fetchUserByFid(targetFid);
+    if (!userInfo) {
+      console.log(`Failed to fetch user info for FID ${targetFid}`);
+      return null;
+    }
+    targetUsername = userInfo.username;
+    console.log(`✓ Fetched username: ${targetUsername}`);
+  }
 
   // Don't allow sending turds to yourself
   if (senderFid === targetFid) {
