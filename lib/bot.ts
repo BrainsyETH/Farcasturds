@@ -120,7 +120,7 @@ export async function replyToCast(parentHash: string, text: string) {
 export async function fetchUserByFid(fid: number) {
   try {
     const client = getNeynarClient();
-    const response = await client.fetchBulkUsers([fid]);
+    const response = await client.fetchBulkUsers({ fids: [fid] });
     return response.users[0] || null;
   } catch (error) {
     console.error('Error fetching user by FID:', error);
