@@ -287,6 +287,12 @@ export default function HomePage() {
       if (storedTxHash) {
         setLastTxHash(storedTxHash);
       }
+
+      // Load hasShared state from localStorage
+      const storedHasShared = localStorage.getItem(`farcasturd_shared_${me.fid}`);
+      if (storedHasShared === 'true') {
+        setHasShared(true);
+      }
     }
   }, [me?.fid, isRefreshing]);
 
@@ -585,7 +591,9 @@ export default function HomePage() {
         embeds: [meta.image],
       });
 
+      // Save shared state to persist across sessions
       setHasShared(true);
+      localStorage.setItem(`farcasturd_shared_${me.fid}`, 'true');
       setStatus("✓ Cast composer opened!");
       setTimeout(() => setStatus(null), 3000);
     } catch (error: any) {
