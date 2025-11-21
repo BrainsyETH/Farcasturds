@@ -52,6 +52,7 @@ export default function HomePage() {
   const [showMintModal, setShowMintModal] = useState(false);
   const [authNonce, setAuthNonce] = useState<string | null>(null);
   const [sharing, setSharing] = useState(false);
+  const [hasShared, setHasShared] = useState(false);
   const [activeTab, setActiveTab] = useState<TabId>('mint');
 
   // Track processed transaction hashes to prevent duplicate generation
@@ -285,6 +286,12 @@ export default function HomePage() {
       const storedTxHash = localStorage.getItem(`farcasturd_tx_${me.fid}`);
       if (storedTxHash) {
         setLastTxHash(storedTxHash);
+      }
+
+      // Load hasShared state from localStorage
+      const storedHasShared = localStorage.getItem(`farcasturd_shared_${me.fid}`);
+      if (storedHasShared === 'true') {
+        setHasShared(true);
       }
     }
   }, [me?.fid, isRefreshing]);
@@ -584,6 +591,9 @@ export default function HomePage() {
         embeds: [meta.image],
       });
 
+      // Save shared state to persist across sessions
+      setHasShared(true);
+      localStorage.setItem(`farcasturd_shared_${me.fid}`, 'true');
       setStatus("✓ Cast composer opened!");
       setTimeout(() => setStatus(null), 3000);
     } catch (error: any) {
@@ -720,149 +730,300 @@ export default function HomePage() {
       {activeTab === 'mint' && (
         <>
 
-      {/* Generation & Mint section */}
-      <section className="fc-section">
-        <div className="fc-card">
-          <div style={{ textAlign: "center" }}>
-            <h2 style={{ fontSize: "1.05rem", fontWeight: 600, margin: "0 0 8px 0" }}>
-              {alreadyMinted ? "" : hasGenerated ? "Secure your Turd!" : ""}
-            </h2>
-            <p style={{ fontSize: "0.9rem", color: "var(--fc-text-soft)", margin: "0 0 12px 0", lineHeight: 1.4 }}>
-              {alreadyMinted
-                ? "Share your Farcasturd with frens"
-                : hasGenerated
-                ? "Your Farcasturd is ready to mint on Base!"
-                : ""}
-            </p>
+      {/* Conditionally render cards based on whether user has shared */}
+      {!hasShared ? (
+        <>
+          {/* Generation & Mint section */}
+          <section className="fc-section">
+            <div className="fc-card">
+              <div style={{ textAlign: "center" }}>
+                <h2 style={{ fontSize: "1.05rem", fontWeight: 600, margin: "0 0 8px 0" }}>
+                  {alreadyMinted ? "" : hasGenerated ? "Secure your Turd!" : ""}
+                </h2>
+                <p style={{ fontSize: "0.9rem", color: "var(--fc-text-soft)", margin: "0 0 12px 0", lineHeight: 1.4 }}>
+                  {alreadyMinted
+                    ? "Share your Farcasturd with frens"
+                    : hasGenerated
+                    ? "Your Farcasturd is ready to mint on Base!"
+                    : ""}
+                </p>
 
-            {!hasGenerated && !alreadyMinted && (
-              <form onSubmit={handleGenerateAndMint} style={{ marginBottom: 8 }}>
-                <button
-                  type="submit"
-                  disabled={generating || minting || !isAuthenticated}
-                  className="fc-button"
-                >
-                  {generating
-                    ? "Generating...💩"
-                    : minting
-                    ? "Minting...💩"
-                    : "Generate & Mint"}
-                </button>
-              </form>
-            )}
-
-            {hasGenerated && !alreadyMinted && (
-              <form onSubmit={handleMint} style={{ marginBottom: 8 }}>
-                <button
-                  type="submit"
-                  disabled={minting || !isAuthenticated}
-                  className="fc-button"
-                >
-                  {minting ? "Minting... 💩" : "Mint Now"}
-                </button>
-              </form>
-            )}
-
-            {alreadyMinted && (
-              <button
-                onClick={handleShareToFarcaster}
-                disabled={sharing}
-                className="fc-button"
-                style={{ marginBottom: 8 }}
-              >
-                {sharing ? "Sharing... 💩" : "Share Your Turd 💩"}
-              </button>
-            )}
-          </div>
-        </div>
-      </section>
-
-      {/* Your Farcasturd preview */}
-      <section className="fc-section">
-        <div className="fc-card">
-          <h2 className={meta ? "fc-card-title" : "fc-card-title-reveal"}>
-            {meta ? meta.name : "Reveal your Farcasturd"}
-          </h2>
-
-          <div className="fc-nft-preview-wrap">
-            {meta?.image && !meta.image.includes("placeholder") ? (
-              <div className="fc-nft-preview">
-                <img src={meta.image} alt="Mint to Reveal" />
-              </div>
-            ) : (
-              <div className="fc-avatar" style={{
-                width: 300,
-                height: 300,
-                borderRadius: 24,
-                background: "white",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                overflow: "hidden"
-              }}>
-                <img
-                  src="https://b4b0aaz7b39hhkor.public.blob.vercel-storage.com/poop_questionv2.png"
-                  alt="Generate your Farcasturd"
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "contain",
-                    display: "block"
-                  }}
-                />
-              </div>
-            )}
-          </div>
-
-          {meta && !meta.image.includes("placeholder") ? (
-            <>
-              <p className="fc-subtle">{meta.description}</p>
-
-              <div className="fc-meta-block">
-                <div style={{ textAlign: "center" }}>
-                  <strong style={{ color: "var(--fc-text)" }}>Image URL:</strong>{" "}
-                  <a
-                    href={meta.image}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="fc-code"
-                    style={{
-                      color: "var(--fc-text)",
-                      opacity: 0.8,
-                      textDecoration: "underline",
-                      cursor: "pointer"
-                    }}
-                  >
-                    {meta.image}
-                  </a>
-                </div>
-              </div>
-
-              {meta.attributes && meta.attributes.length > 0 && (
-                <div className="fc-attr-row">
-                  {meta.attributes.map((attr) => (
-                    <div
-                      key={`${attr.trait_type}-${attr.value}`}
-                      className="fc-attr-pill"
+                {!hasGenerated && !alreadyMinted && (
+                  <form onSubmit={handleGenerateAndMint} style={{ marginBottom: 8 }}>
+                    <button
+                      type="submit"
+                      disabled={generating || minting || !isAuthenticated}
+                      className="fc-button"
                     >
-                      <span className="fc-attr-label">{attr.trait_type}</span>
-                      <span className="fc-attr-value">
-                        {String(attr.value)}
-                      </span>
+                      {generating
+                        ? "Generating...💩"
+                        : minting
+                        ? "Minting...💩"
+                        : "Generate & Mint"}
+                    </button>
+                  </form>
+                )}
+
+                {hasGenerated && !alreadyMinted && (
+                  <form onSubmit={handleMint} style={{ marginBottom: 8 }}>
+                    <button
+                      type="submit"
+                      disabled={minting || !isAuthenticated}
+                      className="fc-button"
+                    >
+                      {minting ? "Minting... 💩" : "Mint Now"}
+                    </button>
+                  </form>
+                )}
+
+                {alreadyMinted && (
+                  <button
+                    onClick={handleShareToFarcaster}
+                    disabled={sharing}
+                    className="fc-button"
+                    style={{ marginBottom: 8 }}
+                  >
+                    {sharing ? "Sharing... 💩" : "Share Your Turd 💩"}
+                  </button>
+                )}
+              </div>
+            </div>
+          </section>
+
+          {/* Your Farcasturd preview */}
+          <section className="fc-section">
+            <div className="fc-card">
+              <h2 className={meta ? "fc-card-title" : "fc-card-title-reveal"}>
+                {meta ? meta.name : "Reveal your Farcasturd"}
+              </h2>
+
+              <div className="fc-nft-preview-wrap">
+                {meta?.image && !meta.image.includes("placeholder") ? (
+                  <div className="fc-nft-preview">
+                    <img src={meta.image} alt="Mint to Reveal" />
+                  </div>
+                ) : (
+                  <div className="fc-avatar" style={{
+                    width: 300,
+                    height: 300,
+                    borderRadius: 24,
+                    background: "white",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    overflow: "hidden"
+                  }}>
+                    <img
+                      src="https://b4b0aaz7b39hhkor.public.blob.vercel-storage.com/poop_questionv2.png"
+                      alt="Generate your Farcasturd"
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "contain",
+                        display: "block"
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
+
+              {meta && !meta.image.includes("placeholder") ? (
+                <>
+                  <p className="fc-subtle">{meta.description}</p>
+
+                  <div className="fc-meta-block">
+                    <div style={{ textAlign: "center" }}>
+                      <strong style={{ color: "var(--fc-text)" }}>Image URL:</strong>{" "}
+                      <a
+                        href={meta.image}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="fc-code"
+                        style={{
+                          color: "var(--fc-text)",
+                          opacity: 0.8,
+                          textDecoration: "underline",
+                          cursor: "pointer"
+                        }}
+                      >
+                        {meta.image}
+                      </a>
                     </div>
-                  ))}
-                </div>
+                  </div>
+
+                  {meta.attributes && meta.attributes.length > 0 && (
+                    <div className="fc-attr-row">
+                      {meta.attributes.map((attr) => (
+                        <div
+                          key={`${attr.trait_type}-${attr.value}`}
+                          className="fc-attr-pill"
+                        >
+                          <span className="fc-attr-label">{attr.trait_type}</span>
+                          <span className="fc-attr-value">
+                            {String(attr.value)}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <p className="fc-subtle">
+                  {hasGenerated
+                    ? "Checking on your turd..."
+                    : "A turd is waiting for you 💩"}
+                </p>
               )}
-            </>
-          ) : (
-            <p className="fc-subtle">
-              {hasGenerated
-                ? "Checking on your turd..."
-                : "A turd is waiting for you 💩"}
-            </p>
-          )}
-        </div>
-      </section>
+            </div>
+          </section>
+        </>
+      ) : (
+        <>
+          {/* After sharing: NFT preview shown first */}
+          <section className="fc-section">
+            <div className="fc-card">
+              <h2 className={meta ? "fc-card-title" : "fc-card-title-reveal"}>
+                {meta ? meta.name : "Reveal your Farcasturd"}
+              </h2>
+
+              <div className="fc-nft-preview-wrap">
+                {meta?.image && !meta.image.includes("placeholder") ? (
+                  <div className="fc-nft-preview">
+                    <img src={meta.image} alt="Mint to Reveal" />
+                  </div>
+                ) : (
+                  <div className="fc-avatar" style={{
+                    width: 300,
+                    height: 300,
+                    borderRadius: 24,
+                    background: "white",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    overflow: "hidden"
+                  }}>
+                    <img
+                      src="https://b4b0aaz7b39hhkor.public.blob.vercel-storage.com/poop_questionv2.png"
+                      alt="Generate your Farcasturd"
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "contain",
+                        display: "block"
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
+
+              {meta && !meta.image.includes("placeholder") ? (
+                <>
+                  <p className="fc-subtle">{meta.description}</p>
+
+                  <div className="fc-meta-block">
+                    <div style={{ textAlign: "center" }}>
+                      <strong style={{ color: "var(--fc-text)" }}>Image URL:</strong>{" "}
+                      <a
+                        href={meta.image}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="fc-code"
+                        style={{
+                          color: "var(--fc-text)",
+                          opacity: 0.8,
+                          textDecoration: "underline",
+                          cursor: "pointer"
+                        }}
+                      >
+                        {meta.image}
+                      </a>
+                    </div>
+                  </div>
+
+                  {meta.attributes && meta.attributes.length > 0 && (
+                    <div className="fc-attr-row">
+                      {meta.attributes.map((attr) => (
+                        <div
+                          key={`${attr.trait_type}-${attr.value}`}
+                          className="fc-attr-pill"
+                        >
+                          <span className="fc-attr-label">{attr.trait_type}</span>
+                          <span className="fc-attr-value">
+                            {String(attr.value)}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <p className="fc-subtle">
+                  {hasGenerated
+                    ? "Checking on your turd..."
+                    : "A turd is waiting for you 💩"}
+                </p>
+              )}
+            </div>
+          </section>
+
+          {/* Share button shown second after sharing */}
+          <section className="fc-section">
+            <div className="fc-card">
+              <div style={{ textAlign: "center" }}>
+                <h2 style={{ fontSize: "1.05rem", fontWeight: 600, margin: "0 0 8px 0" }}>
+                  {alreadyMinted ? "" : hasGenerated ? "Secure your Turd!" : ""}
+                </h2>
+                <p style={{ fontSize: "0.9rem", color: "var(--fc-text-soft)", margin: "0 0 12px 0", lineHeight: 1.4 }}>
+                  {alreadyMinted
+                    ? "Share your Farcasturd with frens"
+                    : hasGenerated
+                    ? "Your Farcasturd is ready to mint on Base!"
+                    : ""}
+                </p>
+
+                {!hasGenerated && !alreadyMinted && (
+                  <form onSubmit={handleGenerateAndMint} style={{ marginBottom: 8 }}>
+                    <button
+                      type="submit"
+                      disabled={generating || minting || !isAuthenticated}
+                      className="fc-button"
+                    >
+                      {generating
+                        ? "Generating...💩"
+                        : minting
+                        ? "Minting...💩"
+                        : "Generate & Mint"}
+                    </button>
+                  </form>
+                )}
+
+                {hasGenerated && !alreadyMinted && (
+                  <form onSubmit={handleMint} style={{ marginBottom: 8 }}>
+                    <button
+                      type="submit"
+                      disabled={minting || !isAuthenticated}
+                      className="fc-button"
+                    >
+                      {minting ? "Minting... 💩" : "Mint Now"}
+                    </button>
+                  </form>
+                )}
+
+                {alreadyMinted && (
+                  <button
+                    onClick={handleShareToFarcaster}
+                    disabled={sharing}
+                    className="fc-button"
+                    style={{ marginBottom: 8 }}
+                  >
+                    {sharing ? "Sharing... 💩" : "Share Your Turd 💩"}
+                  </button>
+                )}
+              </div>
+            </div>
+          </section>
+        </>
+      )}
 
       {/* Recent activity */}
       <section className="fc-section">
