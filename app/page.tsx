@@ -242,37 +242,8 @@ export default function HomePage() {
     };
   }, []);
 
-  // Auto-connect to Farcaster wallet with retry
-  useEffect(() => {
-    let attempts = 0;
-    const maxAttempts = 3;
-
-    async function tryConnect() {
-      if (isConnected || !connectors.length || attempts >= maxAttempts) return;
-
-      try {
-        console.log(`[Wallet] Connection attempt ${attempts + 1}/${maxAttempts}`);
-        const farcasterConnector = connectors[0];
-        
-        if (farcasterConnector) {
-          await connect({ connector: farcasterConnector });
-          console.log("[Wallet] ✓ Connected successfully");
-        }
-      } catch (error) {
-        console.warn(`[Wallet] Connection attempt ${attempts + 1} failed:`, error);
-        attempts++;
-        
-        if (attempts < maxAttempts) {
-          // Retry after delay
-          setTimeout(tryConnect, 1000 * attempts);
-        }
-      }
-    }
-
-    if (!isConnected && connectors.length > 0) {
-      tryConnect();
-    }
-  }, [isConnected, connectors, connect]);
+  // Wallet connection is now handled on-demand when user clicks mint
+  // This prevents the approve screen from showing on page load
 
   // Auto-authenticate when we have FID from Farcaster
   // In a Farcaster Mini App, the FID itself is proof of authentication
@@ -485,12 +456,28 @@ export default function HomePage() {
   async function handleGenerateAndMint(e: React.FormEvent) {
     e.preventDefault();
     if (!me) return;
-    if (!address) {
-      setStatus("⚠️ No wallet connected");
-      return;
-    }
     if (me.hasMinted) {
       setStatus("This FID has already minted a Farcasturd.");
+      return;
+    }
+
+    // Connect wallet if not already connected
+    if (!isConnected && connectors.length > 0) {
+      try {
+        setStatus("Connecting wallet...");
+        const farcasterConnector = connectors[0];
+        await connect({ connector: farcasterConnector });
+        console.log("[Wallet] ✓ Connected successfully");
+      } catch (error) {
+        console.error('[Wallet] Connection failed:', error);
+        setStatus("⚠️ Failed to connect wallet");
+        setTimeout(() => setStatus(null), 3000);
+        return;
+      }
+    }
+
+    if (!address) {
+      setStatus("⚠️ No wallet address available");
       return;
     }
 
@@ -538,6 +525,21 @@ export default function HomePage() {
     if (!hasGenerated) {
       setStatus("Please generate your Farcasturd first!");
       return;
+    }
+
+    // Connect wallet if not already connected
+    if (!isConnected && connectors.length > 0) {
+      try {
+        setStatus("Connecting wallet...");
+        const farcasterConnector = connectors[0];
+        await connect({ connector: farcasterConnector });
+        console.log("[Wallet] ✓ Connected successfully");
+      } catch (error) {
+        console.error('[Wallet] Connection failed:', error);
+        setStatus("⚠️ Failed to connect wallet");
+        setTimeout(() => setStatus(null), 3000);
+        return;
+      }
     }
 
     // Open the mint modal
@@ -645,14 +647,8 @@ export default function HomePage() {
 
   return (
     <main className="fc-shell">
-      {/* Tab Navigation */}
-      <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
-
-      {/* Mint Tab Content */}
-      {activeTab === 'mint' && (
-        <>
-          {/* Header / identity */}
-          <section className="fc-section">
+      {/* Header / identity - shown on all tabs */}
+      <section className="fc-section">
         <div className="fc-header-row">
           <img
             src="https://b4b0aaz7b39hhkor.public.blob.vercel-storage.com/farcasturdsv4.png"
@@ -716,6 +712,13 @@ export default function HomePage() {
           )}
         </div>
       </section>
+
+      {/* Tab Navigation */}
+      <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
+
+      {/* Mint Tab Content */}
+      {activeTab === 'mint' && (
+        <>
 
       {/* Generation & Mint section */}
       <section className="fc-section">
