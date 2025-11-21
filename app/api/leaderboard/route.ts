@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/database';
 
+// Force dynamic rendering - this route uses request params
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -24,21 +27,29 @@ export async function GET(request: Request) {
     // Get user stats if FID provided
     let userStats = null;
     if (userFid) {
-      const { count: received } = await supabase
+      console.log('[Leaderboard API] Fetching stats for FID:', userFid);
+
+      const { count: received, error: receivedError } = await supabase
         .from('turds')
         .select('*', { count: 'exact', head: true })
         .eq('to_fid', parseInt(userFid));
 
-      const { count: sent } = await supabase
+      console.log('[Leaderboard API] Received count:', received, 'Error:', receivedError);
+
+      const { count: sent, error: sentError } = await supabase
         .from('turds')
         .select('*', { count: 'exact', head: true })
         .eq('from_fid', parseInt(userFid));
+
+      console.log('[Leaderboard API] Sent count:', sent, 'Error:', sentError);
 
       userStats = {
         fid: parseInt(userFid),
         received: received || 0,
         sent: sent || 0,
       };
+
+      console.log('[Leaderboard API] Final userStats:', userStats);
     }
 
     return NextResponse.json({

@@ -20,13 +20,21 @@ export async function GET() {
     const { NeynarAPIClient } = await import("@neynar/nodejs-sdk");
     const client = new NeynarAPIClient({ apiKey: process.env.NEYNAR_API_KEY! });
 
-    // Fetch recent mentions
-    const mentions = await client.fetchMentionAndReplyNotifications({
-      fid: parseInt(process.env.BOT_FID!),
-      limit: 25,
+    if (!process.env.BOT_FID) {
+      throw new Error('BOT_FID not configured');
+    }
+
+    // Fetch recent notifications using the correct SDK v3 method
+    const notifications = await client.fetchAllNotifications({
+      fid: parseInt(process.env.BOT_FID),
+      type: ['mentions', 'replies'],
     });
 
-    for (const notification of mentions.notifications) {
+    if (!notifications?.notifications) {
+      return NextResponse.json({ status: 'success', processed: 0 });
+    }
+
+    for (const notification of notifications.notifications) {
       const cast = notification.cast;
 
       // Skip if already processed (check database)
@@ -74,7 +82,7 @@ export async function GET() {
       );
     }
     
-    return NextResponse.json({ status: 'success', processed: mentions.notifications.length });
+    return NextResponse.json({ status: 'success', processed: notifications.notifications.length });
   } catch (error) {
     console.error('Polling error:', error);
     return NextResponse.json({ error: 'Internal error' }, { status: 500 });
