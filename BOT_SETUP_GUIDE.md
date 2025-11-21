@@ -15,7 +15,7 @@ This guide will help you set up the Farcaster bot for turd tracking.
   - `checkIfCastProcessed()` - Prevent duplicates
 
 - **`lib/bot.ts`** - Bot helper functions
-  - `processTurdCommand()` - Parse "@farcasturds @username" mentions
+  - `processTurdCommand()` - Parse mentions of @farcasturd with target usernames
   - `lookupUserByUsername()` - Find users via Neynar
   - `replyToCast()` - Send reply casts
   - `fetchUserByFid()` - Get user info
@@ -98,7 +98,7 @@ $$ LANGUAGE plpgsql;
 
 ### 3. Create Bot Account
 
-1. Create new Farcaster account (e.g., @farcasturds)
+1. Create new Farcaster account (e.g., @farcasturd)
 2. Pay registration fee (~$5-10)
 3. Save your bot's FID
 
@@ -159,9 +159,9 @@ git push origin main
 
 ### 8. Test the Bot
 
-Mention your bot on Farcaster:
+Reply to any cast mentioning your bot on Farcaster:
 ```
-@farcasturds send turd to @testuser
+@farcasturd @testuser
 ```
 
 Check your logs in Vercel dashboard to see:
@@ -211,12 +211,14 @@ npx ngrok http 3000
 
 ### Test Commands:
 
-All these formats work:
+Any phrasing works as long as you reply to a cast and mention both the bot and target:
 ```
-@farcasturds send turd to @username
-@farcasturds turd @username
-@farcasturds @username
+@farcasturd @username
+Hey @farcasturd check out @username
+@username @farcasturd
 ```
+
+**Important:** Must be a REPLY to an existing cast, not an original post!
 
 ---
 

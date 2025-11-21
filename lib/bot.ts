@@ -30,28 +30,37 @@ export interface TurdCommand {
 export async function processTurdCommand(cast: any): Promise<TurdCommand | null> {
   const text = cast.text.toLowerCase();
 
-  // Parse command patterns:
-  // "@farcasturds send turd to @username"
-  // "@farcasturds turd @username"
-  // "@farcasturds @username"
-  const patterns = [
-    /@farcasturds\s+(?:send\s+)?turd\s+(?:to\s+)?@(\w+)/i,
-    /@farcasturds\s+@(\w+)/i,
-  ];
-
-  let match = null;
-  for (const pattern of patterns) {
-    match = text.match(pattern);
-    if (match) break;
+  // Check if this is a reply (has parent)
+  if (!cast.parent_hash && !cast.parent_url) {
+    console.log('Skipping: Not a reply, original post');
+    return null; // Only process replies, not original posts
   }
 
-  if (!match) {
-    return null; // Invalid command
+  // Check if @farcasturd (no S) is mentioned
+  if (!text.includes('@farcasturd')) {
+    return null; // Bot not mentioned
   }
 
-  const targetUsername = match[1];
+  // Extract target username - look for any @username that's NOT @farcasturd
+  // Matches patterns like: @farcasturd @alice, @alice @farcasturd, etc.
+  const allMentions = text.match(/@(\w+)/g) || [];
+
+  // Filter out @farcasturd and find the target
+  const targetMentions = allMentions
+    .map(mention => mention.substring(1)) // Remove @
+    .filter(username => username !== 'farcasturd');
+
+  if (targetMentions.length === 0) {
+    console.log('No target username found');
+    return null; // No target specified
+  }
+
+  // Use the first non-bot username as the target
+  const targetUsername = targetMentions[0];
   const senderFid = cast.author.fid;
   const senderUsername = cast.author.username;
+
+  console.log(`✓ Command parsed: @${senderUsername} → @${targetUsername}`);
 
   return {
     targetUsername,
