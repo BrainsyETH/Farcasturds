@@ -35,48 +35,27 @@ export default function Leaderboard({ userFid }: LeaderboardProps) {
   }, [userFid]);
 
   async function fetchLeaderboardData() {
-    try {
-      setLoading(true);
-
-      // TODO: Replace with actual API call once backend is ready
-      // const response = await fetch('/api/leaderboard');
-      // const data = await response.json();
-
-      // Mock data for now
-      const mockLeaderboard: LeaderboardEntry[] = [
-        { rank: 1, fid: 12345, username: 'vitalik.eth', turdCount: 420, pfpUrl: undefined },
-        { rank: 2, fid: 67890, username: 'dwr.eth', turdCount: 369, pfpUrl: undefined },
-        { rank: 3, fid: 11111, username: 'jessepollak', turdCount: 250, pfpUrl: undefined },
-        { rank: 4, fid: 22222, username: 'balajis', turdCount: 180, pfpUrl: undefined },
-        { rank: 5, fid: 33333, username: 'varunsrin', turdCount: 150, pfpUrl: undefined },
-        { rank: 6, fid: 44444, username: 'sanjay', turdCount: 120, pfpUrl: undefined },
-        { rank: 7, fid: 55555, username: 'cmichel', turdCount: 100, pfpUrl: undefined },
-        { rank: 8, fid: 66666, username: 'farcaster', turdCount: 95, pfpUrl: undefined },
-        { rank: 9, fid: 77777, username: 'base', turdCount: 80, pfpUrl: undefined },
-        { rank: 10, fid: 88888, username: 'noun40', turdCount: 69, pfpUrl: undefined },
-      ];
-
-      const mockActivity: TurdActivity[] = [
-        { id: '1', fromFid: 12345, fromUsername: 'alice', toFid: 67890, toUsername: 'bob', timestamp: new Date(Date.now() - 120000).toISOString() },
-        { id: '2', fromFid: 33333, fromUsername: 'charlie', toFid: 12345, toUsername: 'alice', timestamp: new Date(Date.now() - 300000).toISOString() },
-        { id: '3', fromFid: 44444, fromUsername: 'david', toFid: 22222, toUsername: 'eve', timestamp: new Date(Date.now() - 600000).toISOString() },
-        { id: '4', fromFid: 55555, fromUsername: 'frank', toFid: 11111, toUsername: 'grace', timestamp: new Date(Date.now() - 900000).toISOString() },
-        { id: '5', fromFid: 66666, fromUsername: 'henry', toFid: 33333, toUsername: 'ivy', timestamp: new Date(Date.now() - 1200000).toISOString() },
-      ];
-
-      setLeaderboard(mockLeaderboard);
-      setRecentActivity(mockActivity);
-
-      // Mock user stats
-      if (userFid) {
-        setUserStats({ received: 42, sent: 13 });
-      }
-    } catch (error) {
-      console.error('Error fetching leaderboard:', error);
-    } finally {
-      setLoading(false);
+  try {
+    setLoading(true);
+    
+    // Fetch from real API instead of using mock data
+    const response = await fetch(`/api/leaderboard${userFid ? `?fid=${userFid}` : ''}`);
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch leaderboard');
     }
+    
+    const data = await response.json();
+    
+    setLeaderboard(data.leaderboard);
+    setRecentActivity(data.recentActivity);
+    setUserStats(data.userStats);
+  } catch (error) {
+    console.error('Error fetching leaderboard:', error);
+  } finally {
+    setLoading(false);
   }
+}
 
   function formatTimeAgo(timestamp: string): string {
     const seconds = Math.floor((Date.now() - new Date(timestamp).getTime()) / 1000);
