@@ -9,6 +9,7 @@ import { farcasturdsV2Abi } from '@/abi/FarcasturdsV2';
 import { generateSiweMessage, generateNonce, verifySiweSignature } from '@/lib/auth';
 import TabNavigation, { TabId } from '@/components/TabNavigation';
 import Leaderboard from '@/components/Leaderboard';
+import HowItWorks from '@/components/HowItWorks';
 
 type MeResponse = {
   fid: number;
@@ -1089,6 +1090,11 @@ export default function HomePage() {
       {/* Leaderboard Tab Content */}
       {activeTab === 'leaderboard' && (
         <Leaderboard userFid={me?.fid} />
+      )}
+
+      {/* How It Works Tab Content */}
+      {activeTab === 'howitworks' && (
+        <HowItWorks />
       )}
     </main>
   );

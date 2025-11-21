@@ -2,7 +2,7 @@
 
 import React from 'react';
 
-export type TabId = 'mint' | 'leaderboard';
+export type TabId = 'mint' | 'leaderboard' | 'howitworks';
 
 interface Tab {
   id: TabId;
@@ -17,7 +17,8 @@ interface TabNavigationProps {
 
 const tabs: Tab[] = [
   { id: 'mint', label: 'Mint', icon: '💩' },
-  { id: 'leaderboard', label: 'Leaderboard', icon: '🏆' }
+  { id: 'leaderboard', label: 'Leaderboard', icon: '🏆' },
+  { id: 'howitworks', label: 'How It Works', icon: '❓' }
 ];
 
 export default function TabNavigation({ activeTab, onTabChange }: TabNavigationProps) {
