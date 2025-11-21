@@ -22,6 +22,7 @@ function getNeynarClient() {
 
 export interface TurdCommand {
   targetUsername: string;
+  targetFid: number;
   senderFid: number;
   senderUsername: string;
   castHash: string;
@@ -30,31 +31,44 @@ export interface TurdCommand {
 export async function processTurdCommand(cast: any): Promise<TurdCommand | null> {
   const text = cast.text.toLowerCase();
 
-  // Parse command patterns:
-  // "@farcasturds send turd to @username"
-  // "@farcasturds turd @username"
-  // "@farcasturds @username"
-  const patterns = [
-    /@farcasturds\s+(?:send\s+)?turd\s+(?:to\s+)?@(\w+)/i,
-    /@farcasturds\s+@(\w+)/i,
-  ];
-
-  let match = null;
-  for (const pattern of patterns) {
-    match = text.match(pattern);
-    if (match) break;
+  // Check if this is a reply (has parent)
+  if (!cast.parent_hash && !cast.parent_url) {
+    console.log('Skipping: Not a reply, original post');
+    return null; // Only process replies, not original posts
   }
 
-  if (!match) {
-    return null; // Invalid command
+  // Check if @farcasturd (no S) is mentioned
+  if (!text.includes('@farcasturd')) {
+    return null; // Bot not mentioned
   }
 
-  const targetUsername = match[1];
+  // Get sender info
   const senderFid = cast.author.fid;
   const senderUsername = cast.author.username;
 
+  // The target is the PARENT AUTHOR (the original poster being replied to)
+  // We need to fetch the parent cast to get the author
+  const parentAuthor = cast.parent_author;
+
+  if (!parentAuthor) {
+    console.log('No parent author found in cast');
+    return null;
+  }
+
+  const targetFid = parentAuthor.fid;
+  const targetUsername = parentAuthor.username;
+
+  // Don't allow sending turds to yourself
+  if (senderFid === targetFid) {
+    console.log('User trying to send turd to themselves, ignoring');
+    return null;
+  }
+
+  console.log(`✓ Command parsed: @${senderUsername} → @${targetUsername} (parent author)`);
+
   return {
     targetUsername,
+    targetFid,
     senderFid,
     senderUsername,
     castHash: cast.hash,

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { processTurdCommand, lookupUserByUsername, replyToCast, fetchUserByFid } from '@/lib/bot';
+import { processTurdCommand, replyToCast } from '@/lib/bot';
 import { recordTurd, getTurdCount, checkRateLimit, checkIfCastProcessed } from '@/lib/database';
 
 // Lazy initialization to avoid build-time errors
@@ -46,28 +46,17 @@ export async function GET() {
         continue;
       }
 
-      // Look up target user
-      const targetUser = await lookupUserByUsername(command.targetUsername);
-
-      if (!targetUser) {
-        await replyToCast(
-          cast.hash,
-          `@${command.senderUsername} User @${command.targetUsername} not found! 💩`
-        );
-        continue;
-      }
-
-      // Record the turd
+      // Record the turd (target is the parent author)
       await recordTurd({
         from_fid: command.senderFid,
         from_username: command.senderUsername,
-        to_fid: targetUser.fid,
+        to_fid: command.targetFid,
         to_username: command.targetUsername,
         cast_hash: cast.hash,
       });
 
       // Reply with confirmation
-      const turdCount = await getTurdCount(targetUser.fid);
+      const turdCount = await getTurdCount(command.targetFid);
       await replyToCast(
         cast.hash,
         `💩 @${command.senderUsername} sent a turd to @${command.targetUsername}!\n\nTotal turds received: ${turdCount}`

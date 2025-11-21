@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { processTurdCommand, lookupUserByUsername, replyToCast } from '@/lib/bot';
+import { processTurdCommand, replyToCast } from '@/lib/bot';
 import { recordTurd, getTurdCount, checkRateLimit, checkIfCastProcessed } from '@/lib/database';
 
 export async function POST(request: Request) {
@@ -36,7 +36,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ status: 'invalid_command' });
     }
 
-    console.log(`🎯 Target: @${command.targetUsername}`);
+    console.log(`🎯 Target: @${command.targetUsername} (FID: ${command.targetFid})`);
 
     // ============================================================
     // THIS IS WHERE checkRateLimit IS USED
@@ -58,27 +58,13 @@ export async function POST(request: Request) {
     }
     // ============================================================
 
-    // Look up target user
-    const targetUser = await lookupUserByUsername(command.targetUsername);
-
-    if (!targetUser) {
-      console.log(`❌ User @${command.targetUsername} not found`);
-
-      await replyToCast(
-        cast.hash,
-        `@${command.senderUsername} User @${command.targetUsername} not found! 💩`
-      );
-
-      return NextResponse.json({ status: 'user_not_found' });
-    }
-
-    console.log(`✓ Found target user: @${targetUser.username} (FID: ${targetUser.fid})`);
+    console.log(`✓ Target user: @${command.targetUsername} (FID: ${command.targetFid})`);
 
     // Record the turd in database
     await recordTurd({
       from_fid: command.senderFid,
       from_username: command.senderUsername,
-      to_fid: targetUser.fid,
+      to_fid: command.targetFid,
       to_username: command.targetUsername,
       cast_hash: cast.hash,
     });
@@ -86,7 +72,7 @@ export async function POST(request: Request) {
     console.log(`✓ Turd recorded in database`);
 
     // Get updated count
-    const turdCount = await getTurdCount(targetUser.fid);
+    const turdCount = await getTurdCount(command.targetFid);
 
     // Reply with confirmation
     await replyToCast(

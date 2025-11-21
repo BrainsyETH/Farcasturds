@@ -171,16 +171,16 @@ export default function Leaderboard({ userFid }: LeaderboardProps) {
           <h3 className="fc-card-title">How to Send Turds</h3>
           <div className="fc-howto">
             <p className="fc-howto-step">
-              <strong>1.</strong> Mention <span className="fc-highlight">@farcasturds</span> in a cast
+              <strong>1.</strong> Find a cast you want to send a turd to
             </p>
             <p className="fc-howto-step">
-              <strong>2.</strong> Use the format: <code className="fc-code">@farcasturds send turd to @username</code>
+              <strong>2.</strong> Reply to it with <code className="fc-code">@farcasturd</code>
             </p>
             <p className="fc-howto-step">
-              <strong>3.</strong> Watch them climb the leaderboard! 💩
+              <strong>3.</strong> That's it! The original poster gets the turd 💩
             </p>
             <p className="fc-subtle" style={{ marginTop: '1rem' }}>
-              <strong>Note:</strong> Bot functionality coming soon. For now, mint your own Farcasturd on the Mint tab!
+              <strong>Note:</strong> You can add any text - just include @farcasturd in your reply!
             </p>
           </div>
         </div>
