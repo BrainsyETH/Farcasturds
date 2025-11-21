@@ -15,10 +15,10 @@ This guide will help you set up the Farcaster bot for turd tracking.
   - `checkIfCastProcessed()` - Prevent duplicates
 
 - **`lib/bot.ts`** - Bot helper functions
-  - `processTurdCommand()` - Parse mentions of @farcasturd with target usernames
-  - `lookupUserByUsername()` - Find users via Neynar
+  - `processTurdCommand()` - Parse @farcasturd mentions and get parent author as target
   - `replyToCast()` - Send reply casts
-  - `fetchUserByFid()` - Get user info
+  - `lookupUserByUsername()` - Find users via Neynar (optional)
+  - `fetchUserByFid()` - Get user info (optional)
 
 - **`app/api/webhook/mentions/route.ts`** - Webhook handler
   - Receives Neynar webhook notifications
@@ -159,10 +159,12 @@ git push origin main
 
 ### 8. Test the Bot
 
-Reply to any cast mentioning your bot on Farcaster:
+Reply to any cast on Farcaster mentioning @farcasturd:
 ```
-@farcasturd @testuser
+@farcasturd
 ```
+
+The original poster of the cast you reply to will get the turd!
 
 Check your logs in Vercel dashboard to see:
 - ✅ Webhook received
@@ -211,14 +213,17 @@ npx ngrok http 3000
 
 ### Test Commands:
 
-Any phrasing works as long as you reply to a cast and mention both the bot and target:
+Simply reply to any cast with @farcasturd:
 ```
-@farcasturd @username
-Hey @farcasturd check out @username
-@username @farcasturd
+@farcasturd
+This deserves a turd @farcasturd
+@farcasturd lol
 ```
 
-**Important:** Must be a REPLY to an existing cast, not an original post!
+**Important:**
+- Must be a REPLY to an existing cast, not an original post
+- The turd is automatically sent to whoever made the cast you're replying to
+- No need to specify a target - it's always the parent author!
 
 ---
 

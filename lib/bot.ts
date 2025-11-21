@@ -22,6 +22,7 @@ function getNeynarClient() {
 
 export interface TurdCommand {
   targetUsername: string;
+  targetFid: number;
   senderFid: number;
   senderUsername: string;
   castHash: string;
@@ -41,29 +42,33 @@ export async function processTurdCommand(cast: any): Promise<TurdCommand | null>
     return null; // Bot not mentioned
   }
 
-  // Extract target username - look for any @username that's NOT @farcasturd
-  // Matches patterns like: @farcasturd @alice, @alice @farcasturd, etc.
-  const allMentions = text.match(/@(\w+)/g) || [];
-
-  // Filter out @farcasturd and find the target
-  const targetMentions = allMentions
-    .map(mention => mention.substring(1)) // Remove @
-    .filter(username => username !== 'farcasturd');
-
-  if (targetMentions.length === 0) {
-    console.log('No target username found');
-    return null; // No target specified
-  }
-
-  // Use the first non-bot username as the target
-  const targetUsername = targetMentions[0];
+  // Get sender info
   const senderFid = cast.author.fid;
   const senderUsername = cast.author.username;
 
-  console.log(`✓ Command parsed: @${senderUsername} → @${targetUsername}`);
+  // The target is the PARENT AUTHOR (the original poster being replied to)
+  // We need to fetch the parent cast to get the author
+  const parentAuthor = cast.parent_author;
+
+  if (!parentAuthor) {
+    console.log('No parent author found in cast');
+    return null;
+  }
+
+  const targetFid = parentAuthor.fid;
+  const targetUsername = parentAuthor.username;
+
+  // Don't allow sending turds to yourself
+  if (senderFid === targetFid) {
+    console.log('User trying to send turd to themselves, ignoring');
+    return null;
+  }
+
+  console.log(`✓ Command parsed: @${senderUsername} → @${targetUsername} (parent author)`);
 
   return {
     targetUsername,
+    targetFid,
     senderFid,
     senderUsername,
     castHash: cast.hash,
