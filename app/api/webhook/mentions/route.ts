@@ -82,7 +82,7 @@ export async function POST(request: Request) {
     console.log(`✓ Target user: @${command.targetUsername} (FID: ${command.targetFid})`);
 
     // Record the turd in database
-    await recordTurd({
+    console.log(`[Webhook] Attempting to record turd:`, {
       from_fid: command.senderFid,
       from_username: command.senderUsername,
       to_fid: command.targetFid,
@@ -90,7 +90,19 @@ export async function POST(request: Request) {
       cast_hash: cast.hash,
     });
 
-    console.log(`✓ Turd recorded in database`);
+    try {
+      await recordTurd({
+        from_fid: command.senderFid,
+        from_username: command.senderUsername,
+        to_fid: command.targetFid,
+        to_username: command.targetUsername,
+        cast_hash: cast.hash,
+      });
+      console.log(`✓ Turd recorded in database successfully`);
+    } catch (recordError) {
+      console.error(`❌ FAILED to record turd in database:`, recordError);
+      throw recordError; // Re-throw to be caught by outer catch
+    }
 
     // Get updated count
     const turdCount = await getTurdCount(command.targetFid);
