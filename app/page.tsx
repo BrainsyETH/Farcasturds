@@ -7,6 +7,8 @@ import { parseEther } from 'viem';
 import { MintModal } from '@/components/MintModal';
 import { farcasturdsV2Abi } from '@/abi/FarcasturdsV2';
 import { generateSiweMessage, generateNonce, verifySiweSignature } from '@/lib/auth';
+import TabNavigation, { TabId } from '@/components/TabNavigation';
+import Leaderboard from '@/components/Leaderboard';
 
 type MeResponse = {
   fid: number;
@@ -50,6 +52,7 @@ export default function HomePage() {
   const [showMintModal, setShowMintModal] = useState(false);
   const [authNonce, setAuthNonce] = useState<string | null>(null);
   const [sharing, setSharing] = useState(false);
+  const [activeTab, setActiveTab] = useState<TabId>('mint');
 
   // Track processed transaction hashes to prevent duplicate generation
   const processedTxHashes = useRef<Set<string>>(new Set());
@@ -642,8 +645,14 @@ export default function HomePage() {
 
   return (
     <main className="fc-shell">
-      {/* Header / identity */}
-      <section className="fc-section">
+      {/* Tab Navigation */}
+      <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
+
+      {/* Mint Tab Content */}
+      {activeTab === 'mint' && (
+        <>
+          {/* Header / identity */}
+          <section className="fc-section">
         <div className="fc-header-row">
           <img
             src="https://b4b0aaz7b39hhkor.public.blob.vercel-storage.com/farcasturdsv4.png"
@@ -900,15 +909,22 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Mint Payment Modal */}
-      {me && (
-        <MintModal
-          isOpen={showMintModal}
-          onClose={() => setShowMintModal(false)}
-          fid={me.fid}
-          imageUrl={meta?.image || ''}
-          onSuccess={handleMintSuccess}
-        />
+          {/* Mint Payment Modal */}
+          {me && (
+            <MintModal
+              isOpen={showMintModal}
+              onClose={() => setShowMintModal(false)}
+              fid={me.fid}
+              imageUrl={meta?.image || ''}
+              onSuccess={handleMintSuccess}
+            />
+          )}
+        </>
+      )}
+
+      {/* Leaderboard Tab Content */}
+      {activeTab === 'leaderboard' && (
+        <Leaderboard userFid={me?.fid} />
       )}
     </main>
   );

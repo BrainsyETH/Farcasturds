@@ -827,3 +827,352 @@ h2.fc-title {
     border-radius: 15px;
   }
 }
+
+/* ===========
+   Tab Navigation
+   =========== */
+
+.fc-tab-navigation {
+  display: flex;
+  gap: 8px;
+  padding: 6px;
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  margin-bottom: 20px;
+  box-shadow:
+    0 4px 12px rgba(143, 91, 255, 0.15),
+    inset 0 1px 2px rgba(255, 255, 255, 0.5);
+}
+
+.fc-tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: none;
+  background: transparent;
+  color: var(--fc-text-soft);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 180ms ease-out;
+  position: relative;
+}
+
+.fc-tab:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--fc-text);
+}
+
+.fc-tab-active {
+  background: linear-gradient(135deg, rgba(255, 244, 223, 0.95), rgba(255, 234, 203, 0.95));
+  color: var(--fc-text);
+  font-weight: 600;
+  box-shadow:
+    0 4px 8px rgba(191, 133, 66, 0.2),
+    0 0 0 1px rgba(255, 255, 255, 0.6);
+}
+
+.fc-tab-active:hover {
+  background: linear-gradient(135deg, rgba(255, 244, 223, 1), rgba(255, 234, 203, 1));
+}
+
+.fc-tab-icon {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.fc-tab-label {
+  line-height: 1;
+}
+
+/* ===========
+   Leaderboard Styles
+   =========== */
+
+.fc-leaderboard-container {
+  width: 100%;
+}
+
+.fc-leaderboard {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.fc-leaderboard-entry {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 14px;
+  transition: all 180ms ease-out;
+}
+
+.fc-leaderboard-entry:hover {
+  transform: translateX(4px);
+  background: rgba(255, 255, 255, 0.4);
+  border-color: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 4px 12px rgba(191, 133, 66, 0.2);
+}
+
+.fc-leaderboard-entry-highlight {
+  background: rgba(143, 91, 255, 0.15);
+  border: 2px solid var(--fc-farcaster-purple);
+  box-shadow: 0 4px 16px rgba(143, 91, 255, 0.25);
+}
+
+.fc-leaderboard-entry-highlight:hover {
+  background: rgba(143, 91, 255, 0.2);
+}
+
+.fc-leaderboard-rank {
+  font-size: 1.3rem;
+  font-weight: 700;
+  min-width: 42px;
+  text-align: center;
+  color: var(--fc-text);
+}
+
+.fc-leaderboard-user {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.fc-leaderboard-username {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--fc-text);
+}
+
+.fc-leaderboard-fid {
+  font-size: 0.75rem;
+  color: var(--fc-text-muted);
+}
+
+.fc-leaderboard-count {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.fc-leaderboard-count-value {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--fc-accent-1);
+}
+
+.fc-leaderboard-count-label {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+/* ===========
+   User Stats
+   =========== */
+
+.fc-user-stats {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 12px;
+}
+
+.fc-stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.fc-stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--fc-accent-1);
+  line-height: 1;
+}
+
+.fc-stat-label {
+  font-size: 0.85rem;
+  color: var(--fc-text-soft);
+  font-weight: 500;
+}
+
+.fc-stat-divider {
+  width: 1px;
+  height: 40px;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(191, 133, 66, 0.3),
+    transparent
+  );
+}
+
+/* ===========
+   Activity List
+   =========== */
+
+.fc-activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.fc-activity-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 12px;
+  transition: all 180ms ease-out;
+}
+
+.fc-activity-item:hover {
+  background: rgba(255, 255, 255, 0.35);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateX(2px);
+}
+
+.fc-activity-icon {
+  font-size: 1.2rem;
+  line-height: 1;
+  margin-top: 2px;
+}
+
+.fc-activity-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fc-activity-text {
+  font-size: 0.88rem;
+  color: var(--fc-text);
+  line-height: 1.4;
+}
+
+.fc-activity-text strong {
+  color: var(--fc-text);
+  font-weight: 600;
+}
+
+.fc-activity-time {
+  font-size: 0.75rem;
+  color: var(--fc-text-muted);
+}
+
+/* ===========
+   How-To Section
+   =========== */
+
+.fc-howto {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.fc-howto-step {
+  font-size: 0.9rem;
+  color: var(--fc-text-soft);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.fc-howto-step strong {
+  color: var(--fc-text);
+  font-weight: 700;
+  margin-right: 4px;
+}
+
+.fc-howto-step code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: rgba(143, 91, 255, 0.12);
+  border: 1px solid rgba(143, 91, 255, 0.25);
+  font-size: 0.82rem;
+  color: var(--fc-text);
+  white-space: nowrap;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 480px) {
+  .fc-tab-navigation {
+    gap: 6px;
+    padding: 5px;
+  }
+
+  .fc-tab {
+    padding: 8px 12px;
+    font-size: 0.85rem;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .fc-tab-icon {
+    font-size: 1rem;
+  }
+
+  .fc-tab-label {
+    font-size: 0.75rem;
+  }
+
+  .fc-leaderboard-entry {
+    gap: 10px;
+    padding: 10px 12px;
+  }
+
+  .fc-leaderboard-rank {
+    font-size: 1.1rem;
+    min-width: 36px;
+  }
+
+  .fc-leaderboard-username {
+    font-size: 0.88rem;
+  }
+
+  .fc-leaderboard-fid {
+    font-size: 0.7rem;
+  }
+
+  .fc-leaderboard-count-value {
+    font-size: 1rem;
+  }
+
+  .fc-user-stats {
+    gap: 16px;
+  }
+
+  .fc-stat-value {
+    font-size: 1.6rem;
+  }
+
+  .fc-stat-label {
+    font-size: 0.8rem;
+  }
+
+  .fc-howto-step {
+    font-size: 0.85rem;
+  }
+
+  .fc-howto-step code {
+    font-size: 0.75rem;
+    padding: 2px 6px;
+  }
+}
