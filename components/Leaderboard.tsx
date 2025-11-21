@@ -14,8 +14,10 @@ interface TurdActivity {
   id: string;
   fromFid: number;
   fromUsername: string;
+  fromPfpUrl?: string;
   toFid: number;
   toUsername: string;
+  toPfpUrl?: string;
   timestamp: string;
   castHash?: string;
 }
@@ -151,7 +153,16 @@ export default function Leaderboard({ userFid }: LeaderboardProps) {
           <div className="fc-activity-list">
             {recentActivity.map((activity) => (
               <div key={activity.id} className="fc-activity-item">
-                <div className="fc-activity-icon">💩</div>
+                {activity.fromPfpUrl && (
+                  <img
+                    src={activity.fromPfpUrl}
+                    alt={`@${activity.fromUsername}`}
+                    className="fc-activity-pfp"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none';
+                    }}
+                  />
+                )}
                 <div className="fc-activity-content">
                   <div className="fc-activity-text">
                     <strong>@{activity.fromUsername}</strong> sent a turd to{' '}
@@ -161,27 +172,6 @@ export default function Leaderboard({ userFid }: LeaderboardProps) {
                 </div>
               </div>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* How It Works Section */}
-      <section className="fc-section">
-        <div className="fc-card">
-          <h3 className="fc-card-title">How to Send Turds</h3>
-          <div className="fc-howto">
-            <p className="fc-howto-step">
-              <strong>1.</strong> Come across a crap take?
-            </p>
-            <p className="fc-howto-step">
-              <strong>2.</strong> Reply to it with <code className="fc-code">@farcasturd</code>
-            </p>
-            <p className="fc-howto-step">
-              <strong>3.</strong> That's it! OP gets the turd 💩
-            </p>
-            <p className="fc-subtle" style={{ marginTop: '1rem' }}>
-              <strong>:</strong> You can add any text - just include @farcasturd in your reply!
-            </p>
           </div>
         </div>
       </section>

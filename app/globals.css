@@ -1054,6 +1054,16 @@ h2.fc-title {
   margin-top: 2px;
 }
 
+.fc-activity-pfp {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
 .fc-activity-content {
   flex: 1;
   display: flex;

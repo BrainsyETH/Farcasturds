@@ -1,8 +1,14 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/database';
+import { NeynarAPIClient } from "@neynar/nodejs-sdk";
 
 // Force dynamic rendering - this route uses request params
 export const dynamic = 'force-dynamic';
+
+// Neynar client for fetching user data
+const neynar = new NeynarAPIClient({
+  apiKey: process.env.NEYNAR_API_KEY!,
+});
 
 export async function GET(request: Request) {
   try {
@@ -52,6 +58,33 @@ export async function GET(request: Request) {
       console.log('[Leaderboard API] Final userStats:', userStats);
     }
 
+    // Fetch PFP URLs for recent activity
+    const allFids = new Set<number>();
+    activityData.forEach((row: any) => {
+      allFids.add(row.from_fid);
+      allFids.add(row.to_fid);
+    });
+
+    let pfpMap = new Map<number, string>();
+
+    // Fetch user data from Neynar if we have FIDs
+    if (allFids.size > 0) {
+      try {
+        const { users } = await neynar.fetchBulkUsers({
+          fids: Array.from(allFids)
+        });
+
+        users.forEach((user: any) => {
+          if (user.pfp_url) {
+            pfpMap.set(user.fid, user.pfp_url);
+          }
+        });
+      } catch (err) {
+        console.error('[Leaderboard API] Failed to fetch PFP URLs from Neynar:', err);
+        // Continue without PFP URLs if Neynar fails
+      }
+    }
+
     return NextResponse.json({
       leaderboard: leaderboardData.map((row: any, index: number) => ({
         rank: index + 1,
@@ -63,8 +96,10 @@ export async function GET(request: Request) {
         id: row.id,
         fromFid: row.from_fid,
         fromUsername: row.from_username,
+        fromPfpUrl: pfpMap.get(row.from_fid),
         toFid: row.to_fid,
         toUsername: row.to_username,
+        toPfpUrl: pfpMap.get(row.to_fid),
         timestamp: row.created_at,
         castHash: row.cast_hash,
       })),
