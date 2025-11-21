@@ -24,20 +24,20 @@ export async function GET(request: Request) {
     // Get user stats if FID provided
     let userStats = null;
     if (userFid) {
-      const { data: receivedData } = await supabase
+      const { count: received } = await supabase
         .from('turds')
         .select('*', { count: 'exact', head: true })
         .eq('to_fid', parseInt(userFid));
-      
-      const { data: sentData } = await supabase
+
+      const { count: sent } = await supabase
         .from('turds')
         .select('*', { count: 'exact', head: true })
         .eq('from_fid', parseInt(userFid));
-      
+
       userStats = {
         fid: parseInt(userFid),
-        received: receivedData || 0,
-        sent: sentData || 0,
+        received: received || 0,
+        sent: sent || 0,
       };
     }
 
