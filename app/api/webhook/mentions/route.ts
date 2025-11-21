@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { processTurdCommand, replyToCast } from '@/lib/bot';
 import { recordTurd, getTurdCount, checkRateLimit, checkIfCastProcessed } from '@/lib/database';
+import { checkUserHasNFT } from '@/lib/nftVerification';
 
 export async function POST(request: Request) {
   try {
@@ -54,6 +55,26 @@ export async function POST(request: Request) {
       return NextResponse.json({
         status: 'rate_limited',
         reason: rateLimitCheck.reason
+      });
+    }
+    // ============================================================
+
+    // ============================================================
+    // CHECK IF SENDER HAS FARCASTURD NFT
+    // ============================================================
+    const hasNFT = await checkUserHasNFT(command.senderFid);
+
+    if (!hasNFT) {
+      console.log(`🚫 NFT required for FID ${command.senderFid} (@${command.senderUsername})`);
+
+      await replyToCast(
+        cast.hash,
+        `@${command.senderUsername} You need to mint a Farcasturd NFT to send turds! 💩\n\nMint yours at: https://farcasturds.xyz`
+      );
+
+      return NextResponse.json({
+        status: 'nft_required',
+        reason: 'User must own a Farcasturd NFT to send turds'
       });
     }
     // ============================================================

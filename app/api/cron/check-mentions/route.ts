@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { processTurdCommand, replyToCast } from '@/lib/bot';
 import { recordTurd, getTurdCount, checkRateLimit, checkIfCastProcessed } from '@/lib/database';
+import { checkUserHasNFT } from '@/lib/nftVerification';
 
 // Lazy initialization to avoid build-time errors
 let clientInitialized = false;
@@ -42,6 +43,16 @@ export async function GET() {
         await replyToCast(
           cast.hash,
           `@${command.senderUsername} ${rateLimitCheck.reason} 💩`
+        );
+        continue;
+      }
+
+      // Check if sender has Farcasturd NFT
+      const hasNFT = await checkUserHasNFT(command.senderFid);
+      if (!hasNFT) {
+        await replyToCast(
+          cast.hash,
+          `@${command.senderUsername} You need to mint a Farcasturd NFT to send turds! 💩\n\nMint yours at: https://farcasturds.xyz`
         );
         continue;
       }
