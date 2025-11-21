@@ -39,27 +39,36 @@ Color mood: warm, inviting colors with brown/tan base tones and a simple soft gr
     }
   }
 
-  return `
-Create a single, clean 3D character portrait of a cute, charming cartoon poop emoji representing "${name}".
+return `
+Create a single premium 3D character portrait. IMPORTANT: exactly one character, centered, front-facing.
 
-The image must show:
-- One full-body, purple-colored poop emoji character, centered in the frame.
-- Big or small expressive eyes and a friendly smile.
-- A dynamic, engaging pose that reflects ${personalityHints || "a friendly, approachable personality"}.
-- Modern 3D render quality, similar to high-end NFT/PFP characters.
-- Soft studio-style lighting and a simple gradient background in a random shade of brown.
-- The color of the character should be a shade of purple.
+CHARACTER DETAILS for the "Farcasturd Purple Poop PFP" collection:
+- Full-body purple poop emoji character (three-tier swirl with rounded base)
+- Front-facing and centered in frame
+- Large expressive eyes on upper section, friendly smile below
+- The character is purple - this is the main body color
+- Small arms/hands in expressive pose, slight tilt (no more than 15 degrees)
+
+PERSONALITY:
+- Represents "${name}"
+- ${personalityHints || "friendly, approachable personality"}
+- Dynamic pose with expressive gestures while maintaining poop emoji shape
+
+STYLE & QUALITY:
+- High-end 3D rendered style like premium digital avatars (Azuki, Doodles, Pudgy Penguins quality)
+- 1:1 square aspect ratio
+- Character fills most of the frame (60-80% of height)
+- Soft studio lighting from upper left with gentle rim lighting
+- Simple, clean gradient background
 
 ${colorScheme}
 
-Framing and composition:
-- 1:1 aspect ratio.
-- Character fills most of the frame.
-- No borders, no UI elements, no icons.
+MUST AVOID:
+- No multiple characters or duplicate views
+- No text, logos, watermarks, or UI elements anywhere
+- No side angles - front view only
+- Character must be purple, not other colors
 
-Strictly exclude:
-- No additional characters, no exploded views, no side angles or overlays.
-- No text, logos, watermarks, or interface elements of any kind.
-
-This is a digital collectible NFT avatar. Make it feel special, polished, and unique while keeping the poop emoji charm.`;
+This is a collectible digital avatar - make it polished, charming, and special.
+`;
 }
