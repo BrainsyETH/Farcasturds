@@ -1,6 +1,20 @@
 import { NeynarAPIClient } from "@neynar/nodejs-sdk";
 
-const client = new NeynarAPIClient(process.env.NEYNAR_API_KEY!);
+// Lazy initialization to avoid build-time errors when env vars are not set
+let neynarClient: NeynarAPIClient | null = null;
+
+function getNeynarClient() {
+  if (!neynarClient) {
+    const apiKey = process.env.NEYNAR_API_KEY || '';
+
+    if (!apiKey) {
+      throw new Error('NEYNAR_API_KEY environment variable not configured.');
+    }
+
+    neynarClient = new NeynarAPIClient({ apiKey });
+  }
+  return neynarClient;
+}
 
 // ============================================================================
 // COMMAND PARSING
@@ -53,6 +67,7 @@ export async function processTurdCommand(cast: any): Promise<TurdCommand | null>
 
 export async function lookupUserByUsername(username: string) {
   try {
+    const client = getNeynarClient();
     const response = await client.searchUser(username, 1);
     return response.result.users[0] || null;
   } catch (error) {
@@ -63,6 +78,7 @@ export async function lookupUserByUsername(username: string) {
 
 export async function replyToCast(parentHash: string, text: string) {
   try {
+    const client = getNeynarClient();
     await client.publishCast({
       signerUuid: process.env.BOT_SIGNER_UUID!,
       text: text,
@@ -77,6 +93,7 @@ export async function replyToCast(parentHash: string, text: string) {
 
 export async function fetchUserByFid(fid: number) {
   try {
+    const client = getNeynarClient();
     const response = await client.fetchBulkUsers([fid]);
     return response.users[0] || null;
   } catch (error) {

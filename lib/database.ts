@@ -1,9 +1,30 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.SUPABASE_URL!;
-const supabaseKey = process.env.SUPABASE_ANON_KEY!;
+// Lazy initialization to avoid build-time errors when env vars are not set
+let supabaseClient: ReturnType<typeof createClient> | null = null;
 
-export const supabase = createClient(supabaseUrl, supabaseKey);
+function getSupabaseClient() {
+  if (!supabaseClient) {
+    const supabaseUrl = process.env.SUPABASE_URL || '';
+    const supabaseKey = process.env.SUPABASE_ANON_KEY || '';
+
+    if (!supabaseUrl || !supabaseKey) {
+      throw new Error('Supabase environment variables not configured. Please set SUPABASE_URL and SUPABASE_ANON_KEY.');
+    }
+
+    supabaseClient = createClient(supabaseUrl, supabaseKey);
+  }
+  return supabaseClient;
+}
+
+export const supabase = {
+  get from() {
+    return getSupabaseClient().from.bind(getSupabaseClient());
+  },
+  get rpc() {
+    return getSupabaseClient().rpc.bind(getSupabaseClient());
+  }
+};
 
 // ============================================================================
 // TURD RECORDING FUNCTIONS
