@@ -1,32 +1,54 @@
 import { NextResponse } from 'next/server';
-import { NeynarAPIClient } from "@neynar/nodejs-sdk";
-import { processTurdCommand, lookupUserByUsername, replyToCast } from '@/lib/bot';
-import { recordTurd, getTurdCount } from '@/lib/database';
+import { processTurdCommand, lookupUserByUsername, replyToCast, fetchUserByFid } from '@/lib/bot';
+import { recordTurd, getTurdCount, checkRateLimit, checkIfCastProcessed } from '@/lib/database';
 
-const client = new NeynarAPIClient(process.env.NEYNAR_API_KEY!);
+// Lazy initialization to avoid build-time errors
+let clientInitialized = false;
+async function ensureClientInitialized() {
+  if (!clientInitialized) {
+    // The bot.ts functions handle client initialization
+    clientInitialized = true;
+  }
+}
 
 export async function GET() {
   try {
+    await ensureClientInitialized();
+
+    // Import NeynarAPIClient dynamically to avoid build-time initialization
+    const { NeynarAPIClient } = await import("@neynar/nodejs-sdk");
+    const client = new NeynarAPIClient({ apiKey: process.env.NEYNAR_API_KEY! });
+
     // Fetch recent mentions
     const mentions = await client.fetchMentionAndReplyNotifications({
       fid: parseInt(process.env.BOT_FID!),
       limit: 25,
     });
-    
+
     for (const notification of mentions.notifications) {
       const cast = notification.cast;
-      
+
       // Skip if already processed (check database)
-      const existing = await checkIfProcessed(cast.hash);
+      const existing = await checkIfCastProcessed(cast.hash);
       if (existing) continue;
       
       // Process the command
       const command = await processTurdCommand(cast);
       if (!command) continue;
-      
+
+      // Check rate limit
+      const rateLimitCheck = await checkRateLimit(command.senderFid);
+      if (!rateLimitCheck.allowed) {
+        await replyToCast(
+          cast.hash,
+          `@${command.senderUsername} ${rateLimitCheck.reason} 💩`
+        );
+        continue;
+      }
+
       // Look up target user
       const targetUser = await lookupUserByUsername(command.targetUsername);
-      
+
       if (!targetUser) {
         await replyToCast(
           cast.hash,
@@ -34,7 +56,7 @@ export async function GET() {
         );
         continue;
       }
-      
+
       // Record the turd
       await recordTurd({
         from_fid: command.senderFid,
@@ -43,7 +65,7 @@ export async function GET() {
         to_username: command.targetUsername,
         cast_hash: cast.hash,
       });
-      
+
       // Reply with confirmation
       const turdCount = await getTurdCount(targetUser.fid);
       await replyToCast(
