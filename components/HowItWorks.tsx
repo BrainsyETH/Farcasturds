@@ -9,6 +9,7 @@ export default function HowItWorks() {
         <div className="fc-card">
           <h3 className="fc-card-title">How to Send Turds</h3>
           <div className="fc-howto">
+
             <p className="fc-howto-step" style={{ textAlign: 'center' }}>
               <strong>1.</strong> Come across a crap take?
             </p>
