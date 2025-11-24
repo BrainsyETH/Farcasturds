@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createPublicClient, http } from "viem";
 import { base } from "viem/chains";
 import { NeynarAPIClient } from "@neynar/nodejs-sdk";
-import { farcasturdsV2Abi } from "@/abi/FarcasturdsV2";
+import { farcasturdsV3Abi } from "@/abi/FarcasturdsV3";
 
 // ---- Neynar client ----
 const neynar = new NeynarAPIClient({
@@ -96,7 +96,7 @@ export async function GET(req: NextRequest) {
 
       hasMinted = await publicClient.readContract({
         address: CONTRACT,
-        abi: farcasturdsV2Abi,
+        abi: farcasturdsV3Abi,
         functionName: "hasMinted",
         args: [BigInt(user.fid)],
       } as any);
