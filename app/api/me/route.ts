@@ -4,14 +4,17 @@ import { createPublicClient, http } from "viem";
 import { base } from "viem/chains";
 import { NeynarAPIClient } from "@neynar/nodejs-sdk";
 import { farcasturdsV3Abi } from "@/abi/FarcasturdsV3";
+import { farcasturdsV2Abi } from "@/abi/FarcasturdsV2";
 
 // ---- Neynar client ----
 const neynar = new NeynarAPIClient({
   apiKey: process.env.NEYNAR_API_KEY!,
 });
 
-const CONTRACT = process.env
+const CONTRACT_V3 = process.env
   .NEXT_PUBLIC_FARCASTURDS_ADDRESS as `0x${string}`;
+const CONTRACT_V2 = process.env
+  .NEXT_PUBLIC_FARCASTURDS_V2_ADDRESS as `0x${string}`;
 const RPC = process.env.BASE_RPC_URL;
 
 // Helper: fetch real Farcaster user by fid from Neynar
@@ -86,29 +89,53 @@ export async function GET(req: NextRequest) {
     console.log(`[/api/me] ⚠️ Using mock user for FID ${fidNum}`);
   }
 
-  // 2) On-chain hasMinted check
-  if (CONTRACT && RPC) {
-    try {
-      const publicClient = createPublicClient({
-        chain: base,
-        transport: http(RPC),
-      });
+  // 2) On-chain hasMinted check - Check both V3 and V2 contracts
+  if (RPC) {
+    const publicClient = createPublicClient({
+      chain: base,
+      transport: http(RPC),
+    });
 
-      hasMinted = await publicClient.readContract({
-        address: CONTRACT,
-        abi: farcasturdsV3Abi,
-        functionName: "hasMinted",
-        args: [BigInt(user.fid)],
-      } as any);
+    // Check V3 contract first
+    if (CONTRACT_V3) {
+      try {
+        hasMinted = await publicClient.readContract({
+          address: CONTRACT_V3,
+          abi: farcasturdsV3Abi,
+          functionName: "hasMinted",
+          args: [BigInt(user.fid)],
+        } as any);
 
-      console.log(`[/api/me] hasMinted check for FID ${user.fid}:`, hasMinted);
-    } catch (err) {
-      console.error(`[/api/me] Error reading hasMinted for FID ${user.fid}:`, err);
-      // soft-fail - continue without hasMinted data
+        console.log(`[/api/me] V3 hasMinted check for FID ${user.fid}:`, hasMinted);
+      } catch (err) {
+        console.error(`[/api/me] Error reading hasMinted from V3 for FID ${user.fid}:`, err);
+      }
+    }
+
+    // If not minted on V3, check V2 contract (for backward compatibility)
+    if (!hasMinted && CONTRACT_V2) {
+      try {
+        hasMinted = await publicClient.readContract({
+          address: CONTRACT_V2,
+          abi: farcasturdsV2Abi,
+          functionName: "hasMinted",
+          args: [BigInt(user.fid)],
+        } as any);
+
+        console.log(`[/api/me] V2 hasMinted check for FID ${user.fid}:`, hasMinted);
+      } catch (err) {
+        console.error(`[/api/me] Error reading hasMinted from V2 for FID ${user.fid}:`, err);
+      }
+    }
+
+    if (!CONTRACT_V3 && !CONTRACT_V2) {
+      console.warn(
+        "[/api/me] Neither V3 nor V2 contract addresses configured - skipping on-chain check"
+      );
     }
   } else {
     console.warn(
-      "[/api/me] Contract or RPC not configured - skipping on-chain check"
+      "[/api/me] RPC not configured - skipping on-chain check"
     );
   }
 
