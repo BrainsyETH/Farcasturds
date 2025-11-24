@@ -49,7 +49,7 @@ export async function POST(request: Request) {
 
       await replyToCast(
         cast.hash,
-        `@${command.senderUsername} ${rateLimitCheck.reason} 💦`
+        `@${command.senderUsername} ${rateLimitCheck.reason}`
       );
 
       return NextResponse.json({
@@ -69,7 +69,7 @@ export async function POST(request: Request) {
 
       await replyToCast(
         cast.hash,
-        `@${command.senderUsername} You need to mint a Farcasturd NFT to send turds! 💦\n\nMint yours at: https://farcasturds.xyz`
+        `@${command.senderUsername} You need to mint a Farcasturd NFT to send turds!\n\nMint yours at: https://farcasturds.xyz`
       );
 
       return NextResponse.json({
@@ -125,7 +125,7 @@ export async function POST(request: Request) {
     if (!memeSent) {
       await replyToCast(
         cast.hash,
-        `💦 @${command.senderUsername} sent a turd to @${command.targetUsername}!`
+        `@${command.senderUsername} sent a turd to @${command.targetUsername}!`
       );
       console.log(`✓ Confirmation sent (no meme available)`);
     }

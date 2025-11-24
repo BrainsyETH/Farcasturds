@@ -50,7 +50,7 @@ export async function GET() {
       if (!rateLimitCheck.allowed) {
         await replyToCast(
           cast.hash,
-          `@${command.senderUsername} ${rateLimitCheck.reason} 💦`
+          `@${command.senderUsername} ${rateLimitCheck.reason}`
         );
         continue;
       }
@@ -60,7 +60,7 @@ export async function GET() {
       if (!hasNFT) {
         await replyToCast(
           cast.hash,
-          `@${command.senderUsername} You need to mint a Farcasturd NFT to send turds! 💦\n\nMint yours at: https://farcasturds.vercel.app`
+          `@${command.senderUsername} You need to mint a Farcasturd NFT to send turds!\n\nMint yours at: https://farcasturds.vercel.app`
         );
         continue;
       }
@@ -95,7 +95,7 @@ export async function GET() {
       if (!memeSent) {
         await replyToCast(
           cast.hash,
-          `💦 @${command.senderUsername} sent a turd to @${command.targetUsername}!`
+          `@${command.senderUsername} sent a turd to @${command.targetUsername}!`
         );
         console.log(`✓ Confirmation sent (no meme available)`);
       }
