@@ -125,9 +125,13 @@ export default function Leaderboard({ userFid }: LeaderboardProps) {
 
           <div className="fc-leaderboard">
             {leaderboard.map((entry) => (
-              <div
+              <a
                 key={entry.fid}
+                href={`https://warpcast.com/${entry.username}`}
+                target="_blank"
+                rel="noopener noreferrer"
                 className={`fc-leaderboard-entry ${entry.fid === userFid ? 'fc-leaderboard-entry-highlight' : ''}`}
+                style={{ textDecoration: 'none', color: 'inherit' }}
               >
                 <div className="fc-leaderboard-rank">
                   {getRankEmoji(entry.rank)}
@@ -144,7 +148,7 @@ export default function Leaderboard({ userFid }: LeaderboardProps) {
                     <img src="/splash.png" alt="" style={{ width: '1.1rem', height: '1.1rem', display: 'inline-block' }} />
                   </div>
                 </div>
-              </div>
+              </a>
             ))}
           </div>
         </div>
