@@ -1043,9 +1043,10 @@ h2.fc-title {
 }
 
 .fc-activity-item:hover {
-  background: rgba(255, 255, 255, 0.35);
-  border-color: rgba(255, 255, 255, 0.5);
+  background: rgba(143, 91, 255, 0.18);
+  border-color: rgba(143, 91, 255, 0.4);
   transform: translateX(2px);
+  box-shadow: 0 2px 8px rgba(143, 91, 255, 0.15);
 }
 
 .fc-activity-icon {
