@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useAccount, useWriteContract, useWaitForTransactionReceipt, useSignMessage } from 'wagmi'
 import { parseEther } from 'viem'
-import { farcasturdsV2Abi } from '@/abi/FarcasturdsV2'
+import { farcasturdsV3Abi } from '@/abi/FarcasturdsV3'
 import { generateSiweMessage, generateNonce, verifySiweSignature } from '@/lib/auth'
 import { base } from 'wagmi/chains'
 
@@ -23,6 +23,11 @@ export function MintModal({ isOpen, onClose, fid, imageUrl, onSuccess }: MintMod
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false)
   const [authNonce, setAuthNonce] = useState<string | null>(null)
   const [siweMessage, setSiweMessage] = useState<string | null>(null)
+  const [siweSignature, setSiweSignature] = useState<string | null>(null)
+  const [mintAuthorization, setMintAuthorization] = useState<{
+    deadline: number
+    signature: string
+  } | null>(null)
 
   const {
     data: hash,
@@ -105,6 +110,8 @@ export function MintModal({ isOpen, onClose, fid, imageUrl, onSuccess }: MintMod
       setIsAuthenticated(false)
       setAuthNonce(null)
       setSiweMessage(null)
+      setSiweSignature(null)
+      setMintAuthorization(null)
       setStatus('')
       setError('')
     }
@@ -156,8 +163,41 @@ export function MintModal({ isOpen, onClose, fid, imageUrl, onSuccess }: MintMod
       })
 
       if (result.success) {
+        // Store SIWE signature for authorization request
+        setSiweSignature(sig)
         setIsAuthenticated(true)
-        setStatus('✓ Signature verified! You can now mint.')
+
+        // Fetch mint authorization from backend
+        setStatus('Getting mint authorization...')
+
+        if (!address) {
+          throw new Error('No wallet address')
+        }
+
+        const authResponse = await fetch('/api/mint/authorize', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            fid,
+            to: address,
+            siweSignature: sig,
+            siweMessage: msg,
+            nonce
+          })
+        })
+
+        if (!authResponse.ok) {
+          const authError = await authResponse.json()
+          throw new Error(authError.error || 'Failed to get mint authorization')
+        }
+
+        const authData = await authResponse.json()
+        setMintAuthorization({
+          deadline: authData.deadline,
+          signature: authData.signature
+        })
+
+        setStatus('✓ Authorized! You can now mint.')
         setError('')
       } else {
         setError(result.error || 'Signature verification failed')
@@ -169,8 +209,10 @@ export function MintModal({ isOpen, onClose, fid, imageUrl, onSuccess }: MintMod
       setError(err.message || 'Failed to verify signature')
       setStatus('')
       setIsAuthenticated(false)
+      setSiweSignature(null)
+      setMintAuthorization(null)
     }
-  }, [])
+  }, [address, fid])
 
   const handleMint = useCallback(async () => {
     if (!address) {
@@ -180,6 +222,11 @@ export function MintModal({ isOpen, onClose, fid, imageUrl, onSuccess }: MintMod
 
     if (!isAuthenticated) {
       setError('Please verify your signature first')
+      return
+    }
+
+    if (!mintAuthorization) {
+      setError('Missing mint authorization. Please try verifying again.')
       return
     }
 
@@ -195,9 +242,14 @@ export function MintModal({ isOpen, onClose, fid, imageUrl, onSuccess }: MintMod
 
       writeContract({
         address: CONTRACT_ADDRESS,
-        abi: farcasturdsV2Abi,
+        abi: farcasturdsV3Abi,
         functionName: 'mintFor',
-        args: [address, BigInt(fid)],
+        args: [
+          address,
+          BigInt(fid),
+          BigInt(mintAuthorization.deadline),
+          mintAuthorization.signature as `0x${string}`
+        ],
         value: parseEther(mintPrice || '0'),
       })
 
@@ -207,7 +259,7 @@ export function MintModal({ isOpen, onClose, fid, imageUrl, onSuccess }: MintMod
       setError(err.message || 'Failed to initiate transaction')
       setStatus('')
     }
-  }, [address, fid, mintPrice, writeContract, isAuthenticated])
+  }, [address, fid, mintPrice, writeContract, isAuthenticated, mintAuthorization])
 
   useEffect(() => {
     if (isConfirming) {
