@@ -56,6 +56,7 @@ export default function HomePage() {
   const [hasShared, setHasShared] = useState(false);
   const [activeTab, setActiveTab] = useState<TabId>('mint');
   const [metadataLoading, setMetadataLoading] = useState(true);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   // Track processed transaction hashes to prevent duplicate generation
   const processedTxHashes = useRef<Set<string>>(new Set());
@@ -279,6 +280,7 @@ export default function HomePage() {
         if (data.image && !data.image.includes("placeholder")) {
           setMeta(data);
           setHasGenerated(true);
+          setImageLoaded(false); // Reset image loaded state when new metadata arrives
         }
         setMetadataLoading(false);
       } catch (err) {
@@ -806,7 +808,7 @@ export default function HomePage() {
               </h2>
 
               <div className="fc-nft-preview-wrap">
-                {metadataLoading ? (
+                {metadataLoading || (meta?.image && !meta.image.includes("placeholder") && !imageLoaded) ? (
                   <div className="fc-nft-preview-loading" style={{
                     width: 300,
                     height: 300,
@@ -827,7 +829,11 @@ export default function HomePage() {
                   </div>
                 ) : meta?.image && !meta.image.includes("placeholder") ? (
                   <div className="fc-nft-preview" style={{ animation: "fadeIn 0.4s ease-in" }}>
-                    <img src={meta.image} alt="Mint to Reveal" />
+                    <img
+                      src={meta.image}
+                      alt="Mint to Reveal"
+                      onLoad={() => setImageLoaded(true)}
+                    />
                   </div>
                 ) : (
                   <div className="fc-avatar" style={{
@@ -915,7 +921,7 @@ export default function HomePage() {
               </h2>
 
               <div className="fc-nft-preview-wrap">
-                {metadataLoading ? (
+                {metadataLoading || (meta?.image && !meta.image.includes("placeholder") && !imageLoaded) ? (
                   <div className="fc-nft-preview-loading" style={{
                     width: 300,
                     height: 300,
@@ -936,7 +942,11 @@ export default function HomePage() {
                   </div>
                 ) : meta?.image && !meta.image.includes("placeholder") ? (
                   <div className="fc-nft-preview" style={{ animation: "fadeIn 0.4s ease-in" }}>
-                    <img src={meta.image} alt="Mint to Reveal" />
+                    <img
+                      src={meta.image}
+                      alt="Mint to Reveal"
+                      onLoad={() => setImageLoaded(true)}
+                    />
                   </div>
                 ) : (
                   <div className="fc-avatar" style={{
