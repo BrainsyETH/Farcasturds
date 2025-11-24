@@ -12,21 +12,16 @@ contract DeployScript is Script {
         string memory baseURI = vm.envString("APP_BASE_URL");
         string memory metadataURI = string(abi.encodePacked(baseURI, "/api/metadata/"));
 
-        // Mint price: 0.0001 ETH = 100000000000000 wei
-        uint256 mintPrice = 100000000000000;
-
         vm.startBroadcast(deployerPrivateKey);
 
         Farcasturds farcasturds = new Farcasturds(
             minter,           // minter address
-            metadataURI,      // base URI for metadata
-            mintPrice         // mint price in wei
+            metadataURI       // base URI for metadata
         );
 
         console.log("Farcasturds deployed to:", address(farcasturds));
         console.log("Minter address:", minter);
         console.log("Base URI:", metadataURI);
-        console.log("Mint price:", mintPrice, "wei");
 
         vm.stopBroadcast();
     }
