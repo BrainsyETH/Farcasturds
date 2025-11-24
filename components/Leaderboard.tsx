@@ -68,11 +68,13 @@ export default function Leaderboard({ userFid }: LeaderboardProps) {
     return `${Math.floor(seconds / 86400)}d ago`;
   }
 
-  function getRankIcon(rank: number): JSX.Element {
-    if (rank <= 3) {
-      return <img src="/splash.png" alt={`Rank ${rank}`} style={{ width: '1.3rem', height: '1.3rem', display: 'inline-block' }} />;
+  function getRankEmoji(rank: number): string {
+    switch (rank) {
+      case 1: return '🥇';
+      case 2: return '🥈';
+      case 3: return '🥉';
+      default: return `${rank}.`;
     }
-    return <span>{rank}.</span>;
   }
 
   if (loading) {
@@ -116,10 +118,7 @@ export default function Leaderboard({ userFid }: LeaderboardProps) {
       {/* Leaderboard Section */}
       <section className="fc-section">
         <div className="fc-card">
-          <h2 className="fc-card-title">
-            <img src="/splash.png" alt="" style={{ width: '1.2em', height: '1.2em', display: 'inline-block', verticalAlign: 'middle', marginRight: '0.3em' }} />
-            Stinkiest Offenders
-          </h2>
+          <h2 className="fc-card-title">🏆 Stinkiest Offenders</h2>
           <p className="fc-subtle" style={{ marginBottom: '1rem' }}>
             Hall of of porcelain thrones
           </p>
@@ -131,7 +130,7 @@ export default function Leaderboard({ userFid }: LeaderboardProps) {
                 className={`fc-leaderboard-entry ${entry.fid === userFid ? 'fc-leaderboard-entry-highlight' : ''}`}
               >
                 <div className="fc-leaderboard-rank">
-                  {getRankIcon(entry.rank)}
+                  {getRankEmoji(entry.rank)}
                 </div>
 
                 <div className="fc-leaderboard-user">
