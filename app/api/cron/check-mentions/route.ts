@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { processTurdCommand, replyToCast } from '@/lib/bot';
-import { recordTurd, getTurdCount, checkRateLimit, checkIfCastProcessed } from '@/lib/database';
+import { recordTurd, getTurdCount, checkRateLimit, checkIfCastProcessed, getRandomMeme } from '@/lib/database';
 import { checkUserHasNFT } from '@/lib/nftVerification';
 
 // Lazy initialization to avoid build-time errors
@@ -80,6 +80,22 @@ export async function GET() {
         cast.hash,
         `💩 @${command.senderUsername} sent a turd to @${command.targetUsername}!\n\nTotal turds received: ${turdCount}`
       );
+
+      // Send a random meme/gif response for NFT holders
+      try {
+        const meme = await getRandomMeme();
+        if (meme) {
+          const memeMessage = meme.caption
+            ? `${meme.caption}\n\n${meme.url}`
+            : meme.url;
+
+          await replyToCast(cast.hash, memeMessage);
+          console.log(`✓ Meme response sent: ${meme.url}`);
+        }
+      } catch (memeError) {
+        // Don't fail the whole request if meme fails
+        console.error('⚠️  Failed to send meme response:', memeError);
+      }
     }
     
     return NextResponse.json({ status: 'success', processed: notifications.notifications.length });
