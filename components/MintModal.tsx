@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useAccount, useWriteContract, useWaitForTransactionReceipt, useSignMessage } from 'wagmi'
 import { parseEther } from 'viem'
-import { farcasturdsV2Abi } from '@/abi/FarcasturdsV2'
+import { farcasturdsV3Abi } from '@/abi/FarcasturdsV3'
 import { generateSiweMessage, generateNonce, verifySiweSignature } from '@/lib/auth'
 import { base } from 'wagmi/chains'
 
@@ -240,11 +240,9 @@ export function MintModal({ isOpen, onClose, fid, imageUrl, onSuccess }: MintMod
         throw new Error('Contract address not configured')
       }
 
-      // TODO: Update to use farcasturdsV3Abi once generated
-      // For now, using V2 ABI as placeholder - MUST UPDATE BEFORE DEPLOYMENT
       writeContract({
         address: CONTRACT_ADDRESS,
-        abi: farcasturdsV2Abi, // TODO: Change to farcasturdsV3Abi
+        abi: farcasturdsV3Abi,
         functionName: 'mintFor',
         args: [
           address,

@@ -1,114 +1,495 @@
-// NOTE: This ABI must be generated after compiling FarcasturdsV3.sol
-// Run: forge build
-// Then extract ABI from: contracts/out/FarcasturdsV3.sol/FarcasturdsV3.json
+// FarcasturdsV3 ABI - Extracted from compiled contract
+// Contract Address: 0x99316cF6D2Ff8051Cd0dDfb2adCB0D23F7Ff3Ac3
+// Network: Base Mainnet (Chain ID 8453)
 
 export const farcasturdsV3Abi = [
-  // TODO: Replace with actual ABI after compilation
-  // This is a placeholder to prevent TypeScript errors
   {
-    type: 'function',
-    name: 'mintFor',
-    stateMutability: 'payable',
-    inputs: [
-      { name: 'to', type: 'address' },
-      { name: 'fid', type: 'uint256' },
-      { name: 'deadline', type: 'uint256' },
-      { name: 'signature', type: 'bytes' }
+    "type": "constructor",
+    "inputs": [
+      { "name": "baseURI_", "type": "string", "internalType": "string" },
+      { "name": "_mintPrice", "type": "uint256", "internalType": "uint256" },
+      { "name": "_treasury", "type": "address", "internalType": "address" }
     ],
-    outputs: []
+    "stateMutability": "nonpayable"
   },
   {
-    type: 'function',
-    name: 'hasMinted',
-    stateMutability: 'view',
-    inputs: [{ name: 'fid', type: 'uint256' }],
-    outputs: [{ name: '', type: 'bool' }]
+    "type": "function",
+    "name": "AUTHORIZATION_EXPIRY",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "stateMutability": "view"
   },
   {
-    type: 'function',
-    name: 'ownerOfFid',
-    stateMutability: 'view',
-    inputs: [{ name: 'fid', type: 'uint256' }],
-    outputs: [{ name: '', type: 'address' }]
-  },
-  {
-    type: 'function',
-    name: 'mintPrice',
-    stateMutability: 'view',
-    inputs: [],
-    outputs: [{ name: '', type: 'uint256' }]
-  },
-  {
-    type: 'function',
-    name: 'treasury',
-    stateMutability: 'view',
-    inputs: [],
-    outputs: [{ name: '', type: 'address' }]
-  },
-  {
-    type: 'function',
-    name: 'totalSupply',
-    stateMutability: 'view',
-    inputs: [],
-    outputs: [{ name: '', type: 'uint256' }]
-  },
-  {
-    type: 'function',
-    name: 'verifyAuthorization',
-    stateMutability: 'view',
-    inputs: [
-      { name: 'to', type: 'address' },
-      { name: 'fid', type: 'uint256' },
-      { name: 'deadline', type: 'uint256' },
-      { name: 'signature', type: 'bytes' }
+    "type": "function",
+    "name": "approve",
+    "inputs": [
+      { "name": "", "type": "address", "internalType": "address" },
+      { "name": "", "type": "uint256", "internalType": "uint256" }
     ],
-    outputs: [{ name: '', type: 'bool' }]
+    "outputs": [],
+    "stateMutability": "pure"
   },
   {
-    type: 'error',
-    name: 'AlreadyMinted',
-    inputs: []
+    "type": "function",
+    "name": "balanceOf",
+    "inputs": [{ "name": "owner", "type": "address", "internalType": "address" }],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "stateMutability": "view"
   },
   {
-    type: 'error',
-    name: 'InsufficientPayment',
-    inputs: []
+    "type": "function",
+    "name": "emergencyWithdraw",
+    "inputs": [],
+    "outputs": [],
+    "stateMutability": "nonpayable"
   },
   {
-    type: 'error',
-    name: 'InvalidFID',
-    inputs: []
+    "type": "function",
+    "name": "getApproved",
+    "inputs": [{ "name": "tokenId", "type": "uint256", "internalType": "uint256" }],
+    "outputs": [{ "name": "", "type": "address", "internalType": "address" }],
+    "stateMutability": "view"
   },
   {
-    type: 'error',
-    name: 'InvalidSignature',
-    inputs: []
+    "type": "function",
+    "name": "hasMinted",
+    "inputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "outputs": [{ "name": "", "type": "bool", "internalType": "bool" }],
+    "stateMutability": "view"
   },
   {
-    type: 'error',
-    name: 'SignatureExpired',
-    inputs: []
+    "type": "function",
+    "name": "isApprovedForAll",
+    "inputs": [
+      { "name": "owner", "type": "address", "internalType": "address" },
+      { "name": "operator", "type": "address", "internalType": "address" }
+    ],
+    "outputs": [{ "name": "", "type": "bool", "internalType": "bool" }],
+    "stateMutability": "view"
   },
   {
-    type: 'error',
-    name: 'NonTransferable',
-    inputs: []
+    "type": "function",
+    "name": "mintFor",
+    "inputs": [
+      { "name": "to", "type": "address", "internalType": "address" },
+      { "name": "fid", "type": "uint256", "internalType": "uint256" },
+      { "name": "deadline", "type": "uint256", "internalType": "uint256" },
+      { "name": "signature", "type": "bytes", "internalType": "bytes" }
+    ],
+    "outputs": [],
+    "stateMutability": "payable"
   },
   {
-    type: 'event',
-    name: 'FarcasturdMinted',
-    inputs: [
-      { name: 'fid', type: 'uint256', indexed: true },
-      { name: 'to', type: 'address', indexed: true },
-      { name: 'tokenId', type: 'uint256', indexed: false }
+    "type": "function",
+    "name": "mintPrice",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "name",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "string", "internalType": "string" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "owner",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "address", "internalType": "address" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "ownerOf",
+    "inputs": [{ "name": "tokenId", "type": "uint256", "internalType": "uint256" }],
+    "outputs": [{ "name": "", "type": "address", "internalType": "address" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "ownerOfFid",
+    "inputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "outputs": [{ "name": "", "type": "address", "internalType": "address" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "pause",
+    "inputs": [],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "paused",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "bool", "internalType": "bool" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "renounceOwnership",
+    "inputs": [],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "safeTransferFrom",
+    "inputs": [
+      { "name": "from", "type": "address", "internalType": "address" },
+      { "name": "to", "type": "address", "internalType": "address" },
+      { "name": "tokenId", "type": "uint256", "internalType": "uint256" }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "safeTransferFrom",
+    "inputs": [
+      { "name": "from", "type": "address", "internalType": "address" },
+      { "name": "to", "type": "address", "internalType": "address" },
+      { "name": "tokenId", "type": "uint256", "internalType": "uint256" },
+      { "name": "data", "type": "bytes", "internalType": "bytes" }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "setApprovalForAll",
+    "inputs": [
+      { "name": "", "type": "address", "internalType": "address" },
+      { "name": "", "type": "bool", "internalType": "bool" }
+    ],
+    "outputs": [],
+    "stateMutability": "pure"
+  },
+  {
+    "type": "function",
+    "name": "setBaseURI",
+    "inputs": [{ "name": "baseURI_", "type": "string", "internalType": "string" }],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "setMintPrice",
+    "inputs": [{ "name": "newPrice", "type": "uint256", "internalType": "uint256" }],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "setTreasury",
+    "inputs": [{ "name": "newTreasury", "type": "address", "internalType": "address" }],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "supportsInterface",
+    "inputs": [{ "name": "interfaceId", "type": "bytes4", "internalType": "bytes4" }],
+    "outputs": [{ "name": "", "type": "bool", "internalType": "bool" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "symbol",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "string", "internalType": "string" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "tokenURI",
+    "inputs": [{ "name": "tokenId", "type": "uint256", "internalType": "uint256" }],
+    "outputs": [{ "name": "", "type": "string", "internalType": "string" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "totalSupply",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "transferFrom",
+    "inputs": [
+      { "name": "from", "type": "address", "internalType": "address" },
+      { "name": "to", "type": "address", "internalType": "address" },
+      { "name": "tokenId", "type": "uint256", "internalType": "uint256" }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "transferOwnership",
+    "inputs": [{ "name": "newOwner", "type": "address", "internalType": "address" }],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "treasury",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "address", "internalType": "address" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "unpause",
+    "inputs": [],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "usedAuthorizations",
+    "inputs": [{ "name": "", "type": "bytes32", "internalType": "bytes32" }],
+    "outputs": [{ "name": "", "type": "bool", "internalType": "bool" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "verifyAuthorization",
+    "inputs": [
+      { "name": "to", "type": "address", "internalType": "address" },
+      { "name": "fid", "type": "uint256", "internalType": "uint256" },
+      { "name": "deadline", "type": "uint256", "internalType": "uint256" },
+      { "name": "signature", "type": "bytes", "internalType": "bytes" }
+    ],
+    "outputs": [{ "name": "", "type": "bool", "internalType": "bool" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "event",
+    "name": "Approval",
+    "inputs": [
+      { "name": "owner", "type": "address", "indexed": true, "internalType": "address" },
+      { "name": "approved", "type": "address", "indexed": true, "internalType": "address" },
+      { "name": "tokenId", "type": "uint256", "indexed": true, "internalType": "uint256" }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "ApprovalForAll",
+    "inputs": [
+      { "name": "owner", "type": "address", "indexed": true, "internalType": "address" },
+      { "name": "operator", "type": "address", "indexed": true, "internalType": "address" },
+      { "name": "approved", "type": "bool", "indexed": false, "internalType": "bool" }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "FarcasturdMinted",
+    "inputs": [
+      { "name": "fid", "type": "uint256", "indexed": true, "internalType": "uint256" },
+      { "name": "to", "type": "address", "indexed": true, "internalType": "address" },
+      { "name": "tokenId", "type": "uint256", "indexed": false, "internalType": "uint256" }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "MintPriceUpdated",
+    "inputs": [
+      { "name": "oldPrice", "type": "uint256", "indexed": false, "internalType": "uint256" },
+      { "name": "newPrice", "type": "uint256", "indexed": false, "internalType": "uint256" }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "OwnershipTransferred",
+    "inputs": [
+      { "name": "previousOwner", "type": "address", "indexed": true, "internalType": "address" },
+      { "name": "newOwner", "type": "address", "indexed": true, "internalType": "address" }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "Paused",
+    "inputs": [
+      { "name": "account", "type": "address", "indexed": false, "internalType": "address" }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "PaymentForwarded",
+    "inputs": [
+      { "name": "treasury", "type": "address", "indexed": true, "internalType": "address" },
+      { "name": "amount", "type": "uint256", "indexed": false, "internalType": "uint256" }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "Transfer",
+    "inputs": [
+      { "name": "from", "type": "address", "indexed": true, "internalType": "address" },
+      { "name": "to", "type": "address", "indexed": true, "internalType": "address" },
+      { "name": "tokenId", "type": "uint256", "indexed": true, "internalType": "uint256" }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "TreasuryUpdated",
+    "inputs": [
+      { "name": "oldTreasury", "type": "address", "indexed": true, "internalType": "address" },
+      { "name": "newTreasury", "type": "address", "indexed": true, "internalType": "address" }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "Unpaused",
+    "inputs": [
+      { "name": "account", "type": "address", "indexed": false, "internalType": "address" }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "error",
+    "name": "AlreadyMinted",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "ECDSAInvalidSignature",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "ECDSAInvalidSignatureLength",
+    "inputs": [{ "name": "length", "type": "uint256", "internalType": "uint256" }]
+  },
+  {
+    "type": "error",
+    "name": "ECDSAInvalidSignatureS",
+    "inputs": [{ "name": "s", "type": "bytes32", "internalType": "bytes32" }]
+  },
+  {
+    "type": "error",
+    "name": "ERC721IncorrectOwner",
+    "inputs": [
+      { "name": "sender", "type": "address", "internalType": "address" },
+      { "name": "tokenId", "type": "uint256", "internalType": "uint256" },
+      { "name": "owner", "type": "address", "internalType": "address" }
     ]
   },
   {
-    type: 'event',
-    name: 'PaymentForwarded',
-    inputs: [
-      { name: 'treasury', type: 'address', indexed: true },
-      { name: 'amount', type: 'uint256', indexed: false }
+    "type": "error",
+    "name": "ERC721InsufficientApproval",
+    "inputs": [
+      { "name": "operator", "type": "address", "internalType": "address" },
+      { "name": "tokenId", "type": "uint256", "internalType": "uint256" }
     ]
+  },
+  {
+    "type": "error",
+    "name": "ERC721InvalidApprover",
+    "inputs": [{ "name": "approver", "type": "address", "internalType": "address" }]
+  },
+  {
+    "type": "error",
+    "name": "ERC721InvalidOperator",
+    "inputs": [{ "name": "operator", "type": "address", "internalType": "address" }]
+  },
+  {
+    "type": "error",
+    "name": "ERC721InvalidOwner",
+    "inputs": [{ "name": "owner", "type": "address", "internalType": "address" }]
+  },
+  {
+    "type": "error",
+    "name": "ERC721InvalidReceiver",
+    "inputs": [{ "name": "receiver", "type": "address", "internalType": "address" }]
+  },
+  {
+    "type": "error",
+    "name": "ERC721InvalidSender",
+    "inputs": [{ "name": "sender", "type": "address", "internalType": "address" }]
+  },
+  {
+    "type": "error",
+    "name": "ERC721NonexistentToken",
+    "inputs": [{ "name": "tokenId", "type": "uint256", "internalType": "uint256" }]
+  },
+  {
+    "type": "error",
+    "name": "EnforcedPause",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "ExpectedPause",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "InsufficientPayment",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "InvalidFID",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "InvalidPrice",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "InvalidSignature",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "InvalidTreasuryAddress",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "NonTransferable",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "OwnableInvalidOwner",
+    "inputs": [{ "name": "owner", "type": "address", "internalType": "address" }]
+  },
+  {
+    "type": "error",
+    "name": "OwnableUnauthorizedAccount",
+    "inputs": [{ "name": "account", "type": "address", "internalType": "address" }]
+  },
+  {
+    "type": "error",
+    "name": "ReentrancyGuardReentrantCall",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "SignatureExpired",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "TransferFailed",
+    "inputs": []
   }
 ] as const
