@@ -807,8 +807,8 @@ export default function HomePage() {
                 {meta ? meta.name : "Reveal your Farcasturd"}
               </h2>
 
-              <div className="fc-nft-preview-wrap" style={{ position: "relative" }}>
-                {metadataLoading ? (
+              <div className="fc-nft-preview-wrap">
+                {metadataLoading || (meta?.image && !meta.image.includes("placeholder") && !imageLoaded) ? (
                   <div className="fc-nft-preview-loading" style={{
                     width: 300,
                     height: 300,
@@ -828,41 +828,14 @@ export default function HomePage() {
                     }} />
                   </div>
                 ) : meta?.image && !meta.image.includes("placeholder") ? (
-                  <>
-                    {!imageLoaded && (
-                      <div className="fc-nft-preview-loading" style={{
-                        width: 300,
-                        height: 300,
-                        borderRadius: 24,
-                        background: "linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%)",
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
-                        overflow: "hidden",
-                        zIndex: 10
-                      }}>
-                        <div style={{
-                          position: "absolute",
-                          top: 0,
-                          left: "-100%",
-                          width: "100%",
-                          height: "100%",
-                          background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)",
-                          animation: "shimmer-loading 1.5s infinite"
-                        }} />
-                      </div>
-                    )}
-                    <div className="fc-nft-preview" style={{
-                      animation: imageLoaded ? "fadeIn 0.4s ease-in" : "none",
-                      opacity: imageLoaded ? 1 : 0
-                    }}>
-                      <img
-                        src={meta.image}
-                        alt="Mint to Reveal"
-                        onLoad={() => setImageLoaded(true)}
-                      />
-                    </div>
-                  </>
+                  <div className="fc-nft-preview" style={{ animation: "fadeIn 0.4s ease-in" }}>
+                    <img
+                      src={meta.image}
+                      alt="Mint to Reveal"
+                      onLoad={() => setImageLoaded(true)}
+                      style={{ display: imageLoaded ? "block" : "none" }}
+                    />
+                  </div>
                 ) : (
                   <div className="fc-avatar" style={{
                     width: 300,
@@ -886,6 +859,20 @@ export default function HomePage() {
                       }}
                     />
                   </div>
+                )}
+                {/* Hidden preloader for image */}
+                {meta?.image && !meta.image.includes("placeholder") && !imageLoaded && (
+                  <img
+                    src={meta.image}
+                    alt=""
+                    onLoad={() => setImageLoaded(true)}
+                    style={{
+                      position: "absolute",
+                      top: -9999,
+                      left: -9999,
+                      visibility: "hidden"
+                    }}
+                  />
                 )}
               </div>
 
@@ -948,8 +935,8 @@ export default function HomePage() {
                 {meta ? meta.name : "Reveal your Farcasturd"}
               </h2>
 
-              <div className="fc-nft-preview-wrap" style={{ position: "relative" }}>
-                {metadataLoading ? (
+              <div className="fc-nft-preview-wrap">
+                {metadataLoading || (meta?.image && !meta.image.includes("placeholder") && !imageLoaded) ? (
                   <div className="fc-nft-preview-loading" style={{
                     width: 300,
                     height: 300,
@@ -969,41 +956,14 @@ export default function HomePage() {
                     }} />
                   </div>
                 ) : meta?.image && !meta.image.includes("placeholder") ? (
-                  <>
-                    {!imageLoaded && (
-                      <div className="fc-nft-preview-loading" style={{
-                        width: 300,
-                        height: 300,
-                        borderRadius: 24,
-                        background: "linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%)",
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
-                        overflow: "hidden",
-                        zIndex: 10
-                      }}>
-                        <div style={{
-                          position: "absolute",
-                          top: 0,
-                          left: "-100%",
-                          width: "100%",
-                          height: "100%",
-                          background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)",
-                          animation: "shimmer-loading 1.5s infinite"
-                        }} />
-                      </div>
-                    )}
-                    <div className="fc-nft-preview" style={{
-                      animation: imageLoaded ? "fadeIn 0.4s ease-in" : "none",
-                      opacity: imageLoaded ? 1 : 0
-                    }}>
-                      <img
-                        src={meta.image}
-                        alt="Mint to Reveal"
-                        onLoad={() => setImageLoaded(true)}
-                      />
-                    </div>
-                  </>
+                  <div className="fc-nft-preview" style={{ animation: "fadeIn 0.4s ease-in" }}>
+                    <img
+                      src={meta.image}
+                      alt="Mint to Reveal"
+                      onLoad={() => setImageLoaded(true)}
+                      style={{ display: imageLoaded ? "block" : "none" }}
+                    />
+                  </div>
                 ) : (
                   <div className="fc-avatar" style={{
                     width: 300,
@@ -1027,6 +987,20 @@ export default function HomePage() {
                       }}
                     />
                   </div>
+                )}
+                {/* Hidden preloader for image */}
+                {meta?.image && !meta.image.includes("placeholder") && !imageLoaded && (
+                  <img
+                    src={meta.image}
+                    alt=""
+                    onLoad={() => setImageLoaded(true)}
+                    style={{
+                      position: "absolute",
+                      top: -9999,
+                      left: -9999,
+                      visibility: "hidden"
+                    }}
+                  />
                 )}
               </div>
 
