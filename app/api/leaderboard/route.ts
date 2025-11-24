@@ -26,7 +26,7 @@ export async function GET(request: Request) {
       .from('turds')
       .select('*')
       .order('created_at', { ascending: false })
-      .limit(10);
+      .limit(5);
     
     if (activityError) throw activityError;
 

@@ -160,7 +160,14 @@ export default function Leaderboard({ userFid }: LeaderboardProps) {
 
           <div className="fc-activity-list">
             {recentActivity.map((activity) => (
-              <div key={activity.id} className="fc-activity-item">
+              <a
+                key={activity.id}
+                href={activity.castHash ? `https://warpcast.com/~/conversations/${activity.castHash}` : '#'}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="fc-activity-item"
+                style={{ textDecoration: 'none', color: 'inherit' }}
+              >
                 {activity.fromPfpUrl && (
                   <img
                     src={activity.fromPfpUrl}
@@ -178,7 +185,7 @@ export default function Leaderboard({ userFid }: LeaderboardProps) {
                   </div>
                   <div className="fc-activity-time">{formatTimeAgo(activity.timestamp)}</div>
                 </div>
-              </div>
+              </a>
             ))}
           </div>
         </div>
