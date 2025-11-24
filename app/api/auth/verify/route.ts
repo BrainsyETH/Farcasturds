@@ -60,9 +60,30 @@ export async function POST(req: NextRequest) {
         )
       }
 
-      // In production, you should verify the address matches one of the user's
-      // verified addresses or custody address from Neynar
-      // For now, we trust the SIWE signature as proof of address ownership
+      // Verify the signing address matches the FID's verified addresses or custody address
+      const signingAddress = siweMessage.address.toLowerCase()
+      const verifiedAddresses = profile.verifiedAddresses || []
+      const custodyAddress = profile.custodyAddress
+
+      const isVerifiedAddress = verifiedAddresses.includes(signingAddress)
+      const isCustodyAddress = custodyAddress && custodyAddress === signingAddress
+
+      if (!isVerifiedAddress && !isCustodyAddress) {
+        return NextResponse.json(
+          {
+            error: 'Wallet address does not match FID verified addresses',
+            details: {
+              fid,
+              signingAddress,
+              verifiedAddresses,
+              custodyAddress
+            }
+          },
+          { status: 403 }
+        )
+      }
+
+      console.log(`[Auth] ✓ FID ${fid} ownership verified for address ${signingAddress}`)
 
     } catch (error) {
       console.error('Error fetching Farcaster profile:', error)

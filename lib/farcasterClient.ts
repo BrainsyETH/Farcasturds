@@ -11,6 +11,8 @@ export type FarcasterProfile = {
   displayName: string | null;
   bio: string | null;
   pfpUrl: string | null;
+  verifiedAddresses?: string[];
+  custodyAddress?: string;
 };
 
 export async function getFarcasterProfile(fid: number): Promise<FarcasterProfile> {
@@ -36,11 +38,19 @@ export async function getFarcasterProfile(fid: number): Promise<FarcasterProfile
   const json = await res.json();
   const user = json.users?.[0];
 
+  // Extract verified addresses (ETH addresses the user has verified ownership of)
+  const verifiedAddresses: string[] = [];
+  if (user?.verified_addresses?.eth_addresses) {
+    verifiedAddresses.push(...user.verified_addresses.eth_addresses);
+  }
+
   return {
     fid,
     username: user?.username ?? null,
     displayName: user?.display_name ?? null,
     bio: user?.profile?.bio?.text ?? null,
     pfpUrl: user?.pfp_url ?? null,
+    verifiedAddresses: verifiedAddresses.length > 0 ? verifiedAddresses.map((addr: string) => addr.toLowerCase()) : undefined,
+    custodyAddress: user?.custody_address?.toLowerCase() ?? undefined,
   };
 }
