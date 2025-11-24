@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { processTurdCommand, replyToCast } from '@/lib/bot';
-import { recordTurd, getTurdCount, checkRateLimit, checkIfCastProcessed, getRandomMeme } from '@/lib/database';
+import { recordTurd, checkRateLimit, checkIfCastProcessed, getRandomMeme } from '@/lib/database';
 import { checkUserHasNFT } from '@/lib/nftVerification';
 
 export async function POST(request: Request) {
@@ -49,7 +49,7 @@ export async function POST(request: Request) {
 
       await replyToCast(
         cast.hash,
-        `@${command.senderUsername} ${rateLimitCheck.reason} 💩`
+        `@${command.senderUsername} ${rateLimitCheck.reason}`
       );
 
       return NextResponse.json({
@@ -69,7 +69,7 @@ export async function POST(request: Request) {
 
       await replyToCast(
         cast.hash,
-        `@${command.senderUsername} You need to mint a Farcasturd NFT to send turds! 💩\n\nMint yours at: https://farcasturds.xyz`
+        `@${command.senderUsername} You need to mint a Farcasturd NFT to send turds!\n\nMint yours at: https://farcasturds.xyz`
       );
 
       return NextResponse.json({
@@ -104,18 +104,8 @@ export async function POST(request: Request) {
       throw recordError; // Re-throw to be caught by outer catch
     }
 
-    // Get updated count
-    const turdCount = await getTurdCount(command.targetFid);
-
-    // Reply with confirmation
-    await replyToCast(
-      cast.hash,
-      `💩 @${command.senderUsername} sent a turd to @${command.targetUsername}!\n\nTotal turds received: ${turdCount}`
-    );
-
-    console.log(`✓ Confirmation sent, total count: ${turdCount}`);
-
-    // Send a random meme/gif response for NFT holders
+    // Send a random meme/gif response for NFT holders, or confirmation if no meme available
+    let memeSent = false;
     try {
       const meme = await getRandomMeme();
       if (meme) {
@@ -125,19 +115,26 @@ export async function POST(request: Request) {
 
         await replyToCast(cast.hash, memeMessage);
         console.log(`✓ Meme response sent: ${meme.url}`);
-      } else {
-        console.log(`⚠️  No active memes available to send`);
+        memeSent = true;
       }
     } catch (memeError) {
-      // Don't fail the whole request if meme fails
       console.error('⚠️  Failed to send meme response:', memeError);
+    }
+
+    // Only send confirmation if no meme was sent
+    if (!memeSent) {
+      await replyToCast(
+        cast.hash,
+        `@${command.senderUsername} sent a turd to @${command.targetUsername}!`
+      );
+      console.log(`✓ Confirmation sent (no meme available)`);
     }
 
     return NextResponse.json({
       status: 'success',
       from: command.senderUsername,
       to: command.targetUsername,
-      count: turdCount
+      memeSent
     });
 
   } catch (error) {
