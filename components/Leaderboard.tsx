@@ -155,7 +155,7 @@ export default function Leaderboard({ userFid }: LeaderboardProps) {
         <div className="fc-card">
           <h3 className="fc-card-title">Recent Activity</h3>
           <p className="fc-subtle" style={{ marginBottom: '1rem' }}>
-            Latest turds
+            
           </p>
 
           <div className="fc-activity-list">
