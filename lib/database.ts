@@ -181,3 +181,98 @@ export async function checkIfCastProcessed(castHash: string): Promise<boolean> {
 
   return !!data;
 }
+
+// ============================================================================
+// MEME RESPONSE FUNCTIONS
+// ============================================================================
+
+export interface MemeResponse {
+  id: number;
+  url: string;
+  caption?: string;
+  is_active: boolean;
+  created_at: string;
+}
+
+/**
+ * Fetches a random active meme/gif from the database
+ * Returns null if no active memes are available
+ */
+export async function getRandomMeme(): Promise<MemeResponse | null> {
+  const { data, error } = await supabase
+    .from('meme_responses')
+    .select('*')
+    .eq('is_active', true);
+
+  if (error) {
+    console.error('[Meme] Error fetching memes:', error);
+    return null;
+  }
+
+  if (!data || data.length === 0) {
+    console.warn('[Meme] No active memes found in database');
+    return null;
+  }
+
+  // Select random meme from active memes
+  const randomIndex = Math.floor(Math.random() * data.length);
+  return data[randomIndex];
+}
+
+/**
+ * Adds a new meme/gif to the database
+ */
+export async function addMeme(url: string, caption?: string): Promise<void> {
+  const { error } = await supabase
+    .from('meme_responses')
+    .insert([{
+      url,
+      caption: caption || null,
+      is_active: true,
+    }]);
+
+  if (error) throw error;
+}
+
+/**
+ * Lists all memes in the database
+ */
+export async function listMemes(activeOnly = false): Promise<MemeResponse[]> {
+  let query = supabase
+    .from('meme_responses')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (activeOnly) {
+    query = query.eq('is_active', true);
+  }
+
+  const { data, error } = await query;
+
+  if (error) throw error;
+  return data || [];
+}
+
+/**
+ * Updates a meme's active status
+ */
+export async function toggleMeme(id: number, isActive: boolean): Promise<void> {
+  const { error } = await supabase
+    .from('meme_responses')
+    .update({ is_active: isActive })
+    .eq('id', id);
+
+  if (error) throw error;
+}
+
+/**
+ * Deletes a meme from the database
+ */
+export async function deleteMeme(id: number): Promise<void> {
+  const { error } = await supabase
+    .from('meme_responses')
+    .delete()
+    .eq('id', id);
+
+  if (error) throw error;
+}
