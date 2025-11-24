@@ -779,9 +779,9 @@ h2.fc-title {
   }
 
   .fc-activity-item {
-    flex-direction: column;
-    align-items: flex-start !important;
-    gap: 4px;
+    flex-direction: row;
+    align-items: center !important;
+    gap: 10px;
   }
 
   h1.fc-title {
@@ -1033,7 +1033,7 @@ h2.fc-title {
 
 .fc-activity-item {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 10px;
   padding: 10px 12px;
   background: rgba(255, 255, 255, 0.25);
