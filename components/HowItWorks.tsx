@@ -19,7 +19,7 @@ export default function HowItWorks() {
               <strong>3.</strong> That's it! OP gets the turd <img src="/splash.png" alt="turd" style={{ display: 'inline', width: '1.2em', height: '1.2em', verticalAlign: 'middle' }} />
             </p>
             <p className="fc-subtle" style={{ marginTop: '1rem' }}>
-              <strong>Note:</strong> You must have a Farcsturds NFT to participate!
+              <strong>Note:</strong> You must have a Farcasturds NFT to participate!
             </p>
           </div>
         </div>
