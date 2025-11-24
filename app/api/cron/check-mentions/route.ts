@@ -79,11 +79,8 @@ export async function GET() {
       try {
         const meme = await getRandomMeme();
         if (meme) {
-          const memeMessage = meme.caption
-            ? `${meme.caption}\n\n${meme.url}`
-            : meme.url;
-
-          await replyToCast(cast.hash, memeMessage);
+          // Send meme as an embed with optional caption as text
+          await replyToCast(cast.hash, meme.caption || '', [meme.url]);
           console.log(`✓ Meme response sent: ${meme.url}`);
           memeSent = true;
         }

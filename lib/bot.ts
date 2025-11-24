@@ -102,13 +102,14 @@ export async function lookupUserByUsername(username: string) {
   }
 }
 
-export async function replyToCast(parentHash: string, text: string) {
+export async function replyToCast(parentHash: string, text: string, embeds?: string[]) {
   try {
     const client = getNeynarClient();
     await client.publishCast({
       signerUuid: process.env.BOT_SIGNER_UUID!,
       text: text,
       parent: parentHash,
+      embeds: embeds || [],
     });
     console.log(`✓ Replied to cast ${parentHash}`);
   } catch (error) {
