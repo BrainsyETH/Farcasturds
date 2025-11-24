@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { processTurdCommand, replyToCast } from '@/lib/bot';
-import { recordTurd, getTurdCount, checkRateLimit, checkIfCastProcessed, getRandomMeme } from '@/lib/database';
+import { recordTurd, checkRateLimit, checkIfCastProcessed, getRandomMeme } from '@/lib/database';
 import { checkUserHasNFT } from '@/lib/nftVerification';
 
 // Lazy initialization to avoid build-time errors
@@ -50,7 +50,7 @@ export async function GET() {
       if (!rateLimitCheck.allowed) {
         await replyToCast(
           cast.hash,
-          `@${command.senderUsername} ${rateLimitCheck.reason} 💩`
+          `@${command.senderUsername} ${rateLimitCheck.reason} 💦`
         );
         continue;
       }
@@ -60,7 +60,7 @@ export async function GET() {
       if (!hasNFT) {
         await replyToCast(
           cast.hash,
-          `@${command.senderUsername} You need to mint a Farcasturd NFT to send turds! 💩\n\nMint yours at: https://farcasturds.vercel.app`
+          `@${command.senderUsername} You need to mint a Farcasturd NFT to send turds! 💦\n\nMint yours at: https://farcasturds.vercel.app`
         );
         continue;
       }
@@ -74,14 +74,8 @@ export async function GET() {
         cast_hash: cast.hash,
       });
 
-      // Reply with confirmation
-      const turdCount = await getTurdCount(command.targetFid);
-      await replyToCast(
-        cast.hash,
-        `💩 @${command.senderUsername} sent a turd to @${command.targetUsername}!\n\nTotal turds received: ${turdCount}`
-      );
-
-      // Send a random meme/gif response for NFT holders
+      // Send a random meme/gif response for NFT holders, or confirmation if no meme available
+      let memeSent = false;
       try {
         const meme = await getRandomMeme();
         if (meme) {
@@ -91,10 +85,19 @@ export async function GET() {
 
           await replyToCast(cast.hash, memeMessage);
           console.log(`✓ Meme response sent: ${meme.url}`);
+          memeSent = true;
         }
       } catch (memeError) {
-        // Don't fail the whole request if meme fails
         console.error('⚠️  Failed to send meme response:', memeError);
+      }
+
+      // Only send confirmation if no meme was sent
+      if (!memeSent) {
+        await replyToCast(
+          cast.hash,
+          `💦 @${command.senderUsername} sent a turd to @${command.targetUsername}!`
+        );
+        console.log(`✓ Confirmation sent (no meme available)`);
       }
     }
     
