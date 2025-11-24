@@ -1,9 +1,11 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
+import { useAccount, useWriteContract, useWaitForTransactionReceipt, useSignMessage } from 'wagmi'
 import { parseEther } from 'viem'
 import { farcasturdsV2Abi } from '@/abi/FarcasturdsV2'
+import { generateSiweMessage, generateNonce, verifySiweSignature } from '@/lib/auth'
+import { base } from 'wagmi/chains'
 
 interface MintModalProps {
   isOpen: boolean
@@ -18,6 +20,9 @@ export function MintModal({ isOpen, onClose, fid, imageUrl, onSuccess }: MintMod
   const [mintPrice, setMintPrice] = useState<string>('0')
   const [status, setStatus] = useState<string>('')
   const [error, setError] = useState<string>('')
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false)
+  const [authNonce, setAuthNonce] = useState<string | null>(null)
+  const [siweMessage, setSiweMessage] = useState<string | null>(null)
 
   const {
     data: hash,
@@ -31,6 +36,14 @@ export function MintModal({ isOpen, onClose, fid, imageUrl, onSuccess }: MintMod
     useWaitForTransactionReceipt({
       hash,
     })
+
+  const {
+    data: signature,
+    signMessage,
+    isPending: isSignPending,
+    isError: isSignError,
+    error: signError
+  } = useSignMessage()
 
   // Fetch mint price from contract
   useEffect(() => {
@@ -70,9 +83,103 @@ export function MintModal({ isOpen, onClose, fid, imageUrl, onSuccess }: MintMod
     }
   }, [isWriteError, writeError])
 
+  // Handle signature errors
+  useEffect(() => {
+    if (isSignError && signError) {
+      const errorMessage = signError.message || 'Signature failed'
+      setError(errorMessage)
+      setStatus('')
+    }
+  }, [isSignError, signError])
+
+  // Verify signature when received
+  useEffect(() => {
+    if (signature && siweMessage && authNonce) {
+      handleVerifySignature(signature, siweMessage, authNonce)
+    }
+  }, [signature, siweMessage, authNonce])
+
+  // Reset authentication when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      setIsAuthenticated(false)
+      setAuthNonce(null)
+      setSiweMessage(null)
+      setStatus('')
+      setError('')
+    }
+  }, [isOpen])
+
+  const handleRequestSignature = useCallback(async () => {
+    if (!address) {
+      setError('No wallet connected')
+      return
+    }
+
+    setStatus('Requesting signature to verify ownership...')
+    setError('')
+
+    try {
+      // Generate nonce and SIWE message
+      const nonce = generateNonce()
+      const message = generateSiweMessage({
+        address,
+        chainId: base.id,
+        nonce,
+        fid
+      })
+
+      setAuthNonce(nonce)
+      setSiweMessage(message)
+
+      // Request signature from wallet
+      signMessage({ message })
+    } catch (err: any) {
+      console.error('Signature request error:', err)
+      setError(err.message || 'Failed to request signature')
+      setStatus('')
+    }
+  }, [address, fid, signMessage])
+
+  const handleVerifySignature = useCallback(async (
+    sig: string,
+    msg: string,
+    nonce: string
+  ) => {
+    setStatus('Verifying signature...')
+
+    try {
+      const result = await verifySiweSignature({
+        message: msg,
+        signature: sig,
+        nonce
+      })
+
+      if (result.success) {
+        setIsAuthenticated(true)
+        setStatus('✓ Signature verified! You can now mint.')
+        setError('')
+      } else {
+        setError(result.error || 'Signature verification failed')
+        setStatus('')
+        setIsAuthenticated(false)
+      }
+    } catch (err: any) {
+      console.error('Verification error:', err)
+      setError(err.message || 'Failed to verify signature')
+      setStatus('')
+      setIsAuthenticated(false)
+    }
+  }, [])
+
   const handleMint = useCallback(async () => {
     if (!address) {
       setError('No wallet connected')
+      return
+    }
+
+    if (!isAuthenticated) {
+      setError('Please verify your signature first')
       return
     }
 
@@ -100,7 +207,7 @@ export function MintModal({ isOpen, onClose, fid, imageUrl, onSuccess }: MintMod
       setError(err.message || 'Failed to initiate transaction')
       setStatus('')
     }
-  }, [address, fid, mintPrice, writeContract])
+  }, [address, fid, mintPrice, writeContract, isAuthenticated])
 
   useEffect(() => {
     if (isConfirming) {
@@ -182,29 +289,50 @@ export function MintModal({ isOpen, onClose, fid, imageUrl, onSuccess }: MintMod
           <button
             onClick={onClose}
             className="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={isPending || isConfirming}
+            disabled={isPending || isConfirming || isSignPending}
           >
             {isConfirmed ? 'Close' : 'Cancel'}
           </button>
-          <button
-            onClick={handleMint}
-            disabled={isPending || isConfirming || isConfirmed || !address}
-            className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-3 px-4 rounded-lg shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none transform hover:scale-105"
-          >
-            {isPending || isConfirming ? (
-              <span className="flex items-center justify-center">
-                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                {isPending ? 'Confirming...' : 'Processing...'}
-              </span>
-            ) : isConfirmed ? (
-              '✓ Minted!'
-            ) : (
-              `Mint ${mintPrice === '0' ? 'Free' : `for ${mintPrice} ETH`}`
-            )}
-          </button>
+
+          {!isAuthenticated ? (
+            <button
+              onClick={handleRequestSignature}
+              disabled={isSignPending || !address}
+              className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-3 px-4 rounded-lg shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none transform hover:scale-105"
+            >
+              {isSignPending ? (
+                <span className="flex items-center justify-center">
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Signing...
+                </span>
+              ) : (
+                '🔏 Verify Signature'
+              )}
+            </button>
+          ) : (
+            <button
+              onClick={handleMint}
+              disabled={isPending || isConfirming || isConfirmed || !address || !isAuthenticated}
+              className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-3 px-4 rounded-lg shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none transform hover:scale-105"
+            >
+              {isPending || isConfirming ? (
+                <span className="flex items-center justify-center">
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  {isPending ? 'Confirming...' : 'Processing...'}
+                </span>
+              ) : isConfirmed ? (
+                '✓ Minted!'
+              ) : (
+                `💩 Mint ${mintPrice === '0' ? 'Free' : `for ${mintPrice} ETH`}`
+              )}
+            </button>
+          )}
         </div>
       </div>
     </div>
