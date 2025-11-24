@@ -55,6 +55,7 @@ export default function HomePage() {
   const [sharing, setSharing] = useState(false);
   const [hasShared, setHasShared] = useState(false);
   const [activeTab, setActiveTab] = useState<TabId>('mint');
+  const [metadataLoading, setMetadataLoading] = useState(true);
 
   // Track processed transaction hashes to prevent duplicate generation
   const processedTxHashes = useRef<Set<string>>(new Set());
@@ -263,11 +264,15 @@ export default function HomePage() {
     async function fetchMetadata(fid: number) {
       if (isRefreshing) return;
 
+      setMetadataLoading(true);
       try {
         const res = await fetch(`/api/metadata/${fid}?t=${Date.now()}`, {
           cache: 'no-store'
         });
-        if (!res.ok) return;
+        if (!res.ok) {
+          setMetadataLoading(false);
+          return;
+        }
 
         const data = await res.json();
 
@@ -275,8 +280,10 @@ export default function HomePage() {
           setMeta(data);
           setHasGenerated(true);
         }
+        setMetadataLoading(false);
       } catch (err) {
         console.log("No metadata yet - user needs to generate");
+        setMetadataLoading(false);
       }
     }
 
@@ -799,8 +806,27 @@ export default function HomePage() {
               </h2>
 
               <div className="fc-nft-preview-wrap">
-                {meta?.image && !meta.image.includes("placeholder") ? (
-                  <div className="fc-nft-preview">
+                {metadataLoading ? (
+                  <div className="fc-nft-preview-loading" style={{
+                    width: 300,
+                    height: 300,
+                    borderRadius: 24,
+                    background: "linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%)",
+                    position: "relative",
+                    overflow: "hidden"
+                  }}>
+                    <div style={{
+                      position: "absolute",
+                      top: 0,
+                      left: "-100%",
+                      width: "100%",
+                      height: "100%",
+                      background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)",
+                      animation: "shimmer-loading 1.5s infinite"
+                    }} />
+                  </div>
+                ) : meta?.image && !meta.image.includes("placeholder") ? (
+                  <div className="fc-nft-preview" style={{ animation: "fadeIn 0.4s ease-in" }}>
                     <img src={meta.image} alt="Mint to Reveal" />
                   </div>
                 ) : (
@@ -812,7 +838,8 @@ export default function HomePage() {
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    overflow: "hidden"
+                    overflow: "hidden",
+                    animation: "fadeIn 0.4s ease-in"
                   }}>
                     <img
                       src="https://b4b0aaz7b39hhkor.public.blob.vercel-storage.com/poop_questionv2.png"
@@ -888,8 +915,27 @@ export default function HomePage() {
               </h2>
 
               <div className="fc-nft-preview-wrap">
-                {meta?.image && !meta.image.includes("placeholder") ? (
-                  <div className="fc-nft-preview">
+                {metadataLoading ? (
+                  <div className="fc-nft-preview-loading" style={{
+                    width: 300,
+                    height: 300,
+                    borderRadius: 24,
+                    background: "linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%)",
+                    position: "relative",
+                    overflow: "hidden"
+                  }}>
+                    <div style={{
+                      position: "absolute",
+                      top: 0,
+                      left: "-100%",
+                      width: "100%",
+                      height: "100%",
+                      background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)",
+                      animation: "shimmer-loading 1.5s infinite"
+                    }} />
+                  </div>
+                ) : meta?.image && !meta.image.includes("placeholder") ? (
+                  <div className="fc-nft-preview" style={{ animation: "fadeIn 0.4s ease-in" }}>
                     <img src={meta.image} alt="Mint to Reveal" />
                   </div>
                 ) : (
@@ -901,7 +947,8 @@ export default function HomePage() {
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    overflow: "hidden"
+                    overflow: "hidden",
+                    animation: "fadeIn 0.4s ease-in"
                   }}>
                     <img
                       src="https://b4b0aaz7b39hhkor.public.blob.vercel-storage.com/poop_questionv2.png"

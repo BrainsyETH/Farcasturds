@@ -715,6 +715,16 @@ h2.fc-title {
   100% { transform: translate(100%, 100%) rotate(45deg); }
 }
 
+@keyframes shimmer-loading {
+  0%   { left: -100%; }
+  100% { left: 100%; }
+}
+
+@keyframes fadeIn {
+  0%   { opacity: 0; }
+  100% { opacity: 1; }
+}
+
 /* Mobile scaling */
 @media (max-width: 480px) {
   .fc-nft-preview {
