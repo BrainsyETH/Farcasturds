@@ -120,7 +120,7 @@ export default function Leaderboard({ userFid }: LeaderboardProps) {
         <div className="fc-card">
           <h2 className="fc-card-title">🏆 Stinkiest Offenders</h2>
           <p className="fc-subtle" style={{ marginBottom: '1rem' }}>
-            Hall of of porcelain thrones
+            Hall of Porcelain
           </p>
 
           <div className="fc-leaderboard">
