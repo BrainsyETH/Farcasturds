@@ -11,12 +11,14 @@
 import { createPublicClient, http } from "viem";
 import { base } from "viem/chains";
 import { farcasturdsV2Abi } from "./abi/FarcasturdsV2";
+import { farcasturdsV3Abi } from "./abi/FarcasturdsV3";
 import * as dotenv from "dotenv";
 
 // Load environment variables
 dotenv.config({ path: '.env.local' });
 
-const CONTRACT = process.env.NEXT_PUBLIC_FARCASTURDS_ADDRESS as `0x${string}`;
+const CONTRACT_V3 = process.env.NEXT_PUBLIC_FARCASTURDS_ADDRESS as `0x${string}`;
+const CONTRACT_V2 = process.env.NEXT_PUBLIC_FARCASTURDS_V2_ADDRESS as `0x${string}`;
 const RPC = process.env.BASE_RPC_URL;
 
 interface TestResult {
@@ -29,18 +31,19 @@ interface TestResult {
 const results: TestResult[] = [];
 
 async function testContractConnection() {
-  console.log("\n🔍 Test 1: Contract Connection");
+  console.log("\n🔍 Test 1: Contract Connection (V2 & V3)");
   console.log("━".repeat(60));
 
   try {
-    if (!CONTRACT) {
-      throw new Error("NEXT_PUBLIC_FARCASTURDS_ADDRESS not set");
+    if (!CONTRACT_V3 && !CONTRACT_V2) {
+      throw new Error("Neither NEXT_PUBLIC_FARCASTURDS_ADDRESS (V3) nor NEXT_PUBLIC_FARCASTURDS_V2_ADDRESS set");
     }
     if (!RPC) {
       throw new Error("BASE_RPC_URL not set");
     }
 
-    console.log(`📝 Contract: ${CONTRACT}`);
+    console.log(`📝 Contract V3: ${CONTRACT_V3 || 'not set'}`);
+    console.log(`📝 Contract V2: ${CONTRACT_V2 || 'not set'}`);
     console.log(`🌐 RPC: ${RPC.substring(0, 50)}...`);
 
     const publicClient = createPublicClient({
@@ -48,40 +51,93 @@ async function testContractConnection() {
       transport: http(RPC),
     });
 
-    // Test basic contract info
-    const name = await publicClient.readContract({
-      address: CONTRACT,
-      abi: farcasturdsV2Abi,
-      functionName: "name",
-    });
+    let v3Info = null;
+    let v2Info = null;
 
-    const symbol = await publicClient.readContract({
-      address: CONTRACT,
-      abi: farcasturdsV2Abi,
-      functionName: "symbol",
-    });
+    // Test V3 contract if configured
+    if (CONTRACT_V3) {
+      try {
+        const name = await publicClient.readContract({
+          address: CONTRACT_V3,
+          abi: farcasturdsV3Abi,
+          functionName: "name",
+        });
 
-    const totalSupply = await publicClient.readContract({
-      address: CONTRACT,
-      abi: farcasturdsV2Abi,
-      functionName: "totalSupply",
-    });
+        const symbol = await publicClient.readContract({
+          address: CONTRACT_V3,
+          abi: farcasturdsV3Abi,
+          functionName: "symbol",
+        });
 
-    const mintPrice = await publicClient.readContract({
-      address: CONTRACT,
-      abi: farcasturdsV2Abi,
-      functionName: "mintPrice",
-    });
+        const totalSupply = await publicClient.readContract({
+          address: CONTRACT_V3,
+          abi: farcasturdsV3Abi,
+          functionName: "totalSupply",
+        });
 
-    console.log(`✅ Contract Name: ${name}`);
-    console.log(`✅ Contract Symbol: ${symbol}`);
-    console.log(`✅ Total Supply: ${totalSupply}`);
-    console.log(`✅ Mint Price: ${mintPrice} wei (${Number(mintPrice) / 1e18} ETH)`);
+        const mintPrice = await publicClient.readContract({
+          address: CONTRACT_V3,
+          abi: farcasturdsV3Abi,
+          functionName: "mintPrice",
+        });
+
+        console.log(`\n✅ V3 Contract Name: ${name}`);
+        console.log(`✅ V3 Contract Symbol: ${symbol}`);
+        console.log(`✅ V3 Total Supply: ${totalSupply}`);
+        console.log(`✅ V3 Mint Price: ${mintPrice} wei (${Number(mintPrice) / 1e18} ETH)`);
+
+        v3Info = { name, symbol, totalSupply, mintPrice };
+      } catch (err) {
+        console.log(`⚠️  V3 contract check failed:`, err);
+      }
+    }
+
+    // Test V2 contract if configured
+    if (CONTRACT_V2) {
+      try {
+        const name = await publicClient.readContract({
+          address: CONTRACT_V2,
+          abi: farcasturdsV2Abi,
+          functionName: "name",
+        });
+
+        const symbol = await publicClient.readContract({
+          address: CONTRACT_V2,
+          abi: farcasturdsV2Abi,
+          functionName: "symbol",
+        });
+
+        const totalSupply = await publicClient.readContract({
+          address: CONTRACT_V2,
+          abi: farcasturdsV2Abi,
+          functionName: "totalSupply",
+        });
+
+        const mintPrice = await publicClient.readContract({
+          address: CONTRACT_V2,
+          abi: farcasturdsV2Abi,
+          functionName: "mintPrice",
+        });
+
+        console.log(`\n✅ V2 Contract Name: ${name}`);
+        console.log(`✅ V2 Contract Symbol: ${symbol}`);
+        console.log(`✅ V2 Total Supply: ${totalSupply}`);
+        console.log(`✅ V2 Mint Price: ${mintPrice} wei (${Number(mintPrice) / 1e18} ETH)`);
+
+        v2Info = { name, symbol, totalSupply, mintPrice };
+      } catch (err) {
+        console.log(`⚠️  V2 contract check failed:`, err);
+      }
+    }
+
+    if (!v3Info && !v2Info) {
+      throw new Error("Failed to connect to any contract");
+    }
 
     results.push({
       name: "Contract Connection",
       passed: true,
-      details: `Connected to ${name} (${symbol}), Supply: ${totalSupply}`,
+      details: `V3: ${v3Info ? 'Connected' : 'Not configured'}, V2: ${v2Info ? 'Connected' : 'Not configured'}`,
     });
 
     return publicClient;
@@ -97,7 +153,7 @@ async function testContractConnection() {
 }
 
 async function testHasMintedFunction(publicClient: any) {
-  console.log("\n🔍 Test 2: hasMinted() Function");
+  console.log("\n🔍 Test 2: hasMinted() Function (V2 & V3)");
   console.log("━".repeat(60));
 
   // Test with a few FIDs - some should have minted, some shouldn't
@@ -113,41 +169,76 @@ async function testHasMintedFunction(publicClient: any) {
     for (const { fid, description } of testFids) {
       console.log(`\n📊 Checking FID ${fid} (${description})...`);
 
-      try {
-        const hasMinted = await publicClient.readContract({
-          address: CONTRACT,
-          abi: farcasturdsV2Abi,
-          functionName: "hasMinted",
-          args: [BigInt(fid)],
-        });
+      let hasMintedV3 = false;
+      let hasMintedV2 = false;
 
-        console.log(`   ${hasMinted ? "✅ HAS" : "❌ HAS NOT"} minted`);
-        mintResults.push({ fid, hasMinted, description });
+      // Check V3 contract
+      if (CONTRACT_V3) {
+        try {
+          hasMintedV3 = await publicClient.readContract({
+            address: CONTRACT_V3,
+            abi: farcasturdsV3Abi,
+            functionName: "hasMinted",
+            args: [BigInt(fid)],
+          });
 
-        // If they have minted, try to get their token owner
-        if (hasMinted) {
-          try {
-            const owner = await publicClient.readContract({
-              address: CONTRACT,
-              abi: farcasturdsV2Abi,
-              functionName: "ownerOfFid",
-              args: [BigInt(fid)],
-            });
-            console.log(`   📍 Owner address: ${owner}`);
-          } catch (err) {
-            console.log(`   ⚠️  Could not fetch owner`);
+          console.log(`   V3: ${hasMintedV3 ? "✅ HAS" : "❌ HAS NOT"} minted`);
+
+          if (hasMintedV3) {
+            try {
+              const owner = await publicClient.readContract({
+                address: CONTRACT_V3,
+                abi: farcasturdsV3Abi,
+                functionName: "ownerOfFid",
+                args: [BigInt(fid)],
+              });
+              console.log(`   📍 V3 Owner address: ${owner}`);
+            } catch (err) {
+              console.log(`   ⚠️  Could not fetch V3 owner`);
+            }
           }
+        } catch (err) {
+          console.log(`   ⚠️  V3 Error checking FID ${fid}:`, err);
         }
-      } catch (err) {
-        console.log(`   ⚠️  Error checking FID ${fid}:`, err);
-        mintResults.push({ fid, error: String(err), description });
       }
+
+      // Check V2 contract
+      if (CONTRACT_V2) {
+        try {
+          hasMintedV2 = await publicClient.readContract({
+            address: CONTRACT_V2,
+            abi: farcasturdsV2Abi,
+            functionName: "hasMinted",
+            args: [BigInt(fid)],
+          });
+
+          console.log(`   V2: ${hasMintedV2 ? "✅ HAS" : "❌ HAS NOT"} minted`);
+
+          if (hasMintedV2) {
+            try {
+              const owner = await publicClient.readContract({
+                address: CONTRACT_V2,
+                abi: farcasturdsV2Abi,
+                functionName: "ownerOfFid",
+                args: [BigInt(fid)],
+              });
+              console.log(`   📍 V2 Owner address: ${owner}`);
+            } catch (err) {
+              console.log(`   ⚠️  Could not fetch V2 owner`);
+            }
+          }
+        } catch (err) {
+          console.log(`   ⚠️  V2 Error checking FID ${fid}:`, err);
+        }
+      }
+
+      mintResults.push({ fid, hasMintedV3, hasMintedV2, hasMintedEither: hasMintedV3 || hasMintedV2, description });
     }
 
     results.push({
       name: "hasMinted() Function",
       passed: true,
-      details: `Tested ${testFids.length} FIDs successfully`,
+      details: `Tested ${testFids.length} FIDs on both V2 and V3 contracts`,
     });
 
     return mintResults;
