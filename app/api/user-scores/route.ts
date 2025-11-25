@@ -85,59 +85,55 @@ async function resolveENS(ensName: string): Promise<string | null> {
   }
 }
 
-// Calculate Base onchain score
-async function getBaseOnchainScore(address: string): Promise<number | null> {
+// Get Builder Score from Talent Protocol (official Base reputation score)
+async function getTalentBuilderScore(address: string): Promise<number | null> {
   try {
-    console.log(`[Base] Calculating onchain score for ${address}...`);
+    console.log(`[Talent Protocol] Fetching Builder Score for ${address}...`);
 
-    // Get transaction count on Base
-    const txCount = await basePublicClient.getTransactionCount({
-      address: address as `0x${string}`,
+    const apiKey = process.env.TALENT_PROTOCOL_API_KEY;
+    if (!apiKey) {
+      console.warn('[Talent Protocol] API key not configured');
+      return null;
+    }
+
+    const response = await fetch(`https://api.talentprotocol.com/api/v2/passports/${address}`, {
+      headers: {
+        'X-API-KEY': apiKey,
+        'Accept': 'application/json',
+      },
+      next: { revalidate: 3600 } // Cache for 1 hour
     });
 
-    // Get ETH balance on Base
-    const balance = await basePublicClient.getBalance({
-      address: address as `0x${string}`,
-    });
+    if (!response.ok) {
+      console.warn(`[Talent Protocol] Failed to fetch score for ${address}: ${response.status}`);
+      return null;
+    }
 
-    // Calculate score based on:
-    // - Transaction count (up to 500 points, 1 point per tx)
-    // - Balance (up to 500 points, based on ETH amount)
-    const txScore = Math.min(txCount, 500);
-    const balanceScore = Math.min(Number(balance) / 1e18 * 100, 500); // 1 ETH = 100 points, capped at 500
+    const data = await response.json();
+    const score = data.passport?.score ?? null;
 
-    const totalScore = Math.round(txScore + balanceScore);
+    if (score !== null) {
+      console.log(`[Talent Protocol] ✓ Builder Score for ${address}: ${score}`);
+    }
 
-    console.log(`[Base] ✓ Score for ${address}: ${totalScore} (txs: ${txCount}, balance: ${Number(balance) / 1e18} ETH)`);
-
-    return totalScore;
+    return score;
   } catch (error) {
-    console.error(`[Base] Error calculating score for ${address}:`, error);
+    console.error(`[Talent Protocol] Error fetching score for ${address}:`, error);
     return null;
   }
 }
 
-// Calculate a Neynar-based score from user engagement metrics
-function calculateNeynarScore(user: any): number {
-  // Score based on follower count, following count, and engagement
-  const followerCount = user.follower_count || 0;
-  const followingCount = user.following_count || 0;
+// Extract Neynar's raw reputation score (0-1 scale)
+function getNeynarScore(user: any): number | null {
+  // Neynar provides a user quality score in the experimental object
+  // The field can be accessed as user.experimental?.neynar_user_score or similar
+  const score = user.experimental?.neynar_user_score ?? user.neynar_user_score ?? null;
 
-  // Simple scoring algorithm:
-  // - Followers contribute to score
-  // - Following/follower ratio matters (higher ratio = lower score)
-  // - Cap at 1000 points
-  let score = Math.min(followerCount / 10, 1000);
-
-  // Penalize accounts with very high following/follower ratios
-  if (followerCount > 0) {
-    const ratio = followingCount / followerCount;
-    if (ratio > 2) {
-      score *= 0.7; // 30% penalty for high follow/follower ratio
-    }
+  if (score !== null) {
+    console.log(`[Neynar] Raw user score: ${score}`);
   }
 
-  return Math.round(score);
+  return score;
 }
 
 // GET /api/user-scores?fid=123
@@ -173,10 +169,10 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // Calculate Neynar score
-    const neynarScore = calculateNeynarScore(user);
+    // Get Neynar's raw reputation score (0-1 scale)
+    const neynarScore = getNeynarScore(user);
 
-    // Collect all possible addresses to check for Ethos score
+    // Collect all possible addresses to check for reputation scores
     const addressesToCheck: string[] = [];
 
     // 1. Add all verified addresses
@@ -199,24 +195,24 @@ export async function GET(req: NextRequest) {
       addressesToCheck.push(user.custody_address);
     }
 
-    console.log(`[/api/user-scores] Checking ${addressesToCheck.length} addresses for Ethos score`);
+    console.log(`[/api/user-scores] Checking ${addressesToCheck.length} addresses for reputation scores`);
 
     // Get Ethos score from any of the addresses
     const ethosScore = await getEthosScoreFromAddresses(addressesToCheck);
 
-    // Get Base onchain score from primary address (first verified or custody)
-    let baseScore: number | null = null;
+    // Get Talent Protocol Builder Score (official Base reputation) from primary address
+    let builderScore: number | null = null;
     const primaryAddress = user.verifications?.[0] || user.custody_address;
     if (primaryAddress) {
-      baseScore = await getBaseOnchainScore(primaryAddress);
+      builderScore = await getTalentBuilderScore(primaryAddress);
     }
 
-    console.log(`[/api/user-scores] ✓ Scores for FID ${fid}:`, { neynarScore, ethosScore, baseScore });
+    console.log(`[/api/user-scores] ✓ Scores for FID ${fid}:`, { neynarScore, ethosScore, builderScore });
 
     return NextResponse.json({
       neynarScore,
       ethosScore,
-      baseScore,
+      builderScore,
       followerCount: user.follower_count || 0,
       followingCount: user.following_count || 0,
     });

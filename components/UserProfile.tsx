@@ -7,9 +7,9 @@ interface UserProfileProps {
 }
 
 interface UserScores {
-  neynarScore: number;
+  neynarScore: number | null;
   ethosScore: number | null;
-  baseScore: number | null;
+  builderScore: number | null;
   followerCount: number;
   followingCount: number;
 }
@@ -125,16 +125,21 @@ export default function UserProfile({ userFid }: UserProfileProps) {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
                   <div style={{ fontWeight: 600, fontSize: '0.95rem' }}>Neynar Score</div>
                   <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#6366f1' }}>
-                    {userScores.neynarScore}
+                    {userScores.neynarScore !== null ? userScores.neynarScore.toFixed(2) : 'N/A'}
                   </div>
                 </div>
                 <div style={{ fontSize: '0.8rem', color: 'var(--fc-text-soft)', display: 'flex', justifyContent: 'space-between' }}>
                   <span>{userScores.followerCount} followers</span>
                   <span>{userScores.followingCount} following</span>
                 </div>
+                {userScores.neynarScore === null && (
+                  <div style={{ fontSize: '0.75rem', color: 'var(--fc-text-soft)', marginTop: '0.5rem' }}>
+                    Score not available from Neynar API
+                  </div>
+                )}
               </div>
 
-              {/* Base Score */}
+              {/* Builder Score (Talent Protocol) */}
               <div style={{
                 padding: '1rem',
                 background: 'rgba(37, 99, 235, 0.1)',
@@ -142,16 +147,14 @@ export default function UserProfile({ userFid }: UserProfileProps) {
                 border: '1px solid rgba(37, 99, 235, 0.2)'
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div style={{ fontWeight: 600, fontSize: '0.95rem' }}>Base Onchain Score</div>
+                  <div style={{ fontWeight: 600, fontSize: '0.95rem' }}>Builder Score</div>
                   <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#2563eb' }}>
-                    {userScores.baseScore !== null ? userScores.baseScore : 'N/A'}
+                    {userScores.builderScore !== null ? userScores.builderScore : 'N/A'}
                   </div>
                 </div>
-                {userScores.baseScore === null && (
-                  <div style={{ fontSize: '0.75rem', color: 'var(--fc-text-soft)', marginTop: '0.5rem' }}>
-                    No verified address or no Base activity
-                  </div>
-                )}
+                <div style={{ fontSize: '0.75rem', color: 'var(--fc-text-soft)', marginTop: '0.5rem' }}>
+                  {userScores.builderScore !== null ? 'Talent Protocol • Base Network' : 'No verified address or score not available'}
+                </div>
               </div>
 
               {/* Ethos Score */}
