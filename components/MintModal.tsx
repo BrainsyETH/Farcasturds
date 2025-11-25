@@ -299,28 +299,7 @@ export function MintModal({ isOpen, onClose, fid, imageUrl, onSuccess }: MintMod
         </div>
 
         {/* Note: Image generates AFTER mint confirms */}
-
-        {/* Price Display */}
-        <div className="mb-4 bg-purple-800 bg-opacity-50 rounded-lg p-4">
-          <div className="flex justify-between items-center">
-            <span className="text-gray-300">Mint Price:</span>
-            <span className="text-xl font-bold text-white">
-              {mintPrice === '0' ? 'Free' : `${mintPrice} ETH`}
-            </span>
-          </div>
-          <div className="flex justify-between items-center mt-2">
-            <span className="text-gray-300">FID:</span>
-            <span className="text-white font-mono">#{fid}</span>
-          </div>
-          {address && (
-            <div className="flex justify-between items-center mt-2">
-              <span className="text-gray-300">To:</span>
-              <span className="text-white font-mono text-sm">
-                {address.slice(0, 6)}...{address.slice(-4)}
-              </span>
-            </div>
-          )}
-        </div>
+        {/* Mint details (price, FID, address) appear in Farcaster Pay modal only */}
 
         {/* Wallet Connection Warning */}
         {!address && (
@@ -402,7 +381,7 @@ export function MintModal({ isOpen, onClose, fid, imageUrl, onSuccess }: MintMod
               ) : isConfirmed ? (
                 '✓ Minted!'
               ) : (
-                `💩 Mint ${mintPrice === '0' ? 'Free' : `for ${mintPrice} ETH`}`
+                '💩 Mint'
               )}
             </button>
           )}
