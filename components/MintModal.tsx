@@ -54,6 +54,7 @@ export function MintModal({ isOpen, onClose, fid, imageUrl, onSuccess }: MintMod
   useEffect(() => {
     async function fetchPrice() {
       try {
+        // First try to get price directly from contract
         const res = await fetch('/api/config/mint-price')
         if (res.ok) {
           const data = await res.json()
@@ -61,6 +62,8 @@ export function MintModal({ isOpen, onClose, fid, imageUrl, onSuccess }: MintMod
         }
       } catch (err) {
         console.error('Failed to fetch mint price:', err)
+        // Fallback to 0 if fetch fails
+        setMintPrice('0')
       }
     }
     if (isOpen) {
@@ -240,6 +243,17 @@ export function MintModal({ isOpen, onClose, fid, imageUrl, onSuccess }: MintMod
         throw new Error('Contract address not configured')
       }
 
+      const paymentValue = parseEther(mintPrice || '0')
+
+      console.log('[MintModal] Mint parameters:', {
+        to: address,
+        fid,
+        deadline: mintAuthorization.deadline,
+        signatureLength: mintAuthorization.signature.length,
+        mintPriceETH: mintPrice,
+        paymentValueWei: paymentValue.toString()
+      })
+
       writeContract({
         address: CONTRACT_ADDRESS,
         abi: farcasturdsV3Abi,
@@ -250,7 +264,7 @@ export function MintModal({ isOpen, onClose, fid, imageUrl, onSuccess }: MintMod
           BigInt(mintAuthorization.deadline),
           mintAuthorization.signature as `0x${string}`
         ],
-        value: parseEther(mintPrice || '0'),
+        value: paymentValue,
       })
 
       setStatus('Please confirm the transaction in your wallet...')
