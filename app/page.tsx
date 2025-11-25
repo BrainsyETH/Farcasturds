@@ -9,7 +9,7 @@ import { generateSiweMessage, generateNonce, verifySiweSignature } from '@/lib/a
 import { base } from 'wagmi/chains';
 import TabNavigation, { TabId } from '@/components/TabNavigation';
 import Leaderboard from '@/components/Leaderboard';
-import HowItWorks from '@/components/HowItWorks';
+import UserProfile from '@/components/UserProfile';
 
 type MeResponse = {
   fid: number;
@@ -869,7 +869,7 @@ export default function HomePage() {
       </section>
 
       {/* Tab Navigation */}
-      <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
+      <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} username={me.username} />
 
       {/* Mint Tab Content */}
       {activeTab === 'mint' && (
@@ -1303,9 +1303,9 @@ export default function HomePage() {
         <Leaderboard userFid={me?.fid} />
       )}
 
-      {/* How It Works Tab Content */}
+      {/* User Profile Tab Content */}
       {activeTab === 'howitworks' && (
-        <HowItWorks />
+        <UserProfile userFid={me?.fid} />
       )}
     </main>
   );
