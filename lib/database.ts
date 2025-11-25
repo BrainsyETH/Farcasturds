@@ -173,14 +173,26 @@ export async function checkRateLimit(fid: number): Promise<{
 // ============================================================================
 
 export async function checkIfCastProcessed(castHash: string): Promise<boolean> {
-  // Check the processed_casts table for any cast that's been handled
-  const { data } = await supabase
+  // Check the processed_casts table first
+  const { data: processedData } = await supabase
     .from('processed_casts')
     .select('cast_hash')
     .eq('cast_hash', castHash)
     .single();
 
-  return !!data;
+  if (processedData) {
+    return true;
+  }
+
+  // Fallback: check the turds table for backward compatibility
+  // (to handle casts that were processed before the processed_casts table existed)
+  const { data: turdData } = await supabase
+    .from('turds')
+    .select('cast_hash')
+    .eq('cast_hash', castHash)
+    .single();
+
+  return !!turdData;
 }
 
 export async function markCastAsProcessed(
