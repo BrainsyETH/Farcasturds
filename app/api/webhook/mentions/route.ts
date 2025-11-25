@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { processTurdCommand, replyToCast } from '@/lib/bot';
-import { recordTurd, checkRateLimit, checkIfCastProcessed, getRandomMeme } from '@/lib/database';
+import { recordTurd, checkRateLimit, checkIfCastProcessed, getRandomMeme, markCastAsProcessed } from '@/lib/database';
 import { checkUserHasNFT } from '@/lib/nftVerification';
 
 export async function POST(request: Request) {
@@ -34,6 +34,7 @@ export async function POST(request: Request) {
 
     if (!command) {
       console.log(`❌ Invalid command format`);
+      await markCastAsProcessed(cast.hash, 'invalid_command');
       return NextResponse.json({ status: 'invalid_command' });
     }
 
@@ -51,6 +52,8 @@ export async function POST(request: Request) {
         cast.hash,
         `@${command.senderUsername} ${rateLimitCheck.reason}`
       );
+
+      await markCastAsProcessed(cast.hash, 'rate_limited', command.senderFid, command.senderUsername);
 
       return NextResponse.json({
         status: 'rate_limited',
@@ -72,6 +75,8 @@ export async function POST(request: Request) {
         `@${command.senderUsername} You need to mint a Farcasturd NFT to send turds!`,
         ['https://farcasturds.vercel.app']
       );
+
+      await markCastAsProcessed(cast.hash, 'nft_required', command.senderFid, command.senderUsername);
 
       return NextResponse.json({
         status: 'nft_required',
@@ -100,6 +105,9 @@ export async function POST(request: Request) {
         cast_hash: cast.hash,
       });
       console.log(`✓ Turd recorded in database successfully`);
+
+      // Mark the cast as successfully processed
+      await markCastAsProcessed(cast.hash, 'success', command.senderFid, command.senderUsername);
     } catch (recordError) {
       console.error(`❌ FAILED to record turd in database:`, recordError);
       throw recordError; // Re-throw to be caught by outer catch
