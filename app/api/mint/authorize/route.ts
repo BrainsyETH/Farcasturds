@@ -58,9 +58,10 @@ export async function POST(req: NextRequest) {
     const deadline = Math.floor(Date.now() / 1000) + (5 * 60)
 
     // Create message hash matching contract's keccak256(abi.encodePacked(to, fid, deadline))
+    // NOTE: abi.encodePacked encodes address as 20 bytes (no padding), uint256 as 32 bytes
     const messageHash = keccak256(
       toBytes(
-        `0x${to.slice(2).padStart(64, '0')}${fid.toString(16).padStart(64, '0')}${deadline.toString(16).padStart(64, '0')}`
+        `0x${to.slice(2)}${fid.toString(16).padStart(64, '0')}${deadline.toString(16).padStart(64, '0')}`
       )
     )
 
