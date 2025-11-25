@@ -21,7 +21,7 @@ export function generateSiweMessage(params: {
   const message = new SiweMessage({
     domain: typeof window !== 'undefined' ? window.location.host : '',
     address: params.address,
-    statement: `Sign in to Farcasturds with Farcaster\n\nFarcaster ID: ${params.fid}`,
+    statement: `Sign in to Farcasturds with Farcaster (FID: ${params.fid})`,
     uri: typeof window !== 'undefined' ? window.location.origin : '',
     version: '1',
     chainId: params.chainId,
