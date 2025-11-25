@@ -15,7 +15,7 @@ interface UserScores {
 }
 
 export default function UserProfile({ userFid }: UserProfileProps) {
-  const [userStats, setUserStats] = useState<{ received: number; sent: number } | null>(null);
+  const [userStats, setUserStats] = useState<{ received: number; sent: number; turdScore: number } | null>(null);
   const [userScores, setUserScores] = useState<UserScores | null>(null);
   const [loading, setLoading] = useState(true);
   const [scoresLoading, setScoresLoading] = useState(true);
@@ -86,6 +86,13 @@ export default function UserProfile({ userFid }: UserProfileProps) {
           <div className="fc-card">
             <h3 className="fc-card-title">Your Stats</h3>
             <div className="fc-user-stats">
+              <div className="fc-stat-item">
+                <div className="fc-stat-value" style={{ color: '#c2410c' }}>{userStats.turdScore}%</div>
+                <div className="fc-stat-label">
+                  💩 Turd Score
+                </div>
+              </div>
+              <div className="fc-stat-divider"></div>
               <div className="fc-stat-item">
                 <div className="fc-stat-value">{userStats.received}</div>
                 <div className="fc-stat-label">
