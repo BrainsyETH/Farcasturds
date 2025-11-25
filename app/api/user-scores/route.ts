@@ -1,9 +1,17 @@
 // app/api/user-scores/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { NeynarAPIClient } from "@neynar/nodejs-sdk";
+import { createPublicClient, http, normalize } from "viem";
+import { mainnet } from "viem/chains";
 
 const neynar = new NeynarAPIClient({
   apiKey: process.env.NEYNAR_API_KEY!,
+});
+
+// Create a public client for ENS resolution
+const publicClient = createPublicClient({
+  chain: mainnet,
+  transport: http(),
 });
 
 // Fetch Ethos score from Ethos API
@@ -27,6 +35,46 @@ async function getEthosScore(address: string): Promise<number | null> {
     return data.score ?? null;
   } catch (error) {
     console.error('[Ethos] Error fetching score:', error);
+    return null;
+  }
+}
+
+// Try to get Ethos score from multiple addresses
+async function getEthosScoreFromAddresses(addresses: string[]): Promise<number | null> {
+  for (const address of addresses) {
+    if (!address) continue;
+
+    console.log(`[Ethos] Trying address: ${address}`);
+    const score = await getEthosScore(address);
+
+    if (score !== null) {
+      console.log(`[Ethos] ✓ Found score ${score} for address: ${address}`);
+      return score;
+    }
+  }
+
+  return null;
+}
+
+// Resolve ENS name to address
+async function resolveENS(ensName: string): Promise<string | null> {
+  try {
+    if (!ensName.endsWith('.eth')) {
+      return null;
+    }
+
+    console.log(`[ENS] Resolving ${ensName}...`);
+    const address = await publicClient.getEnsAddress({
+      name: normalize(ensName),
+    });
+
+    if (address) {
+      console.log(`[ENS] ✓ Resolved ${ensName} to ${address}`);
+    }
+
+    return address;
+  } catch (error) {
+    console.error(`[ENS] Error resolving ${ensName}:`, error);
     return null;
   }
 }
@@ -90,13 +138,33 @@ export async function GET(req: NextRequest) {
     // Calculate Neynar score
     const neynarScore = calculateNeynarScore(user);
 
-    // Get Ethos score (if user has verified addresses)
-    let ethosScore: number | null = null;
-    const verifiedAddress = user.verifications?.[0] || user.custody_address;
+    // Collect all possible addresses to check for Ethos score
+    const addressesToCheck: string[] = [];
 
-    if (verifiedAddress) {
-      ethosScore = await getEthosScore(verifiedAddress);
+    // 1. Add all verified addresses
+    if (user.verifications && user.verifications.length > 0) {
+      addressesToCheck.push(...user.verifications);
+      console.log(`[/api/user-scores] Found ${user.verifications.length} verified addresses`);
     }
+
+    // 2. Try to resolve ENS name if available
+    const ensName = user.username ? `${user.username}.eth` : null;
+    if (ensName) {
+      const ensAddress = await resolveENS(ensName);
+      if (ensAddress) {
+        addressesToCheck.push(ensAddress);
+      }
+    }
+
+    // 3. Add custody address as fallback
+    if (user.custody_address) {
+      addressesToCheck.push(user.custody_address);
+    }
+
+    console.log(`[/api/user-scores] Checking ${addressesToCheck.length} addresses for Ethos score`);
+
+    // Get Ethos score from any of the addresses
+    const ethosScore = await getEthosScoreFromAddresses(addressesToCheck);
 
     console.log(`[/api/user-scores] ✓ Scores for FID ${fid}:`, { neynarScore, ethosScore });
 
