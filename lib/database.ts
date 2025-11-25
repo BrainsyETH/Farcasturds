@@ -173,13 +173,37 @@ export async function checkRateLimit(fid: number): Promise<{
 // ============================================================================
 
 export async function checkIfCastProcessed(castHash: string): Promise<boolean> {
+  // Check the processed_casts table for any cast that's been handled
   const { data } = await supabase
-    .from('turds')
+    .from('processed_casts')
     .select('cast_hash')
     .eq('cast_hash', castHash)
     .single();
 
   return !!data;
+}
+
+export async function markCastAsProcessed(
+  castHash: string,
+  status: string,
+  fromFid?: number,
+  fromUsername?: string
+): Promise<void> {
+  const { error } = await supabase
+    .from('processed_casts')
+    .insert([{
+      cast_hash: castHash,
+      status,
+      from_fid: fromFid || null,
+      from_username: fromUsername || null,
+    }]);
+
+  if (error) {
+    // If it's a duplicate key error, that's fine - the cast is already processed
+    if (error.code !== '23505') { // 23505 is PostgreSQL's unique violation error code
+      throw error;
+    }
+  }
 }
 
 // ============================================================================

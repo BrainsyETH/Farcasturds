@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { processTurdCommand, replyToCast } from '@/lib/bot';
-import { recordTurd, checkRateLimit, checkIfCastProcessed, getRandomMeme } from '@/lib/database';
+import { recordTurd, checkRateLimit, checkIfCastProcessed, getRandomMeme, markCastAsProcessed } from '@/lib/database';
 import { checkUserHasNFT } from '@/lib/nftVerification';
 
 // Lazy initialization to avoid build-time errors
@@ -34,7 +34,16 @@ export async function GET() {
       return NextResponse.json({ status: 'success', processed: 0 });
     }
 
-    for (const notification of notifications.notifications) {
+    // Only process notifications from the last 30 minutes to avoid reprocessing old mentions
+    const thirtyMinutesAgo = Date.now() - (30 * 60 * 1000);
+    const recentNotifications = notifications.notifications.filter(notification => {
+      const notificationTime = new Date(notification.cast.timestamp).getTime();
+      return notificationTime > thirtyMinutesAgo;
+    });
+
+    console.log(`📊 Found ${notifications.notifications.length} total notifications, ${recentNotifications.length} from last 30 minutes`);
+
+    for (const notification of recentNotifications) {
       const cast = notification.cast;
 
       // Skip if already processed (check database)
@@ -43,7 +52,10 @@ export async function GET() {
       
       // Process the command
       const command = await processTurdCommand(cast);
-      if (!command) continue;
+      if (!command) {
+        await markCastAsProcessed(cast.hash, 'invalid_command');
+        continue;
+      }
 
       // Check rate limit
       const rateLimitCheck = await checkRateLimit(command.senderFid);
@@ -52,6 +64,7 @@ export async function GET() {
           cast.hash,
           `@${command.senderUsername} ${rateLimitCheck.reason}`
         );
+        await markCastAsProcessed(cast.hash, 'rate_limited', command.senderFid, command.senderUsername);
         continue;
       }
 
@@ -63,6 +76,7 @@ export async function GET() {
           `@${command.senderUsername} You need to mint a Farcasturd NFT to send turds!`,
           ['https://farcasturds.vercel.app']
         );
+        await markCastAsProcessed(cast.hash, 'nft_required', command.senderFid, command.senderUsername);
         continue;
       }
 
@@ -74,6 +88,9 @@ export async function GET() {
         to_username: command.targetUsername,
         cast_hash: cast.hash,
       });
+
+      // Mark the cast as successfully processed
+      await markCastAsProcessed(cast.hash, 'success', command.senderFid, command.senderUsername);
 
       // Send a random meme/gif response for NFT holders, or confirmation if no meme available
       let memeSent = false;
@@ -99,7 +116,7 @@ export async function GET() {
       }
     }
     
-    return NextResponse.json({ status: 'success', processed: notifications.notifications.length });
+    return NextResponse.json({ status: 'success', processed: recentNotifications.length });
   } catch (error) {
     console.error('Polling error:', error);
     return NextResponse.json({ error: 'Internal error' }, { status: 500 });
