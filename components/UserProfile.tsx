@@ -84,10 +84,11 @@ export default function UserProfile({ userFid }: UserProfileProps) {
       {userStats && (
         <section className="fc-section">
           <div className="fc-card">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
-              <div style={{ flex: '0 0 auto' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                  <h3 className="fc-card-title" style={{ margin: 0 }}>💩 Turd Score</h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ flex: '0 0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                  <img src="/splash.png" alt="" style={{ width: '1em', height: '1em', display: 'inline-block', verticalAlign: 'middle' }} />
+                  <h3 className="fc-card-title" style={{ margin: 0 }}>Turd Score</h3>
                   <span
                     title="Your percentile rank based on turds received. Higher = more bad takes called out. 99% = top 1% of bad takes!"
                     style={{
@@ -107,22 +108,22 @@ export default function UserProfile({ userFid }: UserProfileProps) {
                     i
                   </span>
                 </div>
-                <div className="fc-stat-value" style={{ color: '#c2410c', fontSize: '2rem', textAlign: 'left' }}>
+                <div className="fc-stat-value" style={{ color: '#c2410c', fontSize: '2rem' }}>
                   {userStats.turdScore}%
                 </div>
               </div>
 
               <div style={{ flex: '1', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <h3 className="fc-card-title" style={{ margin: '0 0 0.5rem 0' }}>Your Stats</h3>
-                <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
-                  <div className="fc-stat-item">
+                <h3 className="fc-card-title" style={{ margin: '0 0 0.75rem 0' }}>Your Stats</h3>
+                <div style={{ display: 'flex', gap: '2rem', alignItems: 'flex-start' }}>
+                  <div className="fc-stat-item" style={{ textAlign: 'center' }}>
                     <div className="fc-stat-value">{userStats.received}</div>
                     <div className="fc-stat-label">
                       <img src="/splash.png" alt="" style={{ width: '1em', height: '1em', display: 'inline-block', verticalAlign: 'middle', marginRight: '0.2em' }} />
                       Received
                     </div>
                   </div>
-                  <div className="fc-stat-item">
+                  <div className="fc-stat-item" style={{ textAlign: 'center' }}>
                     <div className="fc-stat-value">{userStats.sent}</div>
                     <div className="fc-stat-label">
                       <img src="/splash.png" alt="" style={{ width: '1em', height: '1em', display: 'inline-block', verticalAlign: 'middle', marginRight: '0.2em' }} />
