@@ -118,9 +118,9 @@ export default function UserProfile({ userFid }: UserProfileProps) {
               {/* Neynar Score */}
               <div style={{
                 padding: '1rem',
-                background: 'rgba(139, 92, 246, 0.1)',
+                background: 'rgba(139, 92, 246, 0.15)',
                 borderRadius: '12px',
-                border: '1px solid rgba(139, 92, 246, 0.2)'
+                border: '1.5px solid rgba(139, 92, 246, 0.35)'
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
                   <div style={{ fontWeight: 600, fontSize: '0.95rem' }}>Neynar Score</div>
@@ -153,9 +153,9 @@ export default function UserProfile({ userFid }: UserProfileProps) {
               {/* Builder Score (Talent Protocol) */}
               <div style={{
                 padding: '1rem',
-                background: 'rgba(59, 130, 246, 0.1)',
+                background: 'rgba(59, 130, 246, 0.15)',
                 borderRadius: '12px',
-                border: '1px solid rgba(59, 130, 246, 0.2)'
+                border: '1.5px solid rgba(59, 130, 246, 0.35)'
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
                   <div style={{ fontWeight: 600, fontSize: '0.95rem' }}>Builder Score</div>
@@ -184,9 +184,9 @@ export default function UserProfile({ userFid }: UserProfileProps) {
               {/* Ethos Score */}
               <div style={{
                 padding: '1rem',
-                background: 'rgba(34, 197, 94, 0.1)',
+                background: 'rgba(34, 197, 94, 0.15)',
                 borderRadius: '12px',
-                border: '1px solid rgba(34, 197, 94, 0.2)'
+                border: '1.5px solid rgba(34, 197, 94, 0.35)'
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
                   <div style={{ fontWeight: 600, fontSize: '0.95rem' }}>Ethos Onchain Score</div>
