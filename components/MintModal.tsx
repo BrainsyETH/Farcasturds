@@ -182,10 +182,7 @@ export function MintModal({ isOpen, onClose, fid, imageUrl, onSuccess }: MintMod
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             fid,
-            to: address,
-            siweSignature: sig,
-            siweMessage: msg,
-            nonce
+            to: address
           })
         })
 

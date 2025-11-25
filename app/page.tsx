@@ -298,10 +298,7 @@ export default function HomePage() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               fid: me.fid,
-              to: address,
-              siweSignature: signature,
-              siweMessage: siweMessage,
-              nonce: authNonce
+              to: address
             })
           });
 

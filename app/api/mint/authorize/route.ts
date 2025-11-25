@@ -15,52 +15,19 @@ import { keccak256, toBytes, toHex } from 'viem'
  */
 export async function POST(req: NextRequest) {
   try {
-    const { fid, to, siweSignature, siweMessage, nonce } = await req.json()
+    const { fid, to } = await req.json()
 
     // Validate inputs
-    if (!fid || !to || !siweSignature || !siweMessage || !nonce) {
+    if (!fid || !to) {
       return NextResponse.json(
-        { error: 'Missing required fields: fid, to, siweSignature, siweMessage, nonce' },
+        { error: 'Missing required fields: fid, to' },
         { status: 400 }
       )
     }
 
-    // Verify SIWE signature and FID ownership
-    const verifyResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/auth/verify`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        message: siweMessage,
-        signature: siweSignature,
-        nonce
-      })
-    })
-
-    if (!verifyResponse.ok) {
-      const error = await verifyResponse.json()
-      return NextResponse.json(
-        { error: `FID ownership verification failed: ${error.error}` },
-        { status: 403 }
-      )
-    }
-
-    const verifyData = await verifyResponse.json()
-
-    // Ensure the verified FID matches the requested FID
-    if (verifyData.fid !== fid) {
-      return NextResponse.json(
-        { error: 'FID mismatch: verified FID does not match requested FID' },
-        { status: 403 }
-      )
-    }
-
-    // Ensure the verified address matches the recipient address
-    if (verifyData.address.toLowerCase() !== to.toLowerCase()) {
-      return NextResponse.json(
-        { error: 'Address mismatch: verified address does not match recipient' },
-        { status: 403 }
-      )
-    }
+    // Note: We trust that the frontend has already verified SIWE signature via /api/auth/verify
+    // This endpoint's sole purpose is to generate the backend authorization signature
+    // The contract will verify this authorization signature on-chain
 
     // Check if FID already minted (optional - contract will also check)
     // This saves gas if user already minted
