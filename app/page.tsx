@@ -478,7 +478,8 @@ export default function HomePage() {
       return;
     }
 
-    // Connect wallet if not already connected
+    // Try to connect wallet if not already connected, but don't block on failure
+    // The MintModal will handle wallet connection requirements
     if (!isConnected && connectors.length > 0) {
       try {
         setStatus("Connecting wallet...");
@@ -486,14 +487,12 @@ export default function HomePage() {
         await connect({ connector: farcasterConnector });
         console.log("[Wallet] ✓ Connected successfully");
       } catch (error) {
-        console.error('[Wallet] Connection failed:', error);
-        setStatus("⚠️ Failed to connect wallet");
-        setTimeout(() => setStatus(null), 3000);
-        return;
+        console.error('[Wallet] Pre-connection failed (will retry in modal):', error);
+        // Don't return - continue to open modal which will handle wallet connection
       }
     }
 
-    // Open MintModal for V3 authorization flow
+    // Always open MintModal for V3 authorization flow
     // Image generation happens AFTER mint confirms
     console.log('[GenerateAndMint] Opening MintModal for FID:', me.fid);
     setShowMintModal(true);
@@ -511,7 +510,8 @@ export default function HomePage() {
       return;
     }
 
-    // Connect wallet if not already connected
+    // Try to connect wallet if not already connected, but don't block on failure
+    // The MintModal will handle wallet connection requirements
     if (!isConnected && connectors.length > 0) {
       try {
         setStatus("Connecting wallet...");
@@ -519,14 +519,12 @@ export default function HomePage() {
         await connect({ connector: farcasterConnector });
         console.log("[Wallet] ✓ Connected successfully");
       } catch (error) {
-        console.error('[Wallet] Connection failed:', error);
-        setStatus("⚠️ Failed to connect wallet");
-        setTimeout(() => setStatus(null), 3000);
-        return;
+        console.error('[Wallet] Pre-connection failed (will retry in modal):', error);
+        // Don't return - continue to open modal which will handle wallet connection
       }
     }
 
-    // Open the mint modal
+    // Always open the mint modal
     setShowMintModal(true);
   }
 

@@ -322,6 +322,13 @@ export function MintModal({ isOpen, onClose, fid, imageUrl, onSuccess }: MintMod
           )}
         </div>
 
+        {/* Wallet Connection Warning */}
+        {!address && (
+          <div className="mb-4 p-3 bg-yellow-600 bg-opacity-30 border border-yellow-400 rounded-lg text-yellow-200 text-sm">
+            ⚠️ Please connect your wallet to continue. Make sure you're using the Farcaster app's built-in wallet.
+          </div>
+        )}
+
         {/* Status Messages */}
         {status && (
           <div className="mb-4 p-3 bg-blue-600 bg-opacity-30 border border-blue-400 rounded-lg text-blue-200 text-sm">
