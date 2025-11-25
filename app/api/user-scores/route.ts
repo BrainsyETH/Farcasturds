@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { NeynarAPIClient } from "@neynar/nodejs-sdk";
 import { createPublicClient, http, normalize } from "viem";
-import { mainnet } from "viem/chains";
+import { mainnet, base } from "viem/chains";
 
 const neynar = new NeynarAPIClient({
   apiKey: process.env.NEYNAR_API_KEY!,
@@ -12,6 +12,12 @@ const neynar = new NeynarAPIClient({
 const publicClient = createPublicClient({
   chain: mainnet,
   transport: http(),
+});
+
+// Create a public client for Base network
+const basePublicClient = createPublicClient({
+  chain: base,
+  transport: http(process.env.BASE_RPC_URL || 'https://mainnet.base.org'),
 });
 
 // Fetch Ethos score from Ethos API
@@ -75,6 +81,38 @@ async function resolveENS(ensName: string): Promise<string | null> {
     return address;
   } catch (error) {
     console.error(`[ENS] Error resolving ${ensName}:`, error);
+    return null;
+  }
+}
+
+// Calculate Base onchain score
+async function getBaseOnchainScore(address: string): Promise<number | null> {
+  try {
+    console.log(`[Base] Calculating onchain score for ${address}...`);
+
+    // Get transaction count on Base
+    const txCount = await basePublicClient.getTransactionCount({
+      address: address as `0x${string}`,
+    });
+
+    // Get ETH balance on Base
+    const balance = await basePublicClient.getBalance({
+      address: address as `0x${string}`,
+    });
+
+    // Calculate score based on:
+    // - Transaction count (up to 500 points, 1 point per tx)
+    // - Balance (up to 500 points, based on ETH amount)
+    const txScore = Math.min(txCount, 500);
+    const balanceScore = Math.min(Number(balance) / 1e18 * 100, 500); // 1 ETH = 100 points, capped at 500
+
+    const totalScore = Math.round(txScore + balanceScore);
+
+    console.log(`[Base] ✓ Score for ${address}: ${totalScore} (txs: ${txCount}, balance: ${Number(balance) / 1e18} ETH)`);
+
+    return totalScore;
+  } catch (error) {
+    console.error(`[Base] Error calculating score for ${address}:`, error);
     return null;
   }
 }
@@ -166,11 +204,19 @@ export async function GET(req: NextRequest) {
     // Get Ethos score from any of the addresses
     const ethosScore = await getEthosScoreFromAddresses(addressesToCheck);
 
-    console.log(`[/api/user-scores] ✓ Scores for FID ${fid}:`, { neynarScore, ethosScore });
+    // Get Base onchain score from primary address (first verified or custody)
+    let baseScore: number | null = null;
+    const primaryAddress = user.verifications?.[0] || user.custody_address;
+    if (primaryAddress) {
+      baseScore = await getBaseOnchainScore(primaryAddress);
+    }
+
+    console.log(`[/api/user-scores] ✓ Scores for FID ${fid}:`, { neynarScore, ethosScore, baseScore });
 
     return NextResponse.json({
       neynarScore,
       ethosScore,
+      baseScore,
       followerCount: user.follower_count || 0,
       followingCount: user.following_count || 0,
     });
