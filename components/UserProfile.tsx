@@ -9,6 +9,7 @@ interface UserProfileProps {
 interface UserScores {
   neynarScore: number;
   ethosScore: number | null;
+  baseScore: number | null;
   followerCount: number;
   followingCount: number;
 }
@@ -131,6 +132,26 @@ export default function UserProfile({ userFid }: UserProfileProps) {
                   <span>{userScores.followerCount} followers</span>
                   <span>{userScores.followingCount} following</span>
                 </div>
+              </div>
+
+              {/* Base Score */}
+              <div style={{
+                padding: '1rem',
+                background: 'rgba(37, 99, 235, 0.1)',
+                borderRadius: '12px',
+                border: '1px solid rgba(37, 99, 235, 0.2)'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ fontWeight: 600, fontSize: '0.95rem' }}>Base Onchain Score</div>
+                  <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#2563eb' }}>
+                    {userScores.baseScore !== null ? userScores.baseScore : 'N/A'}
+                  </div>
+                </div>
+                {userScores.baseScore === null && (
+                  <div style={{ fontSize: '0.75rem', color: 'var(--fc-text-soft)', marginTop: '0.5rem' }}>
+                    No verified address or no Base activity
+                  </div>
+                )}
               </div>
 
               {/* Ethos Score */}

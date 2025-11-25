@@ -869,7 +869,7 @@ export default function HomePage() {
       </section>
 
       {/* Tab Navigation */}
-      <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} username={me.username} />
+      <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} username={me.username} pfpUrl={me.pfpUrl} />
 
       {/* Mint Tab Content */}
       {activeTab === 'mint' && (
