@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Extract FID from the statement
-    const fidMatch = siweMessage.statement?.match(/Farcaster ID: (\d+)/)
+    const fidMatch = siweMessage.statement?.match(/FID: (\d+)/)
     if (!fidMatch) {
       return NextResponse.json(
         { error: 'FID not found in message' },
