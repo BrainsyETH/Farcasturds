@@ -60,7 +60,7 @@ export async function GET() {
       if (!hasNFT) {
         await replyToCast(
           cast.hash,
-          `@${command.senderUsername} You need to mint a Farcasturd NFT to send turds!\n\nhttps://farcasturds.vercel.app`
+          `@${command.senderUsername} You need to mint a Farcasturd NFT to send turds!\n\nfarcasturds.vercel.app`
         );
         continue;
       }
