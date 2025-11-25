@@ -229,16 +229,16 @@ h2.fc-title {
    =========== */
 
 .fc-card {
-  background: linear-gradient(135deg, rgba(255, 244, 223, 0.75), rgba(255, 234, 203, 0.8));
-  backdrop-filter: blur(20px) saturate(200%);
-  -webkit-backdrop-filter: blur(20px) saturate(200%);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.8));
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
   border-radius: 18px;
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.7);
   padding: 18px;
   box-shadow:
-    0 10px 25px rgba(180, 145, 104, 0.18),
-    0 0 0 1px rgba(255, 255, 255, 0.4),
-    inset 0 1px 2px rgba(255, 255, 255, 0.8);
+    0 10px 30px rgba(143, 91, 255, 0.12),
+    0 0 0 1px rgba(255, 255, 255, 0.5),
+    inset 0 1px 2px rgba(255, 255, 255, 0.9);
   position: relative;
   overflow: hidden;
   transition:
@@ -253,9 +253,9 @@ h2.fc-title {
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(circle at top left, rgba(255, 255, 255, 0.8), transparent 50%),
-    radial-gradient(circle at bottom right, rgba(255, 248, 230, 0.6), transparent 50%);
-  opacity: 0.9;
+    radial-gradient(circle at top left, rgba(255, 255, 255, 0.6), transparent 50%),
+    radial-gradient(circle at bottom right, rgba(143, 91, 255, 0.03), transparent 60%);
+  opacity: 0.5;
 }
 
 .fc-card::after {
@@ -271,14 +271,14 @@ h2.fc-title {
 
 .fc-card:hover {
   transform: translateY(-2px);
-  border-color: rgba(255, 255, 255, 0.8);
+  border-color: rgba(255, 255, 255, 0.9);
   box-shadow:
-    0 14px 30px rgba(180, 145, 104, 0.26),
-    0 0 0 1px rgba(255, 255, 255, 0.6),
+    0 14px 35px rgba(143, 91, 255, 0.18),
+    0 0 0 1px rgba(255, 255, 255, 0.7),
     inset 0 1px 3px rgba(255, 255, 255, 1),
-    0 0 40px rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(24px) saturate(220%);
-  -webkit-backdrop-filter: blur(24px) saturate(220%);
+    0 0 50px rgba(143, 91, 255, 0.15);
+  backdrop-filter: blur(28px) saturate(200%);
+  -webkit-backdrop-filter: blur(28px) saturate(200%);
 }
 
 /* Stagger animation on load */
@@ -882,16 +882,16 @@ h2.fc-title {
 }
 
 .fc-tab-active {
-  background: linear-gradient(135deg, rgba(255, 244, 223, 0.95), rgba(255, 234, 203, 0.95));
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.9));
   color: var(--fc-text);
   font-weight: 600;
   box-shadow:
-    0 4px 8px rgba(191, 133, 66, 0.2),
-    0 0 0 1px rgba(255, 255, 255, 0.6);
+    0 4px 8px rgba(143, 91, 255, 0.15),
+    0 0 0 1px rgba(255, 255, 255, 0.7);
 }
 
 .fc-tab-active:hover {
-  background: linear-gradient(135deg, rgba(255, 244, 223, 1), rgba(255, 234, 203, 1));
+  background: linear-gradient(135deg, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0.95));
 }
 
 .fc-tab-icon {
