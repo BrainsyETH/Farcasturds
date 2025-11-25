@@ -5,7 +5,7 @@ import { sdk } from "@farcaster/miniapp-sdk";
 import { useAccount, useConnect, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { parseEther } from 'viem';
 import { MintModal } from '@/components/MintModal';
-import { farcasturdsV2Abi } from '@/abi/FarcasturdsV2';
+// Removed farcasturdsV2Abi - using MintModal for all minting (V3 with authorization)
 import { generateSiweMessage, generateNonce, verifySiweSignature } from '@/lib/auth';
 import TabNavigation, { TabId } from '@/components/TabNavigation';
 import Leaderboard from '@/components/Leaderboard';
@@ -478,57 +478,39 @@ export default function HomePage() {
       return;
     }
 
-    // Connect wallet if not already connected
-    if (!isConnected && connectors.length > 0) {
+    // First, generate the Farcasturd image
+    if (!hasGenerated) {
+      setStatus("Generating your Farcasturd...");
       try {
-        setStatus("Connecting wallet...");
-        const farcasterConnector = connectors[0];
-        await connect({ connector: farcasterConnector });
-        console.log("[Wallet] ✓ Connected successfully");
-      } catch (error) {
-        console.error('[Wallet] Connection failed:', error);
-        setStatus("⚠️ Failed to connect wallet");
-        setTimeout(() => setStatus(null), 3000);
-        return;
+        const res = await fetch('/api/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fid: me.fid }),
+        });
+
+        if (!res.ok) {
+          const error = await res.json();
+          throw new Error(error.error || 'Generation failed');
+        }
+
+        const data = await res.json();
+        setGeneratedImageUrl(data.imageUrl);
+        setHasGenerated(true);
+        localStorage.setItem(`farcasturd_generated_${me.fid}`, 'true');
+        setStatus("✓ Farcasturd generated! Opening mint modal...");
+
+        // Wait a moment then open mint modal
+        setTimeout(() => {
+          setShowMintModal(true);
+        }, 1000);
+      } catch (err: any) {
+        console.error('[Generate] Error:', err);
+        setStatus(`⚠️ Generation failed: ${err.message}`);
+        setTimeout(() => setStatus(null), 5000);
       }
-    }
-
-    if (!address) {
-      setStatus("⚠️ No wallet address available");
-      return;
-    }
-
-    // Trigger mint transaction directly - generation happens AFTER mint confirms
-    try {
-      const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_FARCASTURDS_ADDRESS as `0x${string}`;
-
-      if (!CONTRACT_ADDRESS) {
-        throw new Error('Contract address not configured');
-      }
-
-      // Get the actual mint price value (strip "Free" or "ETH" text)
-      let priceInEth = '0';
-      if (mintPrice !== "Free") {
-        priceInEth = mintPrice.replace(' ETH', '').trim();
-      }
-
-      console.log('[Mint] Price string:', mintPrice);
-      console.log('[Mint] Parsed price:', priceInEth);
-      console.log('[Mint] Wei value:', parseEther(priceInEth).toString());
-
-      setStatus("Preparing transaction...");
-
-      writeContract({
-        address: CONTRACT_ADDRESS,
-        abi: farcasturdsV2Abi,
-        functionName: 'mintFor',
-        args: [address, BigInt(me.fid)],
-        value: parseEther(priceInEth),
-      });
-    } catch (err: any) {
-      console.error('Mint error:', err);
-      setStatus(`⚠️ Failed to initiate transaction: ${err.message}`);
-      setTimeout(() => setStatus(null), 5000);
+    } else {
+      // Image already generated, go straight to mint modal
+      setShowMintModal(true);
     }
   }
 
