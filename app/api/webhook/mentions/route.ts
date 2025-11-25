@@ -69,7 +69,8 @@ export async function POST(request: Request) {
 
       await replyToCast(
         cast.hash,
-        `@${command.senderUsername} You need to mint a Farcasturd NFT to send turds!\n\nfarcasturds.vercel.app`
+        `@${command.senderUsername} You need to mint a Farcasturd NFT to send turds!`,
+        ['https://farcasturds.vercel.app']
       );
 
       return NextResponse.json({
