@@ -84,28 +84,51 @@ export default function UserProfile({ userFid }: UserProfileProps) {
       {userStats && (
         <section className="fc-section">
           <div className="fc-card">
-            <h3 className="fc-card-title">Your Stats</h3>
-            <div className="fc-user-stats">
-              <div className="fc-stat-item">
-                <div className="fc-stat-value" style={{ color: '#c2410c' }}>{userStats.turdScore}%</div>
-                <div className="fc-stat-label">
-                  💩 Turd Score
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
+              <div style={{ flex: '0 0 auto' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                  <h3 className="fc-card-title" style={{ margin: 0 }}>💩 Turd Score</h3>
+                  <span
+                    title="Your percentile rank based on turds received. Higher = more bad takes called out. 99% = top 1% of bad takes!"
+                    style={{
+                      cursor: 'help',
+                      fontSize: '0.75rem',
+                      color: 'var(--fc-text-soft)',
+                      backgroundColor: 'rgba(0,0,0,0.1)',
+                      borderRadius: '50%',
+                      width: '16px',
+                      height: '16px',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontWeight: 'bold'
+                    }}
+                  >
+                    i
+                  </span>
+                </div>
+                <div className="fc-stat-value" style={{ color: '#c2410c', fontSize: '2rem', textAlign: 'left' }}>
+                  {userStats.turdScore}%
                 </div>
               </div>
-              <div className="fc-stat-divider"></div>
-              <div className="fc-stat-item">
-                <div className="fc-stat-value">{userStats.received}</div>
-                <div className="fc-stat-label">
-                  <img src="/splash.png" alt="" style={{ width: '1em', height: '1em', display: 'inline-block', verticalAlign: 'middle', marginRight: '0.2em' }} />
-                  Received
-                </div>
-              </div>
-              <div className="fc-stat-divider"></div>
-              <div className="fc-stat-item">
-                <div className="fc-stat-value">{userStats.sent}</div>
-                <div className="fc-stat-label">
-                  <img src="/splash.png" alt="" style={{ width: '1em', height: '1em', display: 'inline-block', verticalAlign: 'middle', marginRight: '0.2em' }} />
-                  Sent
+
+              <div style={{ flex: '1', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <h3 className="fc-card-title" style={{ margin: '0 0 0.5rem 0' }}>Your Stats</h3>
+                <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
+                  <div className="fc-stat-item">
+                    <div className="fc-stat-value">{userStats.received}</div>
+                    <div className="fc-stat-label">
+                      <img src="/splash.png" alt="" style={{ width: '1em', height: '1em', display: 'inline-block', verticalAlign: 'middle', marginRight: '0.2em' }} />
+                      Received
+                    </div>
+                  </div>
+                  <div className="fc-stat-item">
+                    <div className="fc-stat-value">{userStats.sent}</div>
+                    <div className="fc-stat-label">
+                      <img src="/splash.png" alt="" style={{ width: '1em', height: '1em', display: 'inline-block', verticalAlign: 'middle', marginRight: '0.2em' }} />
+                      Sent
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
