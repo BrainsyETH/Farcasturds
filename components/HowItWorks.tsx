@@ -11,29 +11,29 @@ export default function HowItWorks() {
           <div className="fc-howto">
 
             <p className="fc-howto-step">
-              <strong>Spot a terrible take</strong> - Come across a post that's just plain wrong, cringe, or deserves to be called out?
+              <strong>Spot a crap take</strong> - Come across a post or content that deserves a turd?
             </p>
             <p className="fc-howto-step">
-              <strong>Call in the turd</strong> - Reply to that post with <code className="fc-code">@farcasturd</code> (make sure to tag it correctly!)
+              <strong>Alert the turd</strong> - Reply to that post with <code className="fc-code">@farcasturd</code> (make sure to tag it correctly!)
             </p>
             <p className="fc-howto-step">
-              <strong>Turd delivered!</strong> - The original poster automatically receives a turd NFT on their profile as a badge of shame
+              <strong>Turd flung!</strong> - OP automatically receives a turd added to their Turd Score
             </p>
             <p className="fc-howto-step">
-              <strong>One requirement</strong> - You must own a Farcasturds NFT to send turds. No NFT = no turding privileges!
+              <strong>Requirements</strong> - You must own a Farcasturds to send turds. No NFT = no poop privileges!
             </p>
 
             <div style={{ marginTop: '2rem' }}>
               <h4 style={{ marginBottom: '1rem', fontSize: '1.1em', fontWeight: 'bold' }}>Pro tips:</h4>
               <ul style={{ listStyleType: 'disc', paddingLeft: '1.5rem' }}>
                 <li style={{ marginBottom: '0.5rem' }}>
-                  Turds are permanent and publicly visible on the recipient's profile
+                  Turds are meant to be fun. Don't be a turd yourself. 
                 </li>
                 <li style={{ marginBottom: '0.5rem' }}>
-                  Use your turds wisely - they're a limited resource based on your NFT holdings
+                  Use your turds wisely - there are daily limits. 
                 </li>
                 <li style={{ marginBottom: '0.5rem' }}>
-                  The community can see who's sending turds, so your reputation is on the line too
+                  Your Turd Score is based on received Turds.
                 </li>
               </ul>
             </div>

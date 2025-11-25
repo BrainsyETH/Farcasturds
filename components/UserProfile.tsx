@@ -212,7 +212,7 @@ export default function UserProfile({ userFid }: UserProfileProps) {
                       rel="noopener noreferrer"
                       style={{ color: '#8b5cf6', textDecoration: 'none' }}
                     >
-                      Neynar User Quality Score →
+                      Neynar Quality Score
                     </a>
                   </div>
                 )}
@@ -233,7 +233,7 @@ export default function UserProfile({ userFid }: UserProfileProps) {
                 </div>
                 {userScores.builderScore === null ? (
                   <div style={{ fontSize: '0.75rem', color: 'var(--fc-text-soft)' }}>
-                    No verified address or score not available
+                    Pending Talent Protocol granting me API access 🙃
                   </div>
                 ) : (
                   <div style={{ fontSize: '0.75rem', color: 'var(--fc-text-soft)' }}>
