@@ -13,15 +13,16 @@ interface Tab {
 interface TabNavigationProps {
   activeTab: TabId;
   onTabChange: (tabId: TabId) => void;
+  username?: string;
 }
 
-const tabs: Tab[] = [
-  { id: 'mint', label: 'Mint', icon: '💩' },
-  { id: 'leaderboard', label: 'Leaderboard', icon: '🏆' },
-  { id: 'howitworks', label: 'How It Works', icon: '❓' }
-];
+export default function TabNavigation({ activeTab, onTabChange, username }: TabNavigationProps) {
+  const tabs: Tab[] = [
+    { id: 'mint', label: 'Mint', icon: '💩' },
+    { id: 'leaderboard', label: 'Leaderboard', icon: '🏆' },
+    { id: 'howitworks', label: username || 'Profile', icon: '👤' }
+  ];
 
-export default function TabNavigation({ activeTab, onTabChange }: TabNavigationProps) {
   return (
     <div className="fc-tab-navigation">
       {tabs.map((tab) => (
