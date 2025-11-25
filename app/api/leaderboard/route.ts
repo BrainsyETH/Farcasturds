@@ -49,10 +49,33 @@ export async function GET(request: Request) {
 
       console.log('[Leaderboard API] Sent count:', sent, 'Error:', sentError);
 
+      // Calculate Turd Score (percentile rank)
+      let turdScore = 0;
+      const receivedCount = received || 0;
+
+      if (receivedCount > 0) {
+        // Get all users with their received counts
+        const { data: allReceivedCounts, error: allCountsError } = await supabase
+          .rpc('get_all_received_counts');
+
+        if (!allCountsError && allReceivedCounts) {
+          const totalUsers = allReceivedCounts.length;
+          // Count users with fewer turds received (better than current user)
+          const usersWithFewer = allReceivedCounts.filter(
+            (u: any) => u.turd_count < receivedCount
+          ).length;
+
+          // Percentile: higher = more turds = worse takes
+          // 99th percentile = top 1% of bad takes
+          turdScore = totalUsers > 0 ? Math.round((usersWithFewer / totalUsers) * 100) : 0;
+        }
+      }
+
       userStats = {
         fid: parseInt(userFid),
         received: received || 0,
         sent: sent || 0,
+        turdScore,
       };
 
       console.log('[Leaderboard API] Final userStats:', userStats);
