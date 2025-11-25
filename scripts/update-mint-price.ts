@@ -2,10 +2,27 @@
 import { createWalletClient, http, parseEther, publicActions } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { base } from 'viem/chains'
-import { farcasturdsV3Abi } from '../abi/FarcasturdsV3'
 
 const CONTRACT_ADDRESS = '0x99316cF6D2Ff8051Cd0dDfb2adCB0D23F7Ff3Ac3' as `0x${string}`
 const NEW_MINT_PRICE = parseEther('0.001') // 0.001 ETH
+
+// Minimal ABI - just the functions we need
+const abi = [
+  {
+    name: 'mintPrice',
+    type: 'function',
+    stateMutability: 'view',
+    inputs: [],
+    outputs: [{ type: 'uint256' }],
+  },
+  {
+    name: 'setMintPrice',
+    type: 'function',
+    stateMutability: 'nonpayable',
+    inputs: [{ name: 'newPrice', type: 'uint256' }],
+    outputs: [],
+  },
+] as const
 
 async function main() {
   const privateKey = process.env.DEPLOYER_PRIVATE_KEY as `0x${string}`
@@ -35,7 +52,7 @@ async function main() {
     // Read current price
     const currentPrice = await client.readContract({
       address: CONTRACT_ADDRESS,
-      abi: farcasturdsV3Abi,
+      abi,
       functionName: 'mintPrice',
     })
 
@@ -52,7 +69,7 @@ async function main() {
     // Update mint price
     const hash = await client.writeContract({
       address: CONTRACT_ADDRESS,
-      abi: farcasturdsV3Abi,
+      abi,
       functionName: 'setMintPrice',
       args: [NEW_MINT_PRICE],
     })
@@ -69,7 +86,7 @@ async function main() {
       // Verify new price
       const newPrice = await client.readContract({
         address: CONTRACT_ADDRESS,
-        abi: farcasturdsV3Abi,
+        abi,
         functionName: 'mintPrice',
       })
 
