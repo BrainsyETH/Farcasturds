@@ -2,11 +2,11 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import { sdk } from "@farcaster/miniapp-sdk";
-import { useAccount, useConnect, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
+import { useAccount, useConnect, useWriteContract, useWaitForTransactionReceipt, useSignMessage } from 'wagmi';
 import { parseEther } from 'viem';
-import { MintModal } from '@/components/MintModal';
-// Removed farcasturdsV2Abi - using MintModal for all minting (V3 with authorization)
+import { farcasturdsV3Abi } from '@/abi/FarcasturdsV3';
 import { generateSiweMessage, generateNonce, verifySiweSignature } from '@/lib/auth';
+import { base } from 'wagmi/chains';
 import TabNavigation, { TabId } from '@/components/TabNavigation';
 import Leaderboard from '@/components/Leaderboard';
 import HowItWorks from '@/components/HowItWorks';
@@ -50,13 +50,19 @@ export default function HomePage() {
   const [mintPrice, setMintPrice] = useState<string>("Free");
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [showMintModal, setShowMintModal] = useState(false);
   const [authNonce, setAuthNonce] = useState<string | null>(null);
   const [sharing, setSharing] = useState(false);
   const [hasShared, setHasShared] = useState(false);
   const [activeTab, setActiveTab] = useState<TabId>('mint');
   const [metadataLoading, setMetadataLoading] = useState(true);
   const [imageLoaded, setImageLoaded] = useState(false);
+
+  // Authorization state for direct minting
+  const [siweMessage, setSiweMessage] = useState<string | null>(null);
+  const [mintAuthorization, setMintAuthorization] = useState<{
+    deadline: number;
+    signature: string;
+  } | null>(null);
 
   // Track processed transaction hashes to prevent duplicate generation
   const processedTxHashes = useRef<Set<string>>(new Set());
@@ -78,6 +84,13 @@ export default function HomePage() {
     useWaitForTransactionReceipt({
       hash: mintTxHash,
     });
+
+  // Sign message hook for SIWE authorization
+  const {
+    data: signature,
+    signMessage,
+    isPending: isSignPending,
+  } = useSignMessage();
 
   // Initialize SDK + load Farcaster user with retry logic
   useEffect(() => {
@@ -259,6 +272,132 @@ export default function HomePage() {
       setTimeout(() => setStatus(null), 2000);
     }
   }, [me?.fid, isAuthenticated]);
+
+  // Handle SIWE signature response and verify
+  useEffect(() => {
+    async function handleSignatureVerification() {
+      if (!signature || !siweMessage || !authNonce || !address || !me) return;
+
+      console.log('[Auth] Verifying SIWE signature...');
+      setStatus('Verifying signature...');
+
+      try {
+        const result = await verifySiweSignature({
+          message: siweMessage,
+          signature: signature,
+          nonce: authNonce
+        });
+
+        if (result.success) {
+          console.log('[Auth] ✓ Signature verified');
+          setStatus('Getting mint authorization...');
+
+          // Get mint authorization from backend
+          const authResponse = await fetch('/api/mint/authorize', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              fid: me.fid,
+              to: address,
+              siweSignature: signature,
+              siweMessage: siweMessage,
+              nonce: authNonce
+            })
+          });
+
+          if (!authResponse.ok) {
+            const authError = await authResponse.json();
+            throw new Error(authError.error || 'Failed to get mint authorization');
+          }
+
+          const authData = await authResponse.json();
+          setMintAuthorization({
+            deadline: authData.deadline,
+            signature: authData.signature
+          });
+
+          console.log('[Auth] ✓ Authorization received, triggering mint...');
+          // Reset auth states
+          setSiweMessage(null);
+          setAuthNonce(null);
+
+          // Mint will be triggered in the next useEffect when mintAuthorization is set
+        } else {
+          throw new Error(result.error || 'Signature verification failed');
+        }
+      } catch (err: any) {
+        console.error('[Auth] Verification error:', err);
+        setStatus(`⚠️ Authorization failed: ${err.message}`);
+        setMinting(false);
+        setSiweMessage(null);
+        setAuthNonce(null);
+        setMintAuthorization(null);
+        setTimeout(() => setStatus(null), 5000);
+      }
+    }
+
+    handleSignatureVerification();
+  }, [signature, siweMessage, authNonce, address, me]);
+
+  // Trigger mint transaction when authorization is ready
+  useEffect(() => {
+    async function executeMint() {
+      if (!mintAuthorization || !address || !me || minting === false) return;
+
+      // Prevent duplicate calls
+      if (isMintPending || isMintConfirming) {
+        console.log('[Mint] Already minting, skipping duplicate call');
+        return;
+      }
+
+      console.log('[Mint] Executing mint with authorization');
+      setStatus('Preparing transaction...');
+
+      try {
+        const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_FARCASTURDS_ADDRESS as `0x${string}`;
+        if (!CONTRACT_ADDRESS) {
+          throw new Error('Contract address not configured');
+        }
+
+        // Get mint price
+        const priceRes = await fetch('/api/config/mint-price');
+        const priceData = await priceRes.json();
+        const paymentValue = parseEther(priceData.price || '0');
+
+        console.log('[Mint] Transaction parameters:', {
+          to: address,
+          fid: me.fid,
+          deadline: mintAuthorization.deadline,
+          mintPrice: priceData.price,
+          paymentValueWei: paymentValue.toString()
+        });
+
+        writeContract({
+          address: CONTRACT_ADDRESS,
+          abi: farcasturdsV3Abi,
+          functionName: 'mintFor',
+          args: [
+            address,
+            BigInt(me.fid),
+            BigInt(mintAuthorization.deadline),
+            mintAuthorization.signature as `0x${string}`
+          ],
+          value: paymentValue,
+        });
+
+        // Clear authorization after use
+        setMintAuthorization(null);
+      } catch (err: any) {
+        console.error('[Mint] Error:', err);
+        setStatus(`⚠️ Mint failed: ${err.message}`);
+        setMinting(false);
+        setMintAuthorization(null);
+        setTimeout(() => setStatus(null), 5000);
+      }
+    }
+
+    executeMint();
+  }, [mintAuthorization, address, me, minting, isMintPending, isMintConfirming, writeContract]);
 
   // Load metadata preview for this fid
   useEffect(() => {
@@ -478,8 +617,7 @@ export default function HomePage() {
       return;
     }
 
-    // Try to connect wallet if not already connected, but don't block on failure
-    // The MintModal will handle wallet connection requirements
+    // Connect wallet if not already connected
     if (!isConnected && connectors.length > 0) {
       try {
         setStatus("Connecting wallet...");
@@ -487,15 +625,43 @@ export default function HomePage() {
         await connect({ connector: farcasterConnector });
         console.log("[Wallet] ✓ Connected successfully");
       } catch (error) {
-        console.error('[Wallet] Pre-connection failed (will retry in modal):', error);
-        // Don't return - continue to open modal which will handle wallet connection
+        console.error('[Wallet] Connection failed:', error);
+        setStatus("⚠️ Please connect your wallet to continue");
+        return;
       }
     }
 
-    // Always open MintModal for V3 authorization flow
-    // Image generation happens AFTER mint confirms
-    console.log('[GenerateAndMint] Opening MintModal for FID:', me.fid);
-    setShowMintModal(true);
+    if (!address) {
+      setStatus("⚠️ Please connect your wallet to continue");
+      return;
+    }
+
+    // Start mint flow - trigger SIWE signature request
+    console.log('[GenerateAndMint] Starting authorization flow for FID:', me.fid);
+    setMinting(true);
+    setStatus("Requesting signature to verify ownership...");
+
+    try {
+      // Generate nonce and SIWE message
+      const nonce = generateNonce();
+      const message = generateSiweMessage({
+        address,
+        chainId: base.id,
+        nonce,
+        fid: me.fid
+      });
+
+      setAuthNonce(nonce);
+      setSiweMessage(message);
+
+      // Request signature from wallet - this will trigger Farcaster's native signature UI
+      signMessage({ message });
+    } catch (err: any) {
+      console.error('[GenerateAndMint] Error:', err);
+      setStatus(`⚠️ Failed to start mint: ${err.message}`);
+      setMinting(false);
+      setTimeout(() => setStatus(null), 5000);
+    }
   }
 
   async function handleMint(e: React.FormEvent) {
@@ -510,8 +676,7 @@ export default function HomePage() {
       return;
     }
 
-    // Try to connect wallet if not already connected, but don't block on failure
-    // The MintModal will handle wallet connection requirements
+    // Connect wallet if not already connected
     if (!isConnected && connectors.length > 0) {
       try {
         setStatus("Connecting wallet...");
@@ -519,37 +684,45 @@ export default function HomePage() {
         await connect({ connector: farcasterConnector });
         console.log("[Wallet] ✓ Connected successfully");
       } catch (error) {
-        console.error('[Wallet] Pre-connection failed (will retry in modal):', error);
-        // Don't return - continue to open modal which will handle wallet connection
+        console.error('[Wallet] Connection failed:', error);
+        setStatus("⚠️ Please connect your wallet to continue");
+        return;
       }
     }
 
-    // Always open the mint modal
-    setShowMintModal(true);
-  }
-
-  async function handleMintSuccess(txHash: string) {
-    if (!me) return;
-
-    // Prevent duplicate generation - check if this tx was already processed
-    if (processedTxHashes.current.has(txHash)) {
-      console.log('[MintModal] Transaction already processed by main flow, skipping:', txHash);
+    if (!address) {
+      setStatus("⚠️ Please connect your wallet to continue");
       return;
     }
 
-    console.log('[MintModal] Processing mint success:', txHash);
+    // Start mint flow - trigger SIWE signature request
+    console.log('[Mint] Starting authorization flow for FID:', me.fid);
+    setMinting(true);
+    setStatus("Requesting signature to verify ownership...");
 
-    // Mark this transaction as processed FIRST to prevent race conditions
-    processedTxHashes.current.add(txHash);
+    try {
+      // Generate nonce and SIWE message
+      const nonce = generateNonce();
+      const message = generateSiweMessage({
+        address,
+        chainId: base.id,
+        nonce,
+        fid: me.fid
+      });
 
-    // Update state
-    setLastTxHash(txHash);
-    localStorage.setItem(`farcasturd_tx_${me.fid}`, txHash);
-    setMe((prev) => (prev ? { ...prev, hasMinted: true } : prev));
+      setAuthNonce(nonce);
+      setSiweMessage(message);
 
-    // Use consolidated generation function
-    await generateImageAfterMint(me.fid);
+      // Request signature from wallet - this will trigger Farcaster's native signature UI
+      signMessage({ message });
+    } catch (err: any) {
+      console.error('[Mint] Error:', err);
+      setStatus(`⚠️ Failed to start mint: ${err.message}`);
+      setMinting(false);
+      setTimeout(() => setStatus(null), 5000);
+    }
   }
+
 
   async function handleShareToFarcaster() {
     if (!me || !meta) return;
@@ -1125,17 +1298,6 @@ export default function HomePage() {
           )}
         </div>
       </section>
-
-          {/* Mint Payment Modal */}
-          {me && (
-            <MintModal
-              isOpen={showMintModal}
-              onClose={() => setShowMintModal(false)}
-              fid={me.fid}
-              imageUrl={meta?.image || ''}
-              onSuccess={handleMintSuccess}
-            />
-          )}
         </>
       )}
 
