@@ -478,40 +478,25 @@ export default function HomePage() {
       return;
     }
 
-    // First, generate the Farcasturd image
-    if (!hasGenerated) {
-      setStatus("Generating your Farcasturd...");
+    // Connect wallet if not already connected
+    if (!isConnected && connectors.length > 0) {
       try {
-        const res = await fetch('/api/generate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ fid: me.fid }),
-        });
-
-        if (!res.ok) {
-          const error = await res.json();
-          throw new Error(error.error || 'Generation failed');
-        }
-
-        const data = await res.json();
-        setGeneratedImageUrl(data.imageUrl);
-        setHasGenerated(true);
-        localStorage.setItem(`farcasturd_generated_${me.fid}`, 'true');
-        setStatus("✓ Farcasturd generated! Opening mint modal...");
-
-        // Wait a moment then open mint modal
-        setTimeout(() => {
-          setShowMintModal(true);
-        }, 1000);
-      } catch (err: any) {
-        console.error('[Generate] Error:', err);
-        setStatus(`⚠️ Generation failed: ${err.message}`);
-        setTimeout(() => setStatus(null), 5000);
+        setStatus("Connecting wallet...");
+        const farcasterConnector = connectors[0];
+        await connect({ connector: farcasterConnector });
+        console.log("[Wallet] ✓ Connected successfully");
+      } catch (error) {
+        console.error('[Wallet] Connection failed:', error);
+        setStatus("⚠️ Failed to connect wallet");
+        setTimeout(() => setStatus(null), 3000);
+        return;
       }
-    } else {
-      // Image already generated, go straight to mint modal
-      setShowMintModal(true);
     }
+
+    // Open MintModal for V3 authorization flow
+    // Image generation happens AFTER mint confirms
+    console.log('[GenerateAndMint] Opening MintModal for FID:', me.fid);
+    setShowMintModal(true);
   }
 
   async function handleMint(e: React.FormEvent) {
