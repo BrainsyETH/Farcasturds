@@ -118,23 +118,34 @@ export default function UserProfile({ userFid }: UserProfileProps) {
               {/* Neynar Score */}
               <div style={{
                 padding: '1rem',
-                background: 'rgba(99, 102, 241, 0.1)',
+                background: 'rgba(139, 92, 246, 0.1)',
                 borderRadius: '12px',
-                border: '1px solid rgba(99, 102, 241, 0.2)'
+                border: '1px solid rgba(139, 92, 246, 0.2)'
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
                   <div style={{ fontWeight: 600, fontSize: '0.95rem' }}>Neynar Score</div>
-                  <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#6366f1' }}>
+                  <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#8b5cf6' }}>
                     {userScores.neynarScore !== null ? userScores.neynarScore.toFixed(2) : 'N/A'}
                   </div>
                 </div>
-                <div style={{ fontSize: '0.8rem', color: 'var(--fc-text-soft)', display: 'flex', justifyContent: 'space-between' }}>
+                <div style={{ fontSize: '0.8rem', color: 'var(--fc-text-soft)', display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                   <span>{userScores.followerCount} followers</span>
                   <span>{userScores.followingCount} following</span>
                 </div>
-                {userScores.neynarScore === null && (
-                  <div style={{ fontSize: '0.75rem', color: 'var(--fc-text-soft)', marginTop: '0.5rem' }}>
+                {userScores.neynarScore === null ? (
+                  <div style={{ fontSize: '0.75rem', color: 'var(--fc-text-soft)' }}>
                     Score not available from Neynar API
+                  </div>
+                ) : (
+                  <div style={{ fontSize: '0.75rem', color: 'var(--fc-text-soft)' }}>
+                    <a
+                      href="https://docs.neynar.com/docs/neynar-user-quality-score"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ color: '#8b5cf6', textDecoration: 'none' }}
+                    >
+                      Neynar User Quality Score →
+                    </a>
                   </div>
                 )}
               </div>
@@ -142,37 +153,61 @@ export default function UserProfile({ userFid }: UserProfileProps) {
               {/* Builder Score (Talent Protocol) */}
               <div style={{
                 padding: '1rem',
-                background: 'rgba(37, 99, 235, 0.1)',
+                background: 'rgba(59, 130, 246, 0.1)',
                 borderRadius: '12px',
-                border: '1px solid rgba(37, 99, 235, 0.2)'
+                border: '1px solid rgba(59, 130, 246, 0.2)'
               }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
                   <div style={{ fontWeight: 600, fontSize: '0.95rem' }}>Builder Score</div>
-                  <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#2563eb' }}>
+                  <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#3b82f6' }}>
                     {userScores.builderScore !== null ? userScores.builderScore : 'N/A'}
                   </div>
                 </div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--fc-text-soft)', marginTop: '0.5rem' }}>
-                  {userScores.builderScore !== null ? 'Talent Protocol • Base Network' : 'No verified address or score not available'}
-                </div>
+                {userScores.builderScore === null ? (
+                  <div style={{ fontSize: '0.75rem', color: 'var(--fc-text-soft)' }}>
+                    No verified address or score not available
+                  </div>
+                ) : (
+                  <div style={{ fontSize: '0.75rem', color: 'var(--fc-text-soft)' }}>
+                    <a
+                      href="https://docs.talentprotocol.com/docs/protocol-concepts/scoring-systems/builder-score"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ color: '#3b82f6', textDecoration: 'none' }}
+                    >
+                      Talent Protocol • Base Network →
+                    </a>
+                  </div>
+                )}
               </div>
 
               {/* Ethos Score */}
               <div style={{
                 padding: '1rem',
-                background: 'rgba(16, 185, 129, 0.1)',
+                background: 'rgba(34, 197, 94, 0.1)',
                 borderRadius: '12px',
-                border: '1px solid rgba(16, 185, 129, 0.2)'
+                border: '1px solid rgba(34, 197, 94, 0.2)'
               }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
                   <div style={{ fontWeight: 600, fontSize: '0.95rem' }}>Ethos Onchain Score</div>
-                  <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#10b981' }}>
+                  <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#22c55e' }}>
                     {userScores.ethosScore !== null ? userScores.ethosScore : 'N/A'}
                   </div>
                 </div>
-                {userScores.ethosScore === null && (
-                  <div style={{ fontSize: '0.75rem', color: 'var(--fc-text-soft)', marginTop: '0.5rem' }}>
+                {userScores.ethosScore === null ? (
+                  <div style={{ fontSize: '0.75rem', color: 'var(--fc-text-soft)' }}>
                     No verified address or score not available
+                  </div>
+                ) : (
+                  <div style={{ fontSize: '0.75rem', color: 'var(--fc-text-soft)' }}>
+                    <a
+                      href="https://ethos.network"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ color: '#22c55e', textDecoration: 'none' }}
+                    >
+                      Ethos Network →
+                    </a>
                   </div>
                 )}
               </div>
