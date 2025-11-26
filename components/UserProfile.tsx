@@ -114,9 +114,18 @@ export default function UserProfile({ userFid }: UserProfileProps) {
       {userStats && (
         <section className="fc-section">
           <div className="fc-card fc-card--overflow-visible">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ flex: '0 0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem', position: 'relative' }}>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+                gap: '2rem',
+                alignItems: 'center',
+                justifyItems: 'center',
+                textAlign: 'center'
+              }}
+            >
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', position: 'relative' }}>
                   <img src="/splash.png" alt="" style={{ width: '1em', height: '1em', display: 'inline-block', verticalAlign: 'middle' }} />
                   <h3 className="fc-card-title" style={{ margin: 0 }}>Turd Score</h3>
                   <span
@@ -141,48 +150,52 @@ export default function UserProfile({ userFid }: UserProfileProps) {
                   >
                     i
                     {showTooltip && (
-                      <span style={{
-                        position: 'absolute',
-                        bottom: '125%',
-                        left: '50%',
-                        transform: 'translateX(-50%)',
-                        backgroundColor: '#1a1a1a',
-                        color: '#fff',
-                        padding: '0.5rem 0.75rem',
-                        borderRadius: '6px',
-                        fontSize: '0.75rem',
-                        whiteSpace: 'nowrap',
-                        zIndex: 1000,
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
-                        minWidth: '200px',
-                        textAlign: 'center'
-                      }}>
+                      <span
+                        style={{
+                          position: 'absolute',
+                          bottom: '125%',
+                          left: '50%',
+                          transform: 'translateX(-50%)',
+                          backgroundColor: '#1a1a1a',
+                          color: '#fff',
+                          padding: '0.5rem 0.75rem',
+                          borderRadius: '6px',
+                          fontSize: '0.75rem',
+                          whiteSpace: 'nowrap',
+                          zIndex: 1000,
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+                          minWidth: '200px',
+                          textAlign: 'center'
+                        }}
+                      >
                         Your percentile rank based on turds received.<br />
                         Higher = more bad takes called out.<br />
                         99% = top 1% of bad takes!
-                        <span style={{
-                          position: 'absolute',
-                          top: '100%',
-                          left: '50%',
-                          transform: 'translateX(-50%)',
-                          width: 0,
-                          height: 0,
-                          borderLeft: '6px solid transparent',
-                          borderRight: '6px solid transparent',
-                          borderTop: '6px solid #1a1a1a'
-                        }}></span>
+                        <span
+                          style={{
+                            position: 'absolute',
+                            top: '100%',
+                            left: '50%',
+                            transform: 'translateX(-50%)',
+                            width: 0,
+                            height: 0,
+                            borderLeft: '6px solid transparent',
+                            borderRight: '6px solid transparent',
+                            borderTop: '6px solid #1a1a1a'
+                          }}
+                        ></span>
                       </span>
                     )}
                   </span>
                 </div>
-                <div className="fc-stat-value" style={{ color: '#c2410c', fontSize: '2rem' }}>
+                <div className="fc-stat-value" style={{ color: '#c2410c', fontSize: '2rem', lineHeight: 1 }}>
                   {userStats.turdScore}%
                 </div>
               </div>
 
-              <div style={{ flex: '1', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <h3 className="fc-card-title" style={{ margin: '0 0 0.75rem 0' }}>Your Stats</h3>
-                <div style={{ display: 'flex', gap: '2rem', alignItems: 'flex-start' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem' }}>
+                <h3 className="fc-card-title" style={{ margin: 0 }}>Your Stats</h3>
+                <div style={{ display: 'flex', gap: '2rem', alignItems: 'flex-start', justifyContent: 'center' }}>
                   <div className="fc-stat-item" style={{ textAlign: 'center' }}>
                     <div className="fc-stat-value">{userStats.received}</div>
                     <div className="fc-stat-label">
