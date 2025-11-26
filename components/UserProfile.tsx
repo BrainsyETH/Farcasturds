@@ -12,6 +12,7 @@ interface UserScores {
   builderScore: number | null;
   followerCount: number;
   followingCount: number;
+  neynarSpamScore: number | null;
 }
 
 export default function UserProfile({ userFid }: UserProfileProps) {
@@ -19,8 +20,8 @@ export default function UserProfile({ userFid }: UserProfileProps) {
   const [userScores, setUserScores] = useState<UserScores | null>(null);
   const [loading, setLoading] = useState(true);
   const [scoresLoading, setScoresLoading] = useState(true);
-  const [showTooltip, setShowTooltip] = useState(false);
-  const tooltipRef = useRef<HTMLSpanElement>(null);
+  const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
+  const tooltipRefs = useRef<{ [key: string]: HTMLSpanElement | null }>({});
 
   useEffect(() => {
     fetchUserStats();
@@ -72,8 +73,11 @@ export default function UserProfile({ userFid }: UserProfileProps) {
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (tooltipRef.current && !tooltipRef.current.contains(event.target as Node)) {
-        setShowTooltip(false);
+      const clickedOutside = Object.values(tooltipRefs.current).every(
+        (ref) => !ref || !ref.contains(event.target as Node)
+      );
+      if (clickedOutside) {
+        setActiveTooltip(null);
       }
     };
 
@@ -81,21 +85,35 @@ export default function UserProfile({ userFid }: UserProfileProps) {
     return () => document.removeEventListener('click', handleClickOutside);
   }, []);
 
-  const handleTooltipPointerEnter = (event: React.PointerEvent<HTMLSpanElement>) => {
+  const handleTooltipPointerEnter = (tooltipId: string) => (event: React.PointerEvent<HTMLSpanElement>) => {
     if (event.pointerType === 'mouse') {
-      setShowTooltip(true);
+      setActiveTooltip(tooltipId);
     }
   };
 
   const handleTooltipPointerLeave = (event: React.PointerEvent<HTMLSpanElement>) => {
     if (event.pointerType === 'mouse') {
-      setShowTooltip(false);
+      setActiveTooltip(null);
     }
   };
 
-  const toggleTooltip = (event: React.MouseEvent<HTMLSpanElement>) => {
+  const toggleTooltip = (tooltipId: string) => (event: React.MouseEvent<HTMLSpanElement>) => {
     event.stopPropagation();
-    setShowTooltip((prev) => !prev);
+    setActiveTooltip((prev) => prev === tooltipId ? null : tooltipId);
+  };
+
+  // Helper function to calculate color gradient from green to red
+  const getTurdScoreColor = (score: number): string => {
+    // 0% = green (#22c55e = rgb(34, 197, 94))
+    // 99% = red (#ef4444 = rgb(239, 68, 68))
+    const clampedScore = Math.min(Math.max(score, 0), 99);
+    const ratio = clampedScore / 99;
+
+    const r = Math.round(34 + (239 - 34) * ratio);
+    const g = Math.round(197 + (68 - 197) * ratio);
+    const b = Math.round(94 + (68 - 94) * ratio);
+
+    return `rgb(${r}, ${g}, ${b})`;
   };
 
   if (loading) {
@@ -129,10 +147,10 @@ export default function UserProfile({ userFid }: UserProfileProps) {
                   <img src="/splash.png" alt="" style={{ width: '1em', height: '1em', display: 'inline-block', verticalAlign: 'middle' }} />
                   <h3 className="fc-card-title" style={{ margin: 0 }}>Turd Score</h3>
                   <span
-                    ref={tooltipRef}
-                    onPointerEnter={handleTooltipPointerEnter}
+                    ref={(el) => (tooltipRefs.current['turdScore'] = el)}
+                    onPointerEnter={handleTooltipPointerEnter('turdScore')}
                     onPointerLeave={handleTooltipPointerLeave}
-                    onClick={toggleTooltip}
+                    onClick={toggleTooltip('turdScore')}
                     style={{
                       cursor: 'help',
                       fontSize: '0.75rem',
@@ -149,7 +167,7 @@ export default function UserProfile({ userFid }: UserProfileProps) {
                     }}
                   >
                     i
-                    {showTooltip && (
+                    {activeTooltip === 'turdScore' && (
                       <span
                         style={{
                           position: 'absolute',
@@ -188,7 +206,7 @@ export default function UserProfile({ userFid }: UserProfileProps) {
                     )}
                   </span>
                 </div>
-                <div className="fc-stat-value" style={{ color: '#c2410c', fontSize: '2rem', lineHeight: 1 }}>
+                <div className="fc-stat-value" style={{ color: getTurdScoreColor(userStats.turdScore), fontSize: '2rem', lineHeight: 1 }}>
                   {userStats.turdScore}%
                 </div>
               </div>
@@ -234,14 +252,70 @@ export default function UserProfile({ userFid }: UserProfileProps) {
                 border: '1.5px solid rgba(139, 92, 246, 0.35)'
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                  <div style={{ fontWeight: 600, fontSize: '0.95rem' }}>Neynar Score</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontWeight: 600, fontSize: '0.95rem' }}>
+                    Neynar Score
+                    <span
+                      ref={(el) => (tooltipRefs.current['neynarScore'] = el)}
+                      onPointerEnter={handleTooltipPointerEnter('neynarScore')}
+                      onPointerLeave={handleTooltipPointerLeave}
+                      onClick={toggleTooltip('neynarScore')}
+                      style={{
+                        cursor: 'help',
+                        fontSize: '0.7rem',
+                        color: 'var(--fc-text-soft)',
+                        backgroundColor: 'rgba(0,0,0,0.1)',
+                        borderRadius: '50%',
+                        width: '14px',
+                        height: '14px',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontWeight: 'bold',
+                        position: 'relative'
+                      }}
+                    >
+                      i
+                      {activeTooltip === 'neynarScore' && (
+                        <span
+                          style={{
+                            position: 'absolute',
+                            bottom: '125%',
+                            left: '50%',
+                            transform: 'translateX(-50%)',
+                            backgroundColor: '#1a1a1a',
+                            color: '#fff',
+                            padding: '0.5rem 0.75rem',
+                            borderRadius: '6px',
+                            fontSize: '0.7rem',
+                            whiteSpace: 'nowrap',
+                            zIndex: 1000,
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+                            minWidth: '220px',
+                            textAlign: 'center'
+                          }}
+                        >
+                          Quality score from Neynar (0-1 scale).<br />
+                          Based on engagement, followers, and activity.
+                          <span
+                            style={{
+                              position: 'absolute',
+                              top: '100%',
+                              left: '50%',
+                              transform: 'translateX(-50%)',
+                              width: 0,
+                              height: 0,
+                              borderLeft: '6px solid transparent',
+                              borderRight: '6px solid transparent',
+                              borderTop: '6px solid #1a1a1a'
+                            }}
+                          ></span>
+                        </span>
+                      )}
+                    </span>
+                  </div>
                   <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#8b5cf6' }}>
                     {userScores.neynarScore !== null ? userScores.neynarScore.toFixed(2) : 'N/A'}
                   </div>
-                </div>
-                <div style={{ fontSize: '0.8rem', color: 'var(--fc-text-soft)', display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                  <span>{userScores.followerCount} followers</span>
-                  <span>{userScores.followingCount} following</span>
                 </div>
                 {userScores.neynarScore === null ? (
                   <div style={{ fontSize: '0.75rem', color: 'var(--fc-text-soft)' }}>
@@ -255,11 +329,91 @@ export default function UserProfile({ userFid }: UserProfileProps) {
                       rel="noopener noreferrer"
                       style={{ color: '#8b5cf6', textDecoration: 'none' }}
                     >
-                      Neynar Quality Score
+                      Neynar Quality Score →
                     </a>
                   </div>
                 )}
               </div>
+
+              {/* Neynar Spam Score */}
+              {userScores.neynarSpamScore !== null && (
+                <div style={{
+                  padding: '1rem',
+                  background: 'rgba(251, 146, 60, 0.15)',
+                  borderRadius: '12px',
+                  border: '1.5px solid rgba(251, 146, 60, 0.35)'
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontWeight: 600, fontSize: '0.95rem' }}>
+                      Neynar Spam Score
+                      <span
+                        ref={(el) => (tooltipRefs.current['neynarSpamScore'] = el)}
+                        onPointerEnter={handleTooltipPointerEnter('neynarSpamScore')}
+                        onPointerLeave={handleTooltipPointerLeave}
+                        onClick={toggleTooltip('neynarSpamScore')}
+                        style={{
+                          cursor: 'help',
+                          fontSize: '0.7rem',
+                          color: 'var(--fc-text-soft)',
+                          backgroundColor: 'rgba(0,0,0,0.1)',
+                          borderRadius: '50%',
+                          width: '14px',
+                          height: '14px',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontWeight: 'bold',
+                          position: 'relative'
+                        }}
+                      >
+                        i
+                        {activeTooltip === 'neynarSpamScore' && (
+                          <span
+                            style={{
+                              position: 'absolute',
+                              bottom: '125%',
+                              left: '50%',
+                              transform: 'translateX(-50%)',
+                              backgroundColor: '#1a1a1a',
+                              color: '#fff',
+                              padding: '0.5rem 0.75rem',
+                              borderRadius: '6px',
+                              fontSize: '0.7rem',
+                              whiteSpace: 'nowrap',
+                              zIndex: 1000,
+                              boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+                              minWidth: '220px',
+                              textAlign: 'center'
+                            }}
+                          >
+                            Likelihood of being a spam account (0-1 scale).<br />
+                            Lower is better. Higher = likely spam.
+                            <span
+                              style={{
+                                position: 'absolute',
+                                top: '100%',
+                                left: '50%',
+                                transform: 'translateX(-50%)',
+                                width: 0,
+                                height: 0,
+                                borderLeft: '6px solid transparent',
+                                borderRight: '6px solid transparent',
+                                borderTop: '6px solid #1a1a1a'
+                              }}
+                            ></span>
+                          </span>
+                        )}
+                      </span>
+                    </div>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#fb923c' }}>
+                      {userScores.neynarSpamScore.toFixed(2)}
+                    </div>
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--fc-text-soft)' }}>
+                    Spam detection by Neynar
+                  </div>
+                </div>
+              )}
 
               {/* Builder Score (Talent Protocol) */}
               <div style={{
@@ -269,7 +423,67 @@ export default function UserProfile({ userFid }: UserProfileProps) {
                 border: '1.5px solid rgba(59, 130, 246, 0.35)'
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                  <div style={{ fontWeight: 600, fontSize: '0.95rem' }}>Builder Score</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontWeight: 600, fontSize: '0.95rem' }}>
+                    Builder Score
+                    <span
+                      ref={(el) => (tooltipRefs.current['builderScore'] = el)}
+                      onPointerEnter={handleTooltipPointerEnter('builderScore')}
+                      onPointerLeave={handleTooltipPointerLeave}
+                      onClick={toggleTooltip('builderScore')}
+                      style={{
+                        cursor: 'help',
+                        fontSize: '0.7rem',
+                        color: 'var(--fc-text-soft)',
+                        backgroundColor: 'rgba(0,0,0,0.1)',
+                        borderRadius: '50%',
+                        width: '14px',
+                        height: '14px',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontWeight: 'bold',
+                        position: 'relative'
+                      }}
+                    >
+                      i
+                      {activeTooltip === 'builderScore' && (
+                        <span
+                          style={{
+                            position: 'absolute',
+                            bottom: '125%',
+                            left: '50%',
+                            transform: 'translateX(-50%)',
+                            backgroundColor: '#1a1a1a',
+                            color: '#fff',
+                            padding: '0.5rem 0.75rem',
+                            borderRadius: '6px',
+                            fontSize: '0.7rem',
+                            whiteSpace: 'nowrap',
+                            zIndex: 1000,
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+                            minWidth: '220px',
+                            textAlign: 'center'
+                          }}
+                        >
+                          Talent Protocol Builder Score.<br />
+                          Based on onchain activity on Base Network.
+                          <span
+                            style={{
+                              position: 'absolute',
+                              top: '100%',
+                              left: '50%',
+                              transform: 'translateX(-50%)',
+                              width: 0,
+                              height: 0,
+                              borderLeft: '6px solid transparent',
+                              borderRight: '6px solid transparent',
+                              borderTop: '6px solid #1a1a1a'
+                            }}
+                          ></span>
+                        </span>
+                      )}
+                    </span>
+                  </div>
                   <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#3b82f6' }}>
                     {userScores.builderScore !== null ? userScores.builderScore : 'N/A'}
                   </div>
@@ -300,7 +514,67 @@ export default function UserProfile({ userFid }: UserProfileProps) {
                 border: '1.5px solid rgba(34, 197, 94, 0.35)'
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                  <div style={{ fontWeight: 600, fontSize: '0.95rem' }}>Ethos Onchain Score</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontWeight: 600, fontSize: '0.95rem' }}>
+                    Ethos Onchain Score
+                    <span
+                      ref={(el) => (tooltipRefs.current['ethosScore'] = el)}
+                      onPointerEnter={handleTooltipPointerEnter('ethosScore')}
+                      onPointerLeave={handleTooltipPointerLeave}
+                      onClick={toggleTooltip('ethosScore')}
+                      style={{
+                        cursor: 'help',
+                        fontSize: '0.7rem',
+                        color: 'var(--fc-text-soft)',
+                        backgroundColor: 'rgba(0,0,0,0.1)',
+                        borderRadius: '50%',
+                        width: '14px',
+                        height: '14px',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontWeight: 'bold',
+                        position: 'relative'
+                      }}
+                    >
+                      i
+                      {activeTooltip === 'ethosScore' && (
+                        <span
+                          style={{
+                            position: 'absolute',
+                            bottom: '125%',
+                            left: '50%',
+                            transform: 'translateX(-50%)',
+                            backgroundColor: '#1a1a1a',
+                            color: '#fff',
+                            padding: '0.5rem 0.75rem',
+                            borderRadius: '6px',
+                            fontSize: '0.7rem',
+                            whiteSpace: 'nowrap',
+                            zIndex: 1000,
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+                            minWidth: '220px',
+                            textAlign: 'center'
+                          }}
+                        >
+                          Onchain reputation score from Ethos Network.<br />
+                          Based on verified onchain activity and reviews.
+                          <span
+                            style={{
+                              position: 'absolute',
+                              top: '100%',
+                              left: '50%',
+                              transform: 'translateX(-50%)',
+                              width: 0,
+                              height: 0,
+                              borderLeft: '6px solid transparent',
+                              borderRight: '6px solid transparent',
+                              borderTop: '6px solid #1a1a1a'
+                            }}
+                          ></span>
+                        </span>
+                      )}
+                    </span>
+                  </div>
                   <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#22c55e' }}>
                     {userScores.ethosScore !== null ? userScores.ethosScore : 'N/A'}
                   </div>

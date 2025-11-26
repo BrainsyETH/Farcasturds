@@ -136,6 +136,24 @@ function getNeynarScore(user: any): number | null {
   return score;
 }
 
+// Extract Neynar's spam score (0-1 scale)
+function getNeynarSpamScore(user: any): number | null {
+  // Neynar provides a spam score in the experimental object
+  // Try multiple possible field names
+  const spamScore =
+    user.experimental?.spam_score ??
+    user.experimental?.neynar_spam_score ??
+    user.spam_score ??
+    user.neynar_spam_score ??
+    null;
+
+  if (spamScore !== null) {
+    console.log(`[Neynar] Spam score: ${spamScore}`);
+  }
+
+  return spamScore;
+}
+
 // GET /api/user-scores?fid=123
 export async function GET(req: NextRequest) {
   const url = new URL(req.url);
@@ -172,6 +190,9 @@ export async function GET(req: NextRequest) {
     // Get Neynar's raw reputation score (0-1 scale)
     const neynarScore = getNeynarScore(user);
 
+    // Get Neynar's spam score (0-1 scale)
+    const neynarSpamScore = getNeynarSpamScore(user);
+
     // Collect all possible addresses to check for reputation scores
     const addressesToCheck: string[] = [];
 
@@ -207,10 +228,11 @@ export async function GET(req: NextRequest) {
       builderScore = await getTalentBuilderScore(primaryAddress);
     }
 
-    console.log(`[/api/user-scores] ✓ Scores for FID ${fid}:`, { neynarScore, ethosScore, builderScore });
+    console.log(`[/api/user-scores] ✓ Scores for FID ${fid}:`, { neynarScore, neynarSpamScore, ethosScore, builderScore });
 
     return NextResponse.json({
       neynarScore,
+      neynarSpamScore,
       ethosScore,
       builderScore,
       followerCount: user.follower_count || 0,
