@@ -142,13 +142,17 @@ export default function UserProfile({ userFid }: UserProfileProps) {
       imageUrl.searchParams.set('builderScore', userScores.builderScore?.toString() || 'N/A');
       imageUrl.searchParams.set('ethosScore', userScores.ethosScore?.toString() || 'N/A');
 
-      // Create cast text
-      const castText = `Check out my reputation scores on Farcasturds! 💩\n\nfarcasturds.xyz`;
+      // Miniapp URL for link embed
+      const miniappUrl = 'https://farcaster.xyz/miniapps/asmxYIFlnWF0/farcasturds';
 
-      // Open Farcaster composer with the cast
-      await sdk.actions.openUrl(`https://warpcast.com/~/compose?text=${encodeURIComponent(castText)}&embeds[]=${encodeURIComponent(imageUrl.toString())}`);
+      // Create cast text with image embed and miniapp link
+      const castText = `Check out my reputation scores on Farcasturds! 💩`;
 
-      setIsGeneratingImage(false);
+      // Build composer URL with both image and link embeds
+      const composerUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(castText)}&embeds[]=${encodeURIComponent(imageUrl.toString())}&embeds[]=${encodeURIComponent(miniappUrl)}`;
+
+      // Open in same window/tab
+      window.location.href = composerUrl;
 
     } catch (error) {
       console.error('Error sharing scores:', error);

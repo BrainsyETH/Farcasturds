@@ -20,7 +20,6 @@ export async function GET(req: NextRequest) {
             height: '100%',
             width: '100%',
             display: 'flex',
-            flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
             background: 'linear-gradient(135deg, #511974, #1e2329, #501f7b, #371479)',
@@ -32,121 +31,147 @@ export async function GET(req: NextRequest) {
             style={{
               background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.9))',
               borderRadius: '24px',
-              padding: '48px',
-              width: '700px',
+              padding: '40px 60px',
+              width: '100%',
+              maxWidth: '1100px',
               display: 'flex',
               flexDirection: 'column',
-              gap: '32px',
+              gap: '24px',
               boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
             }}
           >
             {/* Header */}
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
-              <h1 style={{ fontSize: '48px', fontWeight: 'bold', margin: 0, color: '#1b0a33' }}>
-                Reputation Scores
-              </h1>
-              <p style={{ fontSize: '20px', margin: 0, color: '#6e5c88' }}>
-                @{username} • FID {fid}
-              </p>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <h1 style={{ fontSize: '40px', fontWeight: 'bold', margin: 0, color: '#1b0a33' }}>
+                  Reputation Scores
+                </h1>
+                <p style={{ fontSize: '18px', margin: 0, color: '#6e5c88' }}>
+                  @{username} • FID {fid}
+                </p>
+              </div>
+              <div style={{ fontSize: '20px', color: '#8b5cf6', fontWeight: 600 }}>
+                farcasturds.xyz
+              </div>
             </div>
 
-            {/* Scores Grid */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              {/* Neynar Score */}
-              <div
-                style={{
-                  background: 'rgba(139, 92, 246, 0.15)',
-                  border: '2px solid rgba(139, 92, 246, 0.35)',
-                  borderRadius: '16px',
-                  padding: '24px',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                }}
-              >
-                <span style={{ fontSize: '28px', fontWeight: 600, color: '#1b0a33' }}>
-                  Neynar Quality Score
-                </span>
-                <span style={{ fontSize: '48px', fontWeight: 700, color: '#8b5cf6' }}>
-                  {neynarScore || 'N/A'}
-                </span>
-              </div>
-
-              {/* Spam Score */}
-              {spamScore && spamScore !== 'null' && (
+            {/* Scores Grid - 2 columns */}
+            <div style={{ display: 'flex', gap: '16px' }}>
+              {/* Left Column */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', flex: 1 }}>
+                {/* Neynar Score */}
                 <div
                   style={{
-                    background: 'rgba(251, 146, 60, 0.15)',
-                    border: '2px solid rgba(251, 146, 60, 0.35)',
+                    background: 'rgba(139, 92, 246, 0.15)',
+                    border: '2px solid rgba(139, 92, 246, 0.35)',
                     borderRadius: '16px',
-                    padding: '24px',
+                    padding: '20px',
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
                   }}
                 >
-                  <span style={{ fontSize: '28px', fontWeight: 600, color: '#1b0a33' }}>
-                    Spam Score
+                  <span style={{ fontSize: '22px', fontWeight: 600, color: '#1b0a33' }}>
+                    Neynar Quality
                   </span>
-                  <span style={{ fontSize: '48px', fontWeight: 700, color: '#fb923c' }}>
-                    {spamScore}
+                  <span style={{ fontSize: '40px', fontWeight: 700, color: '#8b5cf6' }}>
+                    {neynarScore || 'N/A'}
                   </span>
                 </div>
-              )}
 
-              {/* Builder Score */}
-              <div
-                style={{
-                  background: 'rgba(59, 130, 246, 0.15)',
-                  border: '2px solid rgba(59, 130, 246, 0.35)',
-                  borderRadius: '16px',
-                  padding: '24px',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                }}
-              >
-                <span style={{ fontSize: '28px', fontWeight: 600, color: '#1b0a33' }}>
-                  Builder Score
-                </span>
-                <span style={{ fontSize: '48px', fontWeight: 700, color: '#3b82f6' }}>
-                  {builderScore || 'N/A'}
-                </span>
+                {/* Builder Score */}
+                <div
+                  style={{
+                    background: 'rgba(59, 130, 246, 0.15)',
+                    border: '2px solid rgba(59, 130, 246, 0.35)',
+                    borderRadius: '16px',
+                    padding: '20px',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                  }}
+                >
+                  <span style={{ fontSize: '22px', fontWeight: 600, color: '#1b0a33' }}>
+                    Builder Score
+                  </span>
+                  <span style={{ fontSize: '40px', fontWeight: 700, color: '#3b82f6' }}>
+                    {builderScore || 'N/A'}
+                  </span>
+                </div>
               </div>
 
-              {/* Ethos Score */}
-              <div
-                style={{
-                  background: 'rgba(34, 197, 94, 0.15)',
-                  border: '2px solid rgba(34, 197, 94, 0.35)',
-                  borderRadius: '16px',
-                  padding: '24px',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                }}
-              >
-                <span style={{ fontSize: '28px', fontWeight: 600, color: '#1b0a33' }}>
-                  Ethos Onchain Score
-                </span>
-                <span style={{ fontSize: '48px', fontWeight: 700, color: '#22c55e' }}>
-                  {ethosScore || 'N/A'}
-                </span>
-              </div>
-            </div>
+              {/* Right Column */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', flex: 1 }}>
+                {/* Spam Score or Ethos Score */}
+                {spamScore && spamScore !== 'null' ? (
+                  <div
+                    style={{
+                      background: 'rgba(251, 146, 60, 0.15)',
+                      border: '2px solid rgba(251, 146, 60, 0.35)',
+                      borderRadius: '16px',
+                      padding: '20px',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                    }}
+                  >
+                    <span style={{ fontSize: '22px', fontWeight: 600, color: '#1b0a33' }}>
+                      Spam Score
+                    </span>
+                    <span style={{ fontSize: '40px', fontWeight: 700, color: '#fb923c' }}>
+                      {spamScore}
+                    </span>
+                  </div>
+                ) : (
+                  <div
+                    style={{
+                      background: 'rgba(34, 197, 94, 0.15)',
+                      border: '2px solid rgba(34, 197, 94, 0.35)',
+                      borderRadius: '16px',
+                      padding: '20px',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                    }}
+                  >
+                    <span style={{ fontSize: '22px', fontWeight: 600, color: '#1b0a33' }}>
+                      Ethos Onchain
+                    </span>
+                    <span style={{ fontSize: '40px', fontWeight: 700, color: '#22c55e' }}>
+                      {ethosScore || 'N/A'}
+                    </span>
+                  </div>
+                )}
 
-            {/* Footer */}
-            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '16px' }}>
-              <span style={{ fontSize: '20px', color: '#6e5c88' }}>
-                farcasturds.xyz
-              </span>
+                {/* Ethos Score (if spam score exists) */}
+                {spamScore && spamScore !== 'null' && (
+                  <div
+                    style={{
+                      background: 'rgba(34, 197, 94, 0.15)',
+                      border: '2px solid rgba(34, 197, 94, 0.35)',
+                      borderRadius: '16px',
+                      padding: '20px',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                    }}
+                  >
+                    <span style={{ fontSize: '22px', fontWeight: 600, color: '#1b0a33' }}>
+                      Ethos Onchain
+                    </span>
+                    <span style={{ fontSize: '40px', fontWeight: 700, color: '#22c55e' }}>
+                      {ethosScore || 'N/A'}
+                    </span>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
       ),
       {
-        width: 800,
-        height: 800,
+        width: 1200,
+        height: 630,
       }
     );
   } catch (error: any) {
