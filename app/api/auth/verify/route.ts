@@ -3,10 +3,16 @@ import { NextRequest, NextResponse } from 'next/server'
 import { SiweMessage } from 'siwe'
 import { getFarcasterProfile } from '@/lib/farcasterClient'
 import { JsonRpcProvider } from 'ethers'
+import { createPublicClient, http, hashMessage } from 'viem'
+import { base } from 'viem/chains'
 
 // Shared provider for SIWE verification (supports EIP-1271 smart accounts)
 const BASE_RPC_URL = process.env.BASE_RPC_URL || 'https://mainnet.base.org'
 const baseProvider = new JsonRpcProvider(BASE_RPC_URL)
+const basePublicClient = createPublicClient({
+  chain: base,
+  transport: http(BASE_RPC_URL)
+})
 
 // Store used nonces to prevent replay attacks (in production, use Redis or DB)
 const usedNonces = new Set<string>()
@@ -33,13 +39,43 @@ export async function POST(req: NextRequest) {
 
     // Parse and verify the SIWE message
     const siweMessage = new SiweMessage(message)
-    const fields = await siweMessage.verify({
+    let fields = await siweMessage.verify({
       signature,
       nonce,
       domain: siweMessage.domain,
       time: siweMessage.issuedAt,
       provider: baseProvider
     })
+
+    // Fallback for smart wallets whose EIP-1271 validation may fail on the primary provider
+    if (!fields.success) {
+      try {
+        const messageHash = hashMessage(siweMessage.prepareMessage())
+        const result = await basePublicClient.readContract({
+          abi: [
+            {
+              type: 'function',
+              name: 'isValidSignature',
+              stateMutability: 'view',
+              inputs: [
+                { name: 'hash', type: 'bytes32' },
+                { name: 'signature', type: 'bytes' }
+              ],
+              outputs: [{ name: 'magicValue', type: 'bytes4' }]
+            }
+          ],
+          address: siweMessage.address as `0x${string}`,
+          functionName: 'isValidSignature',
+          args: [messageHash, signature as `0x${string}`]
+        })
+
+        if (result === '0x1626ba7e') {
+          fields = { success: true, data: fields.data }
+        }
+      } catch (fallbackError) {
+        console.warn('[Auth] EIP-1271 fallback verification failed:', fallbackError)
+      }
+    }
 
     if (!fields.success) {
       return NextResponse.json(
