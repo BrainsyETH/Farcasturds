@@ -3,15 +3,23 @@ import { NextRequest } from 'next/server';
 
 export const runtime = 'edge';
 
+const normalizeValue = (value: string | null, fallback = 'N/A') => {
+  if (!value) return fallback;
+  const trimmed = value.trim();
+  return trimmed && trimmed !== 'null' && trimmed !== 'undefined' ? trimmed : fallback;
+};
+
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const fid = searchParams.get('fid');
-    const neynarScore = searchParams.get('neynarScore');
-    const spamScore = searchParams.get('spamScore');
-    const builderScore = searchParams.get('builderScore');
-    const ethosScore = searchParams.get('ethosScore');
-    const username = searchParams.get('username') || 'User';
+    const fid = normalizeValue(searchParams.get('fid'), 'N/A');
+    const neynarScore = normalizeValue(searchParams.get('neynarScore'));
+    const spamScoreRaw = normalizeValue(searchParams.get('spamScore'), '');
+    const builderScore = normalizeValue(searchParams.get('builderScore'));
+    const ethosScore = normalizeValue(searchParams.get('ethosScore'));
+    const username = normalizeValue(searchParams.get('username'), 'User');
+
+    const spamScore = spamScoreRaw ? spamScoreRaw : null;
 
     return new ImageResponse(
       (
@@ -22,7 +30,8 @@ export async function GET(req: NextRequest) {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            background: 'radial-gradient(circle at 20% 20%, rgba(105,56,199,0.25), transparent 40%), radial-gradient(circle at 80% 80%, rgba(34,197,94,0.18), transparent 35%), linear-gradient(135deg, #0c0b14, #1d0f2d 55%, #0f1928)',
+            background:
+              'radial-gradient(circle at 20% 20%, rgba(105,56,199,0.24), transparent 40%), radial-gradient(circle at 78% 78%, rgba(34,197,94,0.18), transparent 36%), linear-gradient(135deg, #0c0b14, #1d0f2d 55%, #0f1928)',
             padding: '48px',
           }}
         >
@@ -34,7 +43,7 @@ export async function GET(req: NextRequest) {
               maxHeight: '900px',
               background: 'linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.03))',
               borderRadius: '32px',
-              border: '1px solid rgba(255,255,255,0.06)',
+              border: '1px solid rgba(255,255,255,0.08)',
               boxShadow: '0 30px 120px rgba(0,0,0,0.55)',
               padding: '36px',
               display: 'flex',
@@ -42,14 +51,13 @@ export async function GET(req: NextRequest) {
               gap: '24px',
             }}
           >
-            {/* Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 <span style={{ color: '#c4b5fd', letterSpacing: '0.12em', fontSize: '18px', fontWeight: 700 }}>
                   Farcasturds Reputation
                 </span>
                 <span style={{ color: '#f3f4f6', fontSize: '34px', fontWeight: 800 }}>
-                  @{username} • FID {fid || 'N/A'}
+                  @{username} • FID {fid}
                 </span>
               </div>
               <div
@@ -67,7 +75,6 @@ export async function GET(req: NextRequest) {
               </div>
             </div>
 
-            {/* Scores */}
             <div
               style={{
                 display: 'grid',
@@ -87,9 +94,7 @@ export async function GET(req: NextRequest) {
                 }}
               >
                 <span style={{ color: '#e0def5', fontSize: '20px', fontWeight: 700 }}>Neynar Quality</span>
-                <span style={{ color: '#c084fc', fontSize: '40px', fontWeight: 800 }}>
-                  {neynarScore || 'N/A'}
-                </span>
+                <span style={{ color: '#c084fc', fontSize: '40px', fontWeight: 800 }}>{neynarScore}</span>
               </div>
 
               <div
@@ -104,15 +109,15 @@ export async function GET(req: NextRequest) {
                 }}
               >
                 <span style={{ color: '#dceafe', fontSize: '20px', fontWeight: 700 }}>Builder Score</span>
-                <span style={{ color: '#93c5fd', fontSize: '40px', fontWeight: 800 }}>
-                  {builderScore || 'N/A'}
-                </span>
+                <span style={{ color: '#93c5fd', fontSize: '40px', fontWeight: 800 }}>{builderScore}</span>
               </div>
 
               <div
                 style={{
-                  background: spamScore && spamScore !== 'null' ? 'linear-gradient(135deg, rgba(251,146,60,0.22), rgba(251,146,60,0.1))' : 'linear-gradient(135deg, rgba(34,197,94,0.22), rgba(34,197,94,0.1))',
-                  border: spamScore && spamScore !== 'null' ? '1.5px solid rgba(251,146,60,0.38)' : '1.5px solid rgba(34,197,94,0.35)',
+                  background: spamScore
+                    ? 'linear-gradient(135deg, rgba(251,146,60,0.22), rgba(251,146,60,0.1))'
+                    : 'linear-gradient(135deg, rgba(34,197,94,0.22), rgba(34,197,94,0.1))',
+                  border: spamScore ? '1.5px solid rgba(251,146,60,0.38)' : '1.5px solid rgba(34,197,94,0.35)',
                   borderRadius: '18px',
                   padding: '20px',
                   display: 'flex',
@@ -121,16 +126,16 @@ export async function GET(req: NextRequest) {
                 }}
               >
                 <span style={{ color: '#e5e7eb', fontSize: '20px', fontWeight: 700 }}>
-                  {spamScore && spamScore !== 'null' ? 'Spam Score' : 'Ethos Onchain'}
+                  {spamScore ? 'Spam Score' : 'Ethos Onchain'}
                 </span>
                 <span
                   style={{
-                    color: spamScore && spamScore !== 'null' ? '#fbbf24' : '#86efac',
+                    color: spamScore ? '#fbbf24' : '#86efac',
                     fontSize: '40px',
                     fontWeight: 800,
                   }}
                 >
-                  {spamScore && spamScore !== 'null' ? spamScore : ethosScore || 'N/A'}
+                  {spamScore || ethosScore}
                 </span>
               </div>
 
@@ -162,6 +167,9 @@ export async function GET(req: NextRequest) {
       {
         width: 1000,
         height: 1000,
+        headers: {
+          'Content-Type': 'image/png',
+        },
       }
     );
   } catch (error: any) {
