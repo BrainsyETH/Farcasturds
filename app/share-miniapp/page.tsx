@@ -16,14 +16,35 @@ const normalizeParam = (param?: string | null) => {
   return normalized;
 };
 
+const asAbsoluteUrl = (value?: string) => {
+  if (!value) return undefined;
+  try {
+    return new URL(value).toString();
+  } catch {
+    try {
+      return new URL(value, BASE_URL).toString();
+    } catch {
+      return undefined;
+    }
+  }
+};
+
 export function generateMetadata({ searchParams }: Props): Metadata {
   const imageParam = Array.isArray(searchParams?.image) ? searchParams?.image[0] : searchParams?.image;
   const previewParam = Array.isArray(searchParams?.preview) ? searchParams?.preview[0] : searchParams?.preview;
-  const image = normalizeParam(imageParam);
-  const previewImage = normalizeParam(previewParam);
+  const image = asAbsoluteUrl(normalizeParam(imageParam));
+  const previewImage = asAbsoluteUrl(normalizeParam(previewParam));
 
   const splashImageUrl = image || `${BASE_URL}/splash.png`;
-  const previewImageUrl = previewImage || image || `${BASE_URL}/api/share-scores-preview`;
+  const previewImageUrl = previewImage || `${BASE_URL}/api/share-scores-preview`;
+
+  const openGraphImage = {
+    url: previewImageUrl,
+    width: 1000,
+    height: 1000,
+    alt: 'Farcasturds reputation preview',
+    type: 'image/png',
+  } as const;
 
   const fcMiniAppMetadata = {
     version: '1',
@@ -62,14 +83,15 @@ export function generateMetadata({ searchParams }: Props): Metadata {
     openGraph: {
       title: 'Farcasturds',
       description: 'Your Number Two on Base',
-      images: [
-        {
-          url: previewImageUrl,
-          width: 1000,
-          height: 1000,
-          alt: 'Farcasturds reputation preview',
-        },
-      ],
+      type: 'website',
+      url: BASE_URL,
+      images: [openGraphImage],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: 'Farcasturds',
+      description: 'Your Number Two on Base',
+      images: [openGraphImage],
     },
     other: {
       'fc:miniapp': JSON.stringify(fcMiniAppMetadata),
