@@ -68,6 +68,10 @@ export default function HomePage() {
   // Track processed transaction hashes to prevent duplicate generation
   const processedTxHashes = useRef<Set<string>>(new Set());
 
+  // Track processed signatures to prevent duplicate verification
+  const processedSignatures = useRef<Set<string>>(new Set());
+  const isVerifying = useRef(false);
+
   // Wagmi hooks
   const { address, isConnected } = useAccount();
   const { connect, connectors } = useConnect();
@@ -302,24 +306,58 @@ export default function HomePage() {
   // Handle SIWE signature response and verify
   useEffect(() => {
     async function handleSignatureVerification() {
-      if (!signature || !siweMessage || !authNonce || !address || !me) return;
+      if (!signature || !siweMessage || !authNonce || !address || !me) {
+        console.log('[Auth] Waiting for signature data:', {
+          hasSignature: !!signature,
+          hasSiweMessage: !!siweMessage,
+          hasAuthNonce: !!authNonce,
+          hasAddress: !!address,
+          hasMe: !!me
+        });
+        return;
+      }
 
-      console.log('[Auth] Verifying SIWE signature...');
+      // Prevent duplicate verification of the same signature
+      if (processedSignatures.current.has(signature)) {
+        console.log('[Auth] Signature already processed, skipping duplicate verification');
+        return;
+      }
+
+      // Prevent concurrent verification attempts
+      if (isVerifying.current) {
+        console.log('[Auth] Verification already in progress, skipping duplicate call');
+        return;
+      }
+
+      console.log('[Auth] ========== STARTING SIGNATURE VERIFICATION ==========');
+      console.log('[Auth] Signature received:', signature.substring(0, 20) + '...');
+      console.log('[Auth] Message:', siweMessage.substring(0, 100) + '...');
+      console.log('[Auth] Address:', address);
+      console.log('[Auth] FID:', me.fid);
+
+      // Mark signature as being processed
+      processedSignatures.current.add(signature);
+      isVerifying.current = true;
+
       setStatus('Verifying signature...');
       setIsSignatureRequested(false); // Reset the flag once we have a signature
 
       try {
+        console.log('[Auth] Calling verifySiweSignature API...');
         const result = await verifySiweSignature({
           message: siweMessage,
           signature: signature,
           nonce: authNonce
         });
 
+        console.log('[Auth] Verification result:', result);
+
         if (result.success) {
-          console.log('[Auth] ✓ Signature verified');
+          console.log('[Auth] ✓ Signature verified successfully!');
           setStatus('Getting mint authorization...');
 
           // Get mint authorization from backend
+          console.log('[Auth] Requesting mint authorization for FID:', me.fid, 'to address:', address);
           const authResponse = await fetch('/api/mint/authorize', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -329,35 +367,54 @@ export default function HomePage() {
             })
           });
 
+          console.log('[Auth] Authorization response status:', authResponse.status);
+
           if (!authResponse.ok) {
             const authError = await authResponse.json();
+            console.error('[Auth] Authorization failed:', authError);
             throw new Error(authError.error || 'Failed to get mint authorization');
           }
 
           const authData = await authResponse.json();
+          console.log('[Auth] Authorization received:', authData);
+
           setMintAuthorization({
             deadline: authData.deadline,
             signature: authData.signature
           });
 
-          console.log('[Auth] ✓ Authorization received, triggering mint...');
+          console.log('[Auth] ✓ Authorization complete! Mint will start now...');
+          console.log('[Auth] ========== VERIFICATION COMPLETE ==========');
+
           // Reset auth states
           setSiweMessage(null);
           setAuthNonce(null);
 
           // Mint will be triggered in the next useEffect when mintAuthorization is set
         } else {
+          console.error('[Auth] ❌ Signature verification failed!');
+          console.error('[Auth] Error:', result.error);
+          // Remove from processed set on failure so user can retry
+          processedSignatures.current.delete(signature);
           throw new Error(result.error || 'Signature verification failed');
         }
       } catch (err: any) {
-        console.error('[Auth] Verification error:', err);
+        console.error('[Auth] ========== VERIFICATION ERROR ==========');
+        console.error('[Auth] Error type:', err.name);
+        console.error('[Auth] Error message:', err.message);
+        console.error('[Auth] Full error:', err);
+
         setStatus(`⚠️ Authorization failed: ${err.message}`);
         setMinting(false);
         setIsSignatureRequested(false);
         setSiweMessage(null);
         setAuthNonce(null);
         setMintAuthorization(null);
+
+        console.log('[Auth] State reset, ready for retry');
         setTimeout(() => setStatus(null), 5000);
+      } finally {
+        isVerifying.current = false;
       }
     }
 
