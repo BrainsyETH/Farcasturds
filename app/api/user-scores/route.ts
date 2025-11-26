@@ -1,7 +1,8 @@
 // app/api/user-scores/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { NeynarAPIClient } from "@neynar/nodejs-sdk";
-import { createPublicClient, http, normalize } from "viem";
+import { createPublicClient, http } from "viem";
+import { normalize } from "viem/ens";
 import { mainnet, base } from "viem/chains";
 
 const neynar = new NeynarAPIClient({
