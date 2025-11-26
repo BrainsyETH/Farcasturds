@@ -142,20 +142,28 @@ export default function UserProfile({ userFid }: UserProfileProps) {
       imageUrl.searchParams.set('builderScore', userScores.builderScore?.toString() || 'N/A');
       imageUrl.searchParams.set('ethosScore', userScores.ethosScore?.toString() || 'N/A');
 
-      // Miniapp URL for link embed
-      const miniappUrl = 'https://farcaster.xyz/miniapps/asmxYIFlnWF0/farcasturds';
+      // Miniapp URL for link embed - use share-specific route to inject reputation image as splash
+      const miniappUrl = new URL('/share-miniapp', baseUrl);
+      miniappUrl.searchParams.set('image', imageUrl.toString());
+      miniappUrl.searchParams.set('username', username);
+      miniappUrl.searchParams.set('fid', userFid.toString());
 
       // Create cast text with image embed and miniapp link
       const castText = `Check out my reputation scores on Farcasturds! 💩`;
+      const embeds = [imageUrl.toString(), miniappUrl.toString()];
 
-      // Build composer URL with both image and link embeds
-      const composerUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(castText)}&embeds[]=${encodeURIComponent(imageUrl.toString())}&embeds[]=${encodeURIComponent(miniappUrl)}`;
-
-      // Open in same window/tab
-      window.location.href = composerUrl;
+      // Use miniapp SDK to open the composer in the main Farcaster app and close the mini app view
+      try {
+        await sdk.actions.composeCast({ text: castText, embeds, close: true });
+      } catch (sdkError) {
+        console.error('SDK compose failed, falling back to Warpcast URL:', sdkError);
+        const composerUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(castText)}&embeds[]=${encodeURIComponent(imageUrl.toString())}&embeds[]=${encodeURIComponent(miniappUrl.toString())}`;
+        window.location.href = composerUrl;
+      }
 
     } catch (error) {
       console.error('Error sharing scores:', error);
+    } finally {
       setIsGeneratingImage(false);
     }
   };
