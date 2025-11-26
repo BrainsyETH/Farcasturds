@@ -138,6 +138,10 @@ function getNeynarScore(user: any): number | null {
 
 // Extract Neynar's spam score (0-1 scale)
 function getNeynarSpamScore(user: any): number | null {
+  // Log the full experimental object to debug
+  console.log('[Neynar] Full experimental object:', JSON.stringify(user.experimental, null, 2));
+  console.log('[Neynar] User object keys:', Object.keys(user));
+
   // Neynar provides a spam score in the experimental object
   // Try multiple possible field names
   const spamScore =
@@ -145,10 +149,13 @@ function getNeynarSpamScore(user: any): number | null {
     user.experimental?.neynar_spam_score ??
     user.spam_score ??
     user.neynar_spam_score ??
+    user.activeOnFcNetwork?.spam_score ??
     null;
 
   if (spamScore !== null) {
     console.log(`[Neynar] Spam score: ${spamScore}`);
+  } else {
+    console.log('[Neynar] Spam score not found in any known field');
   }
 
   return spamScore;

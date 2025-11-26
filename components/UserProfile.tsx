@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
-import html2canvas from 'html2canvas';
+import { sdk } from '@farcaster/miniapp-sdk';
 
 interface UserProfileProps {
   userFid?: number;
@@ -119,83 +119,39 @@ export default function UserProfile({ userFid }: UserProfileProps) {
     return `rgb(${r}, ${g}, ${b})`;
   };
 
-  // Share functionality to generate image of scores
+  // Share functionality to create a Farcaster cast
   const handleShareScores = async () => {
-    if (!scoresCardRef.current || !userScores) return;
+    if (!userScores || !userFid) return;
 
     try {
       setIsGeneratingImage(true);
 
-      // Hide all tooltips before capturing
-      const previousTooltip = activeTooltip;
-      setActiveTooltip(null);
+      // Get user info from SDK
+      const context = await sdk.context;
+      const username = context?.user?.username || 'user';
 
-      // Wait for tooltip to hide
-      await new Promise(resolve => setTimeout(resolve, 100));
-
-      // Capture the element as canvas
-      const canvas = await html2canvas(scoresCardRef.current, {
-        backgroundColor: '#0a0a0a',
-        scale: 2, // Higher quality
-        logging: false,
-        windowWidth: scoresCardRef.current.scrollWidth,
-        windowHeight: scoresCardRef.current.scrollHeight,
-      });
-
-      // Convert canvas to data URL and open in new tab
-      const dataUrl = canvas.toDataURL('image/png');
-
-      // Open in new tab (works in sandboxed iframes)
-      const newTab = window.open();
-      if (newTab) {
-        newTab.document.write(`
-          <html>
-            <head>
-              <title>Farcasturds Reputation Scores - FID ${userFid || 'User'}</title>
-              <style>
-                body {
-                  margin: 0;
-                  padding: 20px;
-                  background: #0a0a0a;
-                  display: flex;
-                  flex-direction: column;
-                  align-items: center;
-                  justify-content: center;
-                  min-height: 100vh;
-                  font-family: system-ui, -apple-system, sans-serif;
-                }
-                img {
-                  max-width: 100%;
-                  height: auto;
-                  border-radius: 12px;
-                  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-                }
-                .instructions {
-                  margin-top: 20px;
-                  color: #fff;
-                  text-align: center;
-                  font-size: 14px;
-                  opacity: 0.8;
-                }
-              </style>
-            </head>
-            <body>
-              <img src="${dataUrl}" alt="Reputation Scores" />
-              <div class="instructions">
-                Right-click the image to save or share
-              </div>
-            </body>
-          </html>
-        `);
-        newTab.document.close();
+      // Build the image URL with score parameters
+      const baseUrl = window.location.origin;
+      const imageUrl = new URL('/api/share-scores', baseUrl);
+      imageUrl.searchParams.set('fid', userFid.toString());
+      imageUrl.searchParams.set('username', username);
+      imageUrl.searchParams.set('neynarScore', userScores.neynarScore?.toFixed(2) || 'N/A');
+      if (userScores.neynarSpamScore !== null) {
+        imageUrl.searchParams.set('spamScore', userScores.neynarSpamScore.toFixed(2));
       }
+      imageUrl.searchParams.set('builderScore', userScores.builderScore?.toString() || 'N/A');
+      imageUrl.searchParams.set('ethosScore', userScores.ethosScore?.toString() || 'N/A');
 
-      // Restore previous tooltip state
-      setActiveTooltip(previousTooltip);
+      // Create cast text
+      const castText = `Check out my reputation scores on Farcasturds! 💩\n\nfarcasturds.xyz`;
+
+      // Open Farcaster composer with the cast
+      await sdk.actions.openUrl(`https://warpcast.com/~/compose?text=${encodeURIComponent(castText)}&embeds[]=${encodeURIComponent(imageUrl.toString())}`);
+
       setIsGeneratingImage(false);
 
     } catch (error) {
-      console.error('Error generating image:', error);
+      console.error('Error sharing scores:', error);
       setIsGeneratingImage(false);
     }
   };
@@ -468,12 +424,6 @@ export default function UserProfile({ userFid }: UserProfileProps) {
               </div>
 
               {/* Neynar Spam Score */}
-              {console.log('Spam Score Check:', {
-                neynarSpamScore: userScores.neynarSpamScore,
-                isNull: userScores.neynarSpamScore === null,
-                isUndefined: userScores.neynarSpamScore === undefined,
-                willDisplay: userScores.neynarSpamScore !== null
-              })}
               {userScores.neynarSpamScore !== null && (
                 <div style={{
                   padding: '1rem',
