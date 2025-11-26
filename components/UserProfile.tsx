@@ -11,6 +11,7 @@ interface UserScores {
   neynarScore: number | null;
   ethosScore: number | null;
   builderScore: number | null;
+  username: string | null;
   followerCount: number;
   followingCount: number;
   neynarSpamScore: number | null;
@@ -605,12 +606,14 @@ export default function UserProfile({ userFid }: UserProfileProps) {
                 ) : (
                   <div style={{ fontSize: '0.75rem', color: 'var(--fc-text-soft)' }}>
                     <a
-                      href="https://docs.talentprotocol.com/docs/protocol-concepts/scoring-systems/builder-score"
+                      href={userScores.username
+                        ? `https://www.base.org/name/${encodeURIComponent(userScores.username.toLowerCase())}`
+                        : 'https://docs.talentprotocol.com/docs/protocol-concepts/scoring-systems/builder-score'}
                       target="_blank"
                       rel="noopener noreferrer"
                       style={{ color: '#3b82f6', textDecoration: 'none' }}
                     >
-                      Talent Protocol • Base Network →
+                      Base Name Profile →
                     </a>
                   </div>
                 )}
@@ -696,12 +699,14 @@ export default function UserProfile({ userFid }: UserProfileProps) {
                 ) : (
                   <div style={{ fontSize: '0.75rem', color: 'var(--fc-text-soft)' }}>
                     <a
-                      href="https://ethos.network"
+                      href={userScores.username
+                        ? `https://app.ethos.network/profile/x/${encodeURIComponent(userScores.username)}`
+                        : 'https://ethos.network'}
                       target="_blank"
                       rel="noopener noreferrer"
                       style={{ color: '#22c55e', textDecoration: 'none' }}
                     >
-                      Ethos Network →
+                      Ethos Profile →
                     </a>
                   </div>
                 )}

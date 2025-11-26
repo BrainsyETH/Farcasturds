@@ -243,6 +243,7 @@ export async function GET(req: NextRequest) {
       neynarSpamScore,
       ethosScore,
       builderScore,
+      username: user.username || null,
       followerCount: user.follower_count || 0,
       followingCount: user.following_count || 0,
     });
