@@ -142,24 +142,57 @@ export default function UserProfile({ userFid }: UserProfileProps) {
         windowHeight: scoresCardRef.current.scrollHeight,
       });
 
-      // Convert canvas to blob
-      canvas.toBlob((blob) => {
-        if (!blob) return;
+      // Convert canvas to data URL and open in new tab
+      const dataUrl = canvas.toDataURL('image/png');
 
-        // Create download link
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `farcasturds-reputation-scores-${userFid || 'user'}.png`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
+      // Open in new tab (works in sandboxed iframes)
+      const newTab = window.open();
+      if (newTab) {
+        newTab.document.write(`
+          <html>
+            <head>
+              <title>Farcasturds Reputation Scores - FID ${userFid || 'User'}</title>
+              <style>
+                body {
+                  margin: 0;
+                  padding: 20px;
+                  background: #0a0a0a;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  min-height: 100vh;
+                  font-family: system-ui, -apple-system, sans-serif;
+                }
+                img {
+                  max-width: 100%;
+                  height: auto;
+                  border-radius: 12px;
+                  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+                }
+                .instructions {
+                  margin-top: 20px;
+                  color: #fff;
+                  text-align: center;
+                  font-size: 14px;
+                  opacity: 0.8;
+                }
+              </style>
+            </head>
+            <body>
+              <img src="${dataUrl}" alt="Reputation Scores" />
+              <div class="instructions">
+                Right-click the image to save or share
+              </div>
+            </body>
+          </html>
+        `);
+        newTab.document.close();
+      }
 
-        // Restore previous tooltip state
-        setActiveTooltip(previousTooltip);
-        setIsGeneratingImage(false);
-      }, 'image/png');
+      // Restore previous tooltip state
+      setActiveTooltip(previousTooltip);
+      setIsGeneratingImage(false);
 
     } catch (error) {
       console.error('Error generating image:', error);
@@ -435,6 +468,12 @@ export default function UserProfile({ userFid }: UserProfileProps) {
               </div>
 
               {/* Neynar Spam Score */}
+              {console.log('Spam Score Check:', {
+                neynarSpamScore: userScores.neynarSpamScore,
+                isNull: userScores.neynarSpamScore === null,
+                isUndefined: userScores.neynarSpamScore === undefined,
+                willDisplay: userScores.neynarSpamScore !== null
+              })}
               {userScores.neynarSpamScore !== null && (
                 <div style={{
                   padding: '1rem',
