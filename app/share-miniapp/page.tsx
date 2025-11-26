@@ -41,6 +41,26 @@ const asAbsoluteUrl = (value?: string) => {
   }
 };
 
+const normalizeParam = (param?: string | null) => {
+  if (!param) return undefined;
+  const normalized = param.trim();
+  if (!normalized || normalized === 'undefined' || normalized === 'null') return undefined;
+  return normalized;
+};
+
+const asAbsoluteUrl = (value?: string) => {
+  if (!value) return undefined;
+  try {
+    return new URL(value).toString();
+  } catch {
+    try {
+      return new URL(value, BASE_URL).toString();
+    } catch {
+      return undefined;
+    }
+  }
+};
+
 export function generateMetadata({ searchParams }: Props): Metadata {
   const BASE_URL = getBaseUrl();
   const imageParam = Array.isArray(searchParams?.image) ? searchParams?.image[0] : searchParams?.image;
