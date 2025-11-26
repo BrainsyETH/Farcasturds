@@ -19,6 +19,7 @@
     "@vercel/postgres": "^0.10.0",
     "dotenv": "^17.2.3",
     "ethers": "^6.15.0",
+    "html2canvas": "^1.4.1",
     "next": "14.0.0",
     "node-vibrant": "^4.0.3",
     "openai": "^6.9.1",
