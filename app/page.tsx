@@ -1138,6 +1138,19 @@ export default function HomePage() {
                     </div>
                   </div>
 
+                  {lastTxHash && (
+                    <div style={{ textAlign: "center", marginTop: 12 }}>
+                      <a
+                        href={getBaseScanTxUrl(lastTxHash)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="fc-basescan-link"
+                      >
+                        View on BaseScan
+                      </a>
+                    </div>
+                  )}
+
                   {meta.attributes && meta.attributes.length > 0 && (
                     <div className="fc-attr-row">
                       {meta.attributes.map((attr) => (
@@ -1266,6 +1279,19 @@ export default function HomePage() {
                     </div>
                   </div>
 
+                  {lastTxHash && (
+                    <div style={{ textAlign: "center", marginTop: 12 }}>
+                      <a
+                        href={getBaseScanTxUrl(lastTxHash)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="fc-basescan-link"
+                      >
+                        View on BaseScan
+                      </a>
+                    </div>
+                  )}
+
                   {meta.attributes && meta.attributes.length > 0 && (
                     <div className="fc-attr-row">
                       {meta.attributes.map((attr) => (
@@ -1350,54 +1376,6 @@ export default function HomePage() {
           </section>
         </>
       )}
-
-      {/* Recent activity */}
-      <section className="fc-section">
-        <div className="fc-card fc-activity">
-          <div className="fc-activity-header">
-            <span className="fc-activity-dot" />
-            <span>Recent activity</span>
-          </div>
-
-          {hasActivity ? (
-            <div className="fc-activity-item">
-              <p style={{
-                fontSize: "0.88rem",
-                color: "var(--fc-text-soft)",
-                margin: "0 auto 8px",
-                textAlign: "center",
-                maxWidth: "100%"
-              }}>
-                <span className="fc-activity-label"></span>
-                {" "}FID {me.fid}
-                {" "}→{" "}
-                <span className="fc-code">{truncateAddress(me.wallet)}</span>
-              </p>
-
-              <div style={{ textAlign: "center", width: "100%" }}>
-                {lastTxHash ? (
-                  <a
-                    href={getBaseScanTxUrl(lastTxHash)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="fc-basescan-link"
-                  >
-                    View on BaseScan
-                  </a>
-                ) : (
-                  <span style={{ fontSize: "0.8rem", color: "var(--fc-text-muted)" }}>
-                    on-chain · existing
-                  </span>
-                )}
-              </div>
-            </div>
-          ) : (
-            <p className="fc-subtle" style={{ fontSize: "0.85rem" }}>
-              You haven't minted yet.
-            </p>
-          )}
-        </div>
-      </section>
         </>
       )}
 
