@@ -8,6 +8,7 @@ export const metadata: Metadata = {
   icons: {
     icon: '/icons/icon.png',
   },
+  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'https://farcasturds.vercel.app'),
   openGraph: {
     title: 'Farcasturds',
     description: 'Your Number Two on Base',
