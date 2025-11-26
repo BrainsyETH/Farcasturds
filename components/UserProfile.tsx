@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
+import html2canvas from 'html2canvas';
 
 interface UserProfileProps {
   userFid?: number;
@@ -21,7 +22,9 @@ export default function UserProfile({ userFid }: UserProfileProps) {
   const [loading, setLoading] = useState(true);
   const [scoresLoading, setScoresLoading] = useState(true);
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const tooltipRefs = useRef<{ [key: string]: HTMLSpanElement | null }>({});
+  const scoresCardRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     fetchUserStats();
@@ -114,6 +117,54 @@ export default function UserProfile({ userFid }: UserProfileProps) {
     const b = Math.round(94 + (68 - 94) * ratio);
 
     return `rgb(${r}, ${g}, ${b})`;
+  };
+
+  // Share functionality to generate image of scores
+  const handleShareScores = async () => {
+    if (!scoresCardRef.current || !userScores) return;
+
+    try {
+      setIsGeneratingImage(true);
+
+      // Hide all tooltips before capturing
+      const previousTooltip = activeTooltip;
+      setActiveTooltip(null);
+
+      // Wait for tooltip to hide
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // Capture the element as canvas
+      const canvas = await html2canvas(scoresCardRef.current, {
+        backgroundColor: '#0a0a0a',
+        scale: 2, // Higher quality
+        logging: false,
+        windowWidth: scoresCardRef.current.scrollWidth,
+        windowHeight: scoresCardRef.current.scrollHeight,
+      });
+
+      // Convert canvas to blob
+      canvas.toBlob((blob) => {
+        if (!blob) return;
+
+        // Create download link
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `farcasturds-reputation-scores-${userFid || 'user'}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+
+        // Restore previous tooltip state
+        setActiveTooltip(previousTooltip);
+        setIsGeneratingImage(false);
+      }, 'image/png');
+
+    } catch (error) {
+      console.error('Error generating image:', error);
+      setIsGeneratingImage(false);
+    }
   };
 
   if (loading) {
@@ -237,8 +288,56 @@ export default function UserProfile({ userFid }: UserProfileProps) {
 
       {/* Reputation Scores Section */}
       <section className="fc-section">
-        <div className="fc-card">
-          <h3 className="fc-card-title">Reputation Scores</h3>
+        <div className="fc-card" ref={scoresCardRef}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <h3 className="fc-card-title" style={{ margin: 0 }}>Reputation Scores</h3>
+            {!scoresLoading && userScores && (
+              <button
+                onClick={handleShareScores}
+                disabled={isGeneratingImage}
+                style={{
+                  padding: '0.5rem 1rem',
+                  backgroundColor: isGeneratingImage ? '#444' : '#8b5cf6',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '8px',
+                  fontSize: '0.875rem',
+                  fontWeight: 600,
+                  cursor: isGeneratingImage ? 'not-allowed' : 'pointer',
+                  transition: 'background-color 0.2s',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem'
+                }}
+                onMouseOver={(e) => !isGeneratingImage && (e.currentTarget.style.backgroundColor = '#7c3aed')}
+                onMouseOut={(e) => !isGeneratingImage && (e.currentTarget.style.backgroundColor = '#8b5cf6')}
+              >
+                {isGeneratingImage ? (
+                  <>
+                    <span style={{
+                      display: 'inline-block',
+                      width: '12px',
+                      height: '12px',
+                      border: '2px solid #fff',
+                      borderTopColor: 'transparent',
+                      borderRadius: '50%',
+                      animation: 'spin 1s linear infinite'
+                    }} />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+                      <polyline points="16 6 12 2 8 6" />
+                      <line x1="12" y1="2" x2="12" y2="15" />
+                    </svg>
+                    Share Scores
+                  </>
+                )}
+              </button>
+            )}
+          </div>
 
           {scoresLoading ? (
             <p className="fc-status" style={{ textAlign: 'center', padding: '1rem' }}>Loading scores...</p>
