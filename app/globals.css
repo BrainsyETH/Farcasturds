@@ -247,6 +247,10 @@ h2.fc-title {
     border-color 140ms ease-out;
 }
 
+.fc-card--overflow-visible {
+  overflow: visible;
+}
+
 .fc-card::before {
   content: "";
   position: absolute;

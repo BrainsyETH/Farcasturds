@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 interface UserProfileProps {
   userFid?: number;
@@ -20,6 +20,7 @@ export default function UserProfile({ userFid }: UserProfileProps) {
   const [loading, setLoading] = useState(true);
   const [scoresLoading, setScoresLoading] = useState(true);
   const [showTooltip, setShowTooltip] = useState(false);
+  const tooltipRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     fetchUserStats();
@@ -69,6 +70,34 @@ export default function UserProfile({ userFid }: UserProfileProps) {
     }
   }
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (tooltipRef.current && !tooltipRef.current.contains(event.target as Node)) {
+        setShowTooltip(false);
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, []);
+
+  const handleTooltipPointerEnter = (event: React.PointerEvent<HTMLSpanElement>) => {
+    if (event.pointerType === 'mouse') {
+      setShowTooltip(true);
+    }
+  };
+
+  const handleTooltipPointerLeave = (event: React.PointerEvent<HTMLSpanElement>) => {
+    if (event.pointerType === 'mouse') {
+      setShowTooltip(false);
+    }
+  };
+
+  const toggleTooltip = (event: React.MouseEvent<HTMLSpanElement>) => {
+    event.stopPropagation();
+    setShowTooltip((prev) => !prev);
+  };
+
   if (loading) {
     return (
       <div className="fc-section">
@@ -84,16 +113,17 @@ export default function UserProfile({ userFid }: UserProfileProps) {
       {/* User Stats Section */}
       {userStats && (
         <section className="fc-section">
-          <div className="fc-card">
+          <div className="fc-card fc-card--overflow-visible">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div style={{ flex: '0 0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem', position: 'relative' }}>
                   <img src="/splash.png" alt="" style={{ width: '1em', height: '1em', display: 'inline-block', verticalAlign: 'middle' }} />
                   <h3 className="fc-card-title" style={{ margin: 0 }}>Turd Score</h3>
                   <span
-                    onMouseEnter={() => setShowTooltip(true)}
-                    onMouseLeave={() => setShowTooltip(false)}
-                    onClick={() => setShowTooltip(!showTooltip)}
+                    ref={tooltipRef}
+                    onPointerEnter={handleTooltipPointerEnter}
+                    onPointerLeave={handleTooltipPointerLeave}
+                    onClick={toggleTooltip}
                     style={{
                       cursor: 'help',
                       fontSize: '0.75rem',
