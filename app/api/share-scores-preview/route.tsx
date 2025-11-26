@@ -79,8 +79,8 @@ export async function GET(req: NextRequest) {
 
             <div
               style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+                display: 'flex',
+                flexWrap: 'wrap',
                 gap: '18px',
               }}
             >
@@ -93,6 +93,7 @@ export async function GET(req: NextRequest) {
                   display: 'flex',
                   flexDirection: 'column',
                   gap: '8px',
+                  flex: '1 1 48%',
                 }}
               >
                 <span style={{ color: '#e0def5', fontSize: '20px', fontWeight: 700 }}>Neynar Quality</span>
@@ -108,6 +109,7 @@ export async function GET(req: NextRequest) {
                   display: 'flex',
                   flexDirection: 'column',
                   gap: '8px',
+                  flex: '1 1 48%',
                 }}
               >
                 <span style={{ color: '#dceafe', fontSize: '20px', fontWeight: 700 }}>Builder Score</span>
@@ -125,6 +127,7 @@ export async function GET(req: NextRequest) {
                   display: 'flex',
                   flexDirection: 'column',
                   gap: '8px',
+                  flex: '1 1 48%',
                 }}
               >
                 <span style={{ color: '#e5e7eb', fontSize: '20px', fontWeight: 700 }}>
@@ -151,12 +154,19 @@ export async function GET(req: NextRequest) {
                   flexDirection: 'column',
                   gap: '12px',
                   justifyContent: 'space-between',
+                  flex: '1 1 48%',
                 }}
               >
                 <span style={{ color: '#d1d5db', fontSize: '18px', fontWeight: 700 }}>Share your scores</span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <span style={{ fontSize: '26px' }}>💩</span>
-                  <span style={{ color: '#f9fafb', fontSize: '22px', fontWeight: 800 }}>Mint a Turd on Farcasturds</span>
+                  <span style={{
+                    color: '#f9fafb',
+                    fontSize: '22px',
+                    fontWeight: 800,
+                    letterSpacing: '0.01em',
+                  }}>
+                    Mint a Turd on Farcasturds
+                  </span>
                 </div>
                 <span style={{ color: '#9ca3af', fontSize: '16px' }}>
                   Stand out in casts with a dedicated reputation preview that links straight to the mini app.
