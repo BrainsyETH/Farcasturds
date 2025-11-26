@@ -2,6 +2,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { SiweMessage } from 'siwe'
 import { getFarcasterProfile } from '@/lib/farcasterClient'
+import { JsonRpcProvider } from 'ethers'
+
+// Shared provider for SIWE verification (supports EIP-1271 smart accounts)
+const BASE_RPC_URL = process.env.BASE_RPC_URL || 'https://mainnet.base.org'
+const baseProvider = new JsonRpcProvider(BASE_RPC_URL)
 
 // Store used nonces to prevent replay attacks (in production, use Redis or DB)
 const usedNonces = new Set<string>()
@@ -28,7 +33,13 @@ export async function POST(req: NextRequest) {
 
     // Parse and verify the SIWE message
     const siweMessage = new SiweMessage(message)
-    const fields = await siweMessage.verify({ signature })
+    const fields = await siweMessage.verify({
+      signature,
+      nonce,
+      domain: siweMessage.domain,
+      time: siweMessage.issuedAt,
+      provider: baseProvider
+    })
 
     if (!fields.success) {
       return NextResponse.json(
