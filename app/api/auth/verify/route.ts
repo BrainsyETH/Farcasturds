@@ -39,6 +39,9 @@ export async function POST(req: NextRequest) {
 
     // Parse and verify the SIWE message
     const siweMessage = new SiweMessage(message)
+
+    console.log('[Auth] Verifying SIWE signature for address:', siweMessage.address)
+
     let fields = await siweMessage.verify({
       signature,
       nonce,
@@ -47,39 +50,73 @@ export async function POST(req: NextRequest) {
       provider: baseProvider
     })
 
-    // Fallback for smart wallets whose EIP-1271 validation may fail on the primary provider
+    // Fallback for smart wallets (e.g., Coinbase Smart Wallets with passkeys)
     if (!fields.success) {
+      console.log('[Auth] Primary verification failed, trying EIP-1271 fallback...')
+
       try {
-        const messageHash = hashMessage(siweMessage.prepareMessage())
-        const result = await basePublicClient.readContract({
-          abi: [
-            {
-              type: 'function',
-              name: 'isValidSignature',
-              stateMutability: 'view',
-              inputs: [
-                { name: 'hash', type: 'bytes32' },
-                { name: 'signature', type: 'bytes' }
-              ],
-              outputs: [{ name: 'magicValue', type: 'bytes4' }]
-            }
-          ],
-          address: siweMessage.address as `0x${string}`,
-          functionName: 'isValidSignature',
-          args: [messageHash, signature as `0x${string}`]
+        // Check if the address is a contract (smart wallet)
+        const code = await basePublicClient.getBytecode({
+          address: siweMessage.address as `0x${string}`
         })
 
-        if (result === '0x1626ba7e') {
-          fields = { success: true, data: fields.data }
+        if (code && code !== '0x') {
+          console.log('[Auth] Address is a smart contract, attempting EIP-1271 verification')
+
+          // Prepare the message hash for EIP-1271
+          const preparedMessage = siweMessage.prepareMessage()
+          const messageHash = hashMessage(preparedMessage)
+
+          console.log('[Auth] Calling isValidSignature with hash:', messageHash)
+
+          const result = await basePublicClient.readContract({
+            abi: [
+              {
+                type: 'function',
+                name: 'isValidSignature',
+                stateMutability: 'view',
+                inputs: [
+                  { name: 'hash', type: 'bytes32' },
+                  { name: 'signature', type: 'bytes' }
+                ],
+                outputs: [{ name: 'magicValue', type: 'bytes4' }]
+              }
+            ],
+            address: siweMessage.address as `0x${string}`,
+            functionName: 'isValidSignature',
+            args: [messageHash, signature as `0x${string}`]
+          })
+
+          console.log('[Auth] isValidSignature returned:', result)
+
+          if (result === '0x1626ba7e') {
+            console.log('[Auth] ✓ EIP-1271 verification successful')
+            fields = { success: true, data: fields.data }
+          } else {
+            console.warn('[Auth] EIP-1271 verification failed: invalid magic value')
+          }
+        } else {
+          console.log('[Auth] Address is not a contract, cannot use EIP-1271 verification')
         }
-      } catch (fallbackError) {
-        console.warn('[Auth] EIP-1271 fallback verification failed:', fallbackError)
+      } catch (fallbackError: any) {
+        console.error('[Auth] EIP-1271 fallback verification error:', fallbackError)
+        console.error('[Auth] Error details:', {
+          message: fallbackError.message,
+          code: fallbackError.code,
+          address: siweMessage.address
+        })
       }
+    } else {
+      console.log('[Auth] ✓ Primary SIWE verification successful')
     }
 
     if (!fields.success) {
+      console.error('[Auth] All verification methods failed')
       return NextResponse.json(
-        { error: 'Invalid signature' },
+        {
+          error: 'Invalid signature',
+          details: 'Both standard SIWE and EIP-1271 verification failed'
+        },
         { status: 401 }
       )
     }

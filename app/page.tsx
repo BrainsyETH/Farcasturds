@@ -56,6 +56,7 @@ export default function HomePage() {
   const [activeTab, setActiveTab] = useState<TabId>('mint');
   const [metadataLoading, setMetadataLoading] = useState(true);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [isSignatureRequested, setIsSignatureRequested] = useState(false);
 
   // Authorization state for direct minting
   const [siweMessage, setSiweMessage] = useState<string | null>(null);
@@ -90,6 +91,8 @@ export default function HomePage() {
     data: signature,
     signMessage,
     isPending: isSignPending,
+    isError: isSignError,
+    error: signError,
   } = useSignMessage();
 
   // Initialize SDK + load Farcaster user with retry logic
@@ -273,6 +276,29 @@ export default function HomePage() {
     }
   }, [me?.fid, isAuthenticated]);
 
+  // Handle signature errors (e.g., user cancelled)
+  useEffect(() => {
+    if (isSignError && signError) {
+      console.error('[Auth] Signature error:', signError);
+
+      // Check if user cancelled
+      const errorMessage = signError.message || '';
+      if (errorMessage.includes('rejected') || errorMessage.includes('denied') || errorMessage.includes('cancelled')) {
+        setStatus('⚠️ Signature request cancelled');
+      } else {
+        setStatus(`⚠️ Signature failed: ${errorMessage}`);
+      }
+
+      // Reset states
+      setMinting(false);
+      setIsSignatureRequested(false);
+      setSiweMessage(null);
+      setAuthNonce(null);
+
+      setTimeout(() => setStatus(null), 5000);
+    }
+  }, [isSignError, signError]);
+
   // Handle SIWE signature response and verify
   useEffect(() => {
     async function handleSignatureVerification() {
@@ -280,6 +306,7 @@ export default function HomePage() {
 
       console.log('[Auth] Verifying SIWE signature...');
       setStatus('Verifying signature...');
+      setIsSignatureRequested(false); // Reset the flag once we have a signature
 
       try {
         const result = await verifySiweSignature({
@@ -326,6 +353,7 @@ export default function HomePage() {
         console.error('[Auth] Verification error:', err);
         setStatus(`⚠️ Authorization failed: ${err.message}`);
         setMinting(false);
+        setIsSignatureRequested(false);
         setSiweMessage(null);
         setAuthNonce(null);
         setMintAuthorization(null);
@@ -614,6 +642,12 @@ export default function HomePage() {
       return;
     }
 
+    // Prevent duplicate signature requests
+    if (isSignatureRequested || isSignPending) {
+      console.log('[GenerateAndMint] Signature request already in progress, ignoring duplicate call');
+      return;
+    }
+
     // Connect wallet if not already connected
     if (!isConnected && connectors.length > 0) {
       try {
@@ -636,6 +670,7 @@ export default function HomePage() {
     // Start mint flow - trigger SIWE signature request
     console.log('[GenerateAndMint] Starting authorization flow for FID:', me.fid);
     setMinting(true);
+    setIsSignatureRequested(true); // Set flag before requesting signature
     setStatus("Requesting signature to verify ownership...");
 
     try {
@@ -652,11 +687,13 @@ export default function HomePage() {
       setSiweMessage(message);
 
       // Request signature from wallet - this will trigger Farcaster's native signature UI
+      console.log('[GenerateAndMint] Requesting signature for message:', message.substring(0, 100) + '...');
       signMessage({ message });
     } catch (err: any) {
       console.error('[GenerateAndMint] Error:', err);
       setStatus(`⚠️ Failed to start mint: ${err.message}`);
       setMinting(false);
+      setIsSignatureRequested(false);
       setTimeout(() => setStatus(null), 5000);
     }
   }
@@ -670,6 +707,12 @@ export default function HomePage() {
     }
     if (!hasGenerated) {
       setStatus("Please generate your Farcasturd first!");
+      return;
+    }
+
+    // Prevent duplicate signature requests
+    if (isSignatureRequested || isSignPending) {
+      console.log('[Mint] Signature request already in progress, ignoring duplicate call');
       return;
     }
 
@@ -695,6 +738,7 @@ export default function HomePage() {
     // Start mint flow - trigger SIWE signature request
     console.log('[Mint] Starting authorization flow for FID:', me.fid);
     setMinting(true);
+    setIsSignatureRequested(true); // Set flag before requesting signature
     setStatus("Requesting signature to verify ownership...");
 
     try {
@@ -711,11 +755,13 @@ export default function HomePage() {
       setSiweMessage(message);
 
       // Request signature from wallet - this will trigger Farcaster's native signature UI
+      console.log('[Mint] Requesting signature for message:', message.substring(0, 100) + '...');
       signMessage({ message });
     } catch (err: any) {
       console.error('[Mint] Error:', err);
       setStatus(`⚠️ Failed to start mint: ${err.message}`);
       setMinting(false);
+      setIsSignatureRequested(false);
       setTimeout(() => setStatus(null), 5000);
     }
   }
