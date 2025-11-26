@@ -66,8 +66,6 @@ export default function UserProfile({ userFid }: UserProfileProps) {
       }
 
       const data = await response.json();
-      console.log('User scores data received:', data);
-      console.log('Neynar Spam Score:', data.neynarSpamScore);
       setUserScores(data);
     } catch (error) {
       console.error('Error fetching user scores:', error);
@@ -123,18 +121,10 @@ export default function UserProfile({ userFid }: UserProfileProps) {
 
   // Share functionality to generate image of scores
   const handleShareScores = async () => {
-    console.log('Share button clicked');
-    console.log('scoresCardRef.current:', scoresCardRef.current);
-    console.log('userScores:', userScores);
-
-    if (!scoresCardRef.current || !userScores) {
-      console.log('Returning early - missing ref or scores');
-      return;
-    }
+    if (!scoresCardRef.current || !userScores) return;
 
     try {
       setIsGeneratingImage(true);
-      console.log('Starting image generation...');
 
       // Hide all tooltips before capturing
       const previousTooltip = activeTooltip;
@@ -143,42 +133,66 @@ export default function UserProfile({ userFid }: UserProfileProps) {
       // Wait for tooltip to hide
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      console.log('Calling html2canvas...');
       // Capture the element as canvas
       const canvas = await html2canvas(scoresCardRef.current, {
         backgroundColor: '#0a0a0a',
         scale: 2, // Higher quality
-        logging: true,
+        logging: false,
         windowWidth: scoresCardRef.current.scrollWidth,
         windowHeight: scoresCardRef.current.scrollHeight,
       });
 
-      console.log('Canvas created:', canvas);
+      // Convert canvas to data URL and open in new tab
+      const dataUrl = canvas.toDataURL('image/png');
 
-      // Convert canvas to blob
-      canvas.toBlob((blob) => {
-        console.log('Blob created:', blob);
-        if (!blob) {
-          console.log('Blob is null!');
-          return;
-        }
+      // Open in new tab (works in sandboxed iframes)
+      const newTab = window.open();
+      if (newTab) {
+        newTab.document.write(`
+          <html>
+            <head>
+              <title>Farcasturds Reputation Scores - FID ${userFid || 'User'}</title>
+              <style>
+                body {
+                  margin: 0;
+                  padding: 20px;
+                  background: #0a0a0a;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  min-height: 100vh;
+                  font-family: system-ui, -apple-system, sans-serif;
+                }
+                img {
+                  max-width: 100%;
+                  height: auto;
+                  border-radius: 12px;
+                  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+                }
+                .instructions {
+                  margin-top: 20px;
+                  color: #fff;
+                  text-align: center;
+                  font-size: 14px;
+                  opacity: 0.8;
+                }
+              </style>
+            </head>
+            <body>
+              <img src="${dataUrl}" alt="Reputation Scores" />
+              <div class="instructions">
+                Right-click the image to save or share
+              </div>
+            </body>
+          </html>
+        `);
+        newTab.document.close();
+      }
 
-        // Create download link
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `farcasturds-reputation-scores-${userFid || 'user'}.png`;
-        document.body.appendChild(link);
-        console.log('Triggering download...');
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-
-        // Restore previous tooltip state
-        setActiveTooltip(previousTooltip);
-        setIsGeneratingImage(false);
-        console.log('Image generation complete!');
-      }, 'image/png');
+      // Restore previous tooltip state
+      setActiveTooltip(previousTooltip);
+      setIsGeneratingImage(false);
 
     } catch (error) {
       console.error('Error generating image:', error);
