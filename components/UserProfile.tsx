@@ -66,6 +66,8 @@ export default function UserProfile({ userFid }: UserProfileProps) {
       }
 
       const data = await response.json();
+      console.log('User scores data received:', data);
+      console.log('Neynar Spam Score:', data.neynarSpamScore);
       setUserScores(data);
     } catch (error) {
       console.error('Error fetching user scores:', error);
@@ -121,10 +123,18 @@ export default function UserProfile({ userFid }: UserProfileProps) {
 
   // Share functionality to generate image of scores
   const handleShareScores = async () => {
-    if (!scoresCardRef.current || !userScores) return;
+    console.log('Share button clicked');
+    console.log('scoresCardRef.current:', scoresCardRef.current);
+    console.log('userScores:', userScores);
+
+    if (!scoresCardRef.current || !userScores) {
+      console.log('Returning early - missing ref or scores');
+      return;
+    }
 
     try {
       setIsGeneratingImage(true);
+      console.log('Starting image generation...');
 
       // Hide all tooltips before capturing
       const previousTooltip = activeTooltip;
@@ -133,18 +143,25 @@ export default function UserProfile({ userFid }: UserProfileProps) {
       // Wait for tooltip to hide
       await new Promise(resolve => setTimeout(resolve, 100));
 
+      console.log('Calling html2canvas...');
       // Capture the element as canvas
       const canvas = await html2canvas(scoresCardRef.current, {
         backgroundColor: '#0a0a0a',
         scale: 2, // Higher quality
-        logging: false,
+        logging: true,
         windowWidth: scoresCardRef.current.scrollWidth,
         windowHeight: scoresCardRef.current.scrollHeight,
       });
 
+      console.log('Canvas created:', canvas);
+
       // Convert canvas to blob
       canvas.toBlob((blob) => {
-        if (!blob) return;
+        console.log('Blob created:', blob);
+        if (!blob) {
+          console.log('Blob is null!');
+          return;
+        }
 
         // Create download link
         const url = URL.createObjectURL(blob);
@@ -152,6 +169,7 @@ export default function UserProfile({ userFid }: UserProfileProps) {
         link.href = url;
         link.download = `farcasturds-reputation-scores-${userFid || 'user'}.png`;
         document.body.appendChild(link);
+        console.log('Triggering download...');
         link.click();
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
@@ -159,6 +177,7 @@ export default function UserProfile({ userFid }: UserProfileProps) {
         // Restore previous tooltip state
         setActiveTooltip(previousTooltip);
         setIsGeneratingImage(false);
+        console.log('Image generation complete!');
       }, 'image/png');
 
     } catch (error) {
@@ -435,6 +454,12 @@ export default function UserProfile({ userFid }: UserProfileProps) {
               </div>
 
               {/* Neynar Spam Score */}
+              {console.log('Spam Score Check:', {
+                neynarSpamScore: userScores.neynarSpamScore,
+                isNull: userScores.neynarSpamScore === null,
+                isUndefined: userScores.neynarSpamScore === undefined,
+                willDisplay: userScores.neynarSpamScore !== null
+              })}
               {userScores.neynarSpamScore !== null && (
                 <div style={{
                   padding: '1rem',
