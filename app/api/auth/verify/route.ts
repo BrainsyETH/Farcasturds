@@ -41,18 +41,40 @@ export async function POST(req: NextRequest) {
     const siweMessage = new SiweMessage(message)
 
     console.log('[Auth] Verifying SIWE signature for address:', siweMessage.address)
+    console.log('[Auth] Signature type check - length:', signature.length)
 
-    let fields = await siweMessage.verify({
-      signature,
-      nonce,
-      domain: siweMessage.domain,
-      time: siweMessage.issuedAt,
-      provider: baseProvider
-    })
+    // Check if this is a passkey/WebAuthn signature (much longer than standard 132 chars)
+    // Standard ECDSA signatures are 132 characters (0x + 130 hex chars)
+    // Passkey signatures are ABI-encoded and much longer
+    const isPasskeySignature = signature.length > 200
+
+    console.log('[Auth] Signature appears to be:', isPasskeySignature ? 'Passkey/WebAuthn' : 'Standard ECDSA')
+
+    let fields: { success: boolean; data: any } = { success: false, data: {} }
+
+    // For passkey signatures, skip standard verification and go straight to EIP-1271
+    if (!isPasskeySignature) {
+      try {
+        console.log('[Auth] Attempting standard SIWE verification...')
+        fields = await siweMessage.verify({
+          signature,
+          nonce,
+          domain: siweMessage.domain,
+          time: siweMessage.issuedAt,
+          provider: baseProvider
+        })
+        console.log('[Auth] ✓ Primary SIWE verification successful')
+      } catch (verifyError: any) {
+        console.log('[Auth] Standard verification failed:', verifyError.message)
+        fields.success = false
+      }
+    } else {
+      console.log('[Auth] Skipping standard verification for passkey signature')
+    }
 
     // Fallback for smart wallets (e.g., Coinbase Smart Wallets with passkeys)
     if (!fields.success) {
-      console.log('[Auth] Primary verification failed, trying EIP-1271 fallback...')
+      console.log('[Auth] Trying EIP-1271 verification...')
 
       try {
         // Check if the address is a contract (smart wallet)
@@ -67,7 +89,8 @@ export async function POST(req: NextRequest) {
           const preparedMessage = siweMessage.prepareMessage()
           const messageHash = hashMessage(preparedMessage)
 
-          console.log('[Auth] Calling isValidSignature with hash:', messageHash)
+          console.log('[Auth] Message hash:', messageHash)
+          console.log('[Auth] Signature length:', signature.length)
 
           const result = await basePublicClient.readContract({
             abi: [
@@ -91,7 +114,7 @@ export async function POST(req: NextRequest) {
 
           if (result === '0x1626ba7e') {
             console.log('[Auth] ✓ EIP-1271 verification successful')
-            fields = { success: true, data: fields.data }
+            fields = { success: true, data: siweMessage }
           } else {
             console.warn('[Auth] EIP-1271 verification failed: invalid magic value')
           }
@@ -106,8 +129,6 @@ export async function POST(req: NextRequest) {
           address: siweMessage.address
         })
       }
-    } else {
-      console.log('[Auth] ✓ Primary SIWE verification successful')
     }
 
     if (!fields.success) {
@@ -120,6 +141,8 @@ export async function POST(req: NextRequest) {
         { status: 401 }
       )
     }
+
+    console.log('[Auth] ✓ Signature verification successful!')
 
     // Extract FID from the statement
     const fidMatch = siweMessage.statement?.match(/FID: (\d+)/)
