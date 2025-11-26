@@ -9,11 +9,17 @@ const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://farcasturds.vercel
 export function generateMetadata({ searchParams }: Props): Metadata {
   const imageParam = searchParams?.image;
   const image = Array.isArray(imageParam) ? imageParam[0] : imageParam;
+  const previewParam = searchParams?.preview;
+  const previewImage = Array.isArray(previewParam) ? previewParam[0] : previewParam;
   const splashImageUrl = image || `${BASE_URL}/splash.png`;
+  const previewImageUrl =
+    previewImage ||
+    image ||
+    `${BASE_URL}/api/share-scores-preview`;
 
   const fcMiniAppMetadata = {
     version: '1',
-    imageUrl: splashImageUrl,
+    imageUrl: previewImageUrl,
     button: {
       title: '💩 Mint a Turd',
       action: {
@@ -28,7 +34,7 @@ export function generateMetadata({ searchParams }: Props): Metadata {
 
   const fcFrameMetadata = {
     version: '1',
-    imageUrl: splashImageUrl,
+    imageUrl: previewImageUrl,
     button: {
       title: '💩 Mint a Turd',
       action: {
@@ -47,7 +53,7 @@ export function generateMetadata({ searchParams }: Props): Metadata {
     openGraph: {
       title: 'Farcasturds',
       description: 'Your Number Two on Base',
-      images: [splashImageUrl],
+      images: [previewImageUrl],
     },
     other: {
       'fc:miniapp': JSON.stringify(fcMiniAppMetadata),
