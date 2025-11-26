@@ -117,15 +117,15 @@ export default function UserProfile({ userFid }: UserProfileProps) {
             <div
               style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-                gap: '1.75rem',
+                gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+                gap: '2rem',
                 alignItems: 'center',
                 justifyItems: 'center',
                 textAlign: 'center'
               }}
             >
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', position: 'relative' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', position: 'relative' }}>
                   <img src="/splash.png" alt="" style={{ width: '1em', height: '1em', display: 'inline-block', verticalAlign: 'middle' }} />
                   <h3 className="fc-card-title" style={{ margin: 0 }}>Turd Score</h3>
                   <span
