@@ -120,6 +120,58 @@ export default function UserProfile({ userFid }: UserProfileProps) {
     return `rgb(${r}, ${g}, ${b})`;
   };
 
+  // Get Ethos score color based on score level (Ethos native color scheme)
+  const getEthosColor = (score: number | null): { color: string; background: string; border: string; level: string } => {
+    if (score === null) {
+      return {
+        color: '#6b7280',
+        background: 'rgba(107, 114, 128, 0.15)',
+        border: 'rgba(107, 114, 128, 0.35)',
+        level: 'N/A'
+      };
+    }
+
+    // Ethos native color gradient: red (untrusted) to purple (exemplary)
+    if (score >= 2000) {
+      return {
+        color: '#a855f7', // Purple - Exemplary
+        background: 'rgba(168, 85, 247, 0.15)',
+        border: 'rgba(168, 85, 247, 0.35)',
+        level: 'Exemplary'
+      };
+    }
+    if (score >= 1600) {
+      return {
+        color: '#22c55e', // Green - Reputable
+        background: 'rgba(34, 197, 94, 0.15)',
+        border: 'rgba(34, 197, 94, 0.35)',
+        level: 'Reputable'
+      };
+    }
+    if (score >= 1200) {
+      return {
+        color: '#eab308', // Yellow - Neutral
+        background: 'rgba(234, 179, 8, 0.15)',
+        border: 'rgba(234, 179, 8, 0.35)',
+        level: 'Neutral'
+      };
+    }
+    if (score >= 800) {
+      return {
+        color: '#f97316', // Orange - Questionable
+        background: 'rgba(249, 115, 22, 0.15)',
+        border: 'rgba(249, 115, 22, 0.35)',
+        level: 'Questionable'
+      };
+    }
+    return {
+      color: '#ef4444', // Red - Untrusted
+      background: 'rgba(239, 68, 68, 0.15)',
+      border: 'rgba(239, 68, 68, 0.35)',
+      level: 'Untrusted'
+    };
+  };
+
   // Share functionality to create a Farcaster cast
   const handleShareScores = async () => {
     if (!userScores || !userFid) return;
@@ -526,16 +578,17 @@ export default function UserProfile({ userFid }: UserProfileProps) {
                 </div>
               )}
 
-              {/* Builder Score (Talent Protocol) */}
+              {/* Base Onchain Score (Talent Protocol Builder Score) */}
               <div style={{
                 padding: '1rem',
-                background: 'rgba(59, 130, 246, 0.15)',
+                background: 'linear-gradient(135deg, rgba(0, 82, 255, 0.12), rgba(0, 122, 255, 0.08))',
                 borderRadius: '12px',
-                border: '1.5px solid rgba(59, 130, 246, 0.35)'
+                border: '1.5px solid rgba(0, 82, 255, 0.4)',
+                boxShadow: '0 2px 8px rgba(0, 82, 255, 0.1)'
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontWeight: 600, fontSize: '0.95rem' }}>
-                    Builder Score
+                    Base Onchain Score
                     <span
                       ref={(el) => (tooltipRefs.current['builderScore'] = el)}
                       onPointerEnter={handleTooltipPointerEnter('builderScore')}
@@ -576,8 +629,8 @@ export default function UserProfile({ userFid }: UserProfileProps) {
                             textAlign: 'center'
                           }}
                         >
-                          Talent Protocol Builder Score.<br />
-                          Based on onchain activity on Base Network.
+                          Your onchain score on Base Network.<br />
+                          Based on transactions, activity, swaps, and more.
                           <span
                             style={{
                               position: 'absolute',
@@ -595,7 +648,14 @@ export default function UserProfile({ userFid }: UserProfileProps) {
                       )}
                     </span>
                   </div>
-                  <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#3b82f6' }}>
+                  <div style={{
+                    fontSize: '1.5rem',
+                    fontWeight: 700,
+                    background: 'linear-gradient(135deg, #0052ff, #007aff)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text'
+                  }}>
                     {userScores.builderScore !== null ? userScores.builderScore : 'N/A'}
                   </div>
                 </div>
@@ -604,113 +664,156 @@ export default function UserProfile({ userFid }: UserProfileProps) {
                     Pending Talent Protocol granting me API access 🙃
                   </div>
                 ) : (
-                  <div style={{ fontSize: '0.75rem', color: 'var(--fc-text-soft)' }}>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--fc-text-soft)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <a
                       href={userScores.username
                         ? `https://www.base.org/name/${encodeURIComponent(userScores.username.toLowerCase())}`
-                        : 'https://docs.talentprotocol.com/docs/protocol-concepts/scoring-systems/builder-score'}
+                        : 'https://www.base.org/name/scores'}
                       target="_blank"
                       rel="noopener noreferrer"
-                      style={{ color: '#3b82f6', textDecoration: 'none' }}
+                      style={{
+                        color: '#0052ff',
+                        textDecoration: 'none',
+                        fontWeight: 500,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.25rem'
+                      }}
                     >
-                      Base Name Profile →
+                      <svg width="14" height="14" viewBox="0 0 111 111" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ marginRight: '2px' }}>
+                        <path d="M54.921 110.034C85.359 110.034 110.034 85.402 110.034 55.017C110.034 24.6319 85.359 0 54.921 0C26.0432 0 2.35281 22.1714 0 50.3923H72.8467V59.6416H3.9565e-07C2.35281 87.8625 26.0432 110.034 54.921 110.034Z" fill="#0052FF"/>
+                      </svg>
+                      View on Base →
                     </a>
                   </div>
                 )}
               </div>
 
               {/* Ethos Score */}
-              <div style={{
-                padding: '1rem',
-                background: 'rgba(34, 197, 94, 0.15)',
-                borderRadius: '12px',
-                border: '1.5px solid rgba(34, 197, 94, 0.35)'
-              }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontWeight: 600, fontSize: '0.95rem' }}>
-                    Ethos Onchain Score
-                    <span
-                      ref={(el) => (tooltipRefs.current['ethosScore'] = el)}
-                      onPointerEnter={handleTooltipPointerEnter('ethosScore')}
-                      onPointerLeave={handleTooltipPointerLeave}
-                      onClick={toggleTooltip('ethosScore')}
-                      style={{
-                        cursor: 'help',
-                        fontSize: '0.7rem',
-                        color: 'var(--fc-text-soft)',
-                        backgroundColor: 'rgba(0,0,0,0.1)',
-                        borderRadius: '50%',
-                        width: '14px',
-                        height: '14px',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontWeight: 'bold',
-                        position: 'relative'
-                      }}
-                    >
-                      i
-                      {activeTooltip === 'ethosScore' && (
+              {(() => {
+                const ethosStyle = getEthosColor(userScores.ethosScore);
+                return (
+                  <div style={{
+                    padding: '1rem',
+                    background: ethosStyle.background,
+                    borderRadius: '12px',
+                    border: `1.5px solid ${ethosStyle.border}`,
+                    transition: 'all 0.3s ease'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontWeight: 600, fontSize: '0.95rem' }}>
+                        Ethos Credibility
                         <span
+                          ref={(el) => (tooltipRefs.current['ethosScore'] = el)}
+                          onPointerEnter={handleTooltipPointerEnter('ethosScore')}
+                          onPointerLeave={handleTooltipPointerLeave}
+                          onClick={toggleTooltip('ethosScore')}
                           style={{
-                            position: 'absolute',
-                            bottom: '125%',
-                            left: '50%',
-                            transform: 'translateX(-50%)',
-                            backgroundColor: '#1a1a1a',
-                            color: '#fff',
-                            padding: '0.5rem 0.75rem',
-                            borderRadius: '6px',
+                            cursor: 'help',
                             fontSize: '0.7rem',
-                            whiteSpace: 'nowrap',
-                            zIndex: 1000,
-                            boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
-                            minWidth: '220px',
-                            textAlign: 'center'
+                            color: 'var(--fc-text-soft)',
+                            backgroundColor: 'rgba(0,0,0,0.1)',
+                            borderRadius: '50%',
+                            width: '14px',
+                            height: '14px',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontWeight: 'bold',
+                            position: 'relative'
                           }}
                         >
-                          Onchain reputation score from Ethos Network.<br />
-                          Based on verified onchain activity and reviews.
-                          <span
-                            style={{
-                              position: 'absolute',
-                              top: '100%',
-                              left: '50%',
-                              transform: 'translateX(-50%)',
-                              width: 0,
-                              height: 0,
-                              borderLeft: '6px solid transparent',
-                              borderRight: '6px solid transparent',
-                              borderTop: '6px solid #1a1a1a'
-                            }}
-                          ></span>
+                          i
+                          {activeTooltip === 'ethosScore' && (
+                            <span
+                              style={{
+                                position: 'absolute',
+                                bottom: '125%',
+                                left: '50%',
+                                transform: 'translateX(-50%)',
+                                backgroundColor: '#1a1a1a',
+                                color: '#fff',
+                                padding: '0.5rem 0.75rem',
+                                borderRadius: '6px',
+                                fontSize: '0.7rem',
+                                whiteSpace: 'nowrap',
+                                zIndex: 1000,
+                                boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+                                minWidth: '220px',
+                                textAlign: 'center'
+                              }}
+                            >
+                              Credibility score from Ethos Network.<br />
+                              Color reflects trust level (red to purple).
+                              <span
+                                style={{
+                                  position: 'absolute',
+                                  top: '100%',
+                                  left: '50%',
+                                  transform: 'translateX(-50%)',
+                                  width: 0,
+                                  height: 0,
+                                  borderLeft: '6px solid transparent',
+                                  borderRight: '6px solid transparent',
+                                  borderTop: '6px solid #1a1a1a'
+                                }}
+                              ></span>
+                            </span>
+                          )}
                         </span>
-                      )}
-                    </span>
+                      </div>
+                      <div style={{
+                        fontSize: '1.5rem',
+                        fontWeight: 700,
+                        color: ethosStyle.color,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem'
+                      }}>
+                        {userScores.ethosScore !== null ? (
+                          <>
+                            {userScores.ethosScore}
+                            <span style={{
+                              fontSize: '0.65rem',
+                              fontWeight: 600,
+                              padding: '2px 6px',
+                              borderRadius: '4px',
+                              backgroundColor: `${ethosStyle.color}20`,
+                              color: ethosStyle.color,
+                              textTransform: 'uppercase',
+                              letterSpacing: '0.5px'
+                            }}>
+                              {ethosStyle.level}
+                            </span>
+                          </>
+                        ) : 'N/A'}
+                      </div>
+                    </div>
+                    {userScores.ethosScore === null ? (
+                      <div style={{ fontSize: '0.75rem', color: 'var(--fc-text-soft)' }}>
+                        No verified address or score not available
+                      </div>
+                    ) : (
+                      <div style={{ fontSize: '0.75rem', color: 'var(--fc-text-soft)' }}>
+                        <a
+                          href={userScores.username
+                            ? `https://app.ethos.network/profile/x/${encodeURIComponent(userScores.username)}`
+                            : 'https://ethos.network'}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            color: ethosStyle.color,
+                            textDecoration: 'none',
+                            fontWeight: 500
+                          }}
+                        >
+                          View Ethos Profile →
+                        </a>
+                      </div>
+                    )}
                   </div>
-                  <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#22c55e' }}>
-                    {userScores.ethosScore !== null ? userScores.ethosScore : 'N/A'}
-                  </div>
-                </div>
-                {userScores.ethosScore === null ? (
-                  <div style={{ fontSize: '0.75rem', color: 'var(--fc-text-soft)' }}>
-                    No verified address or score not available
-                  </div>
-                ) : (
-                  <div style={{ fontSize: '0.75rem', color: 'var(--fc-text-soft)' }}>
-                    <a
-                      href={userScores.username
-                        ? `https://app.ethos.network/profile/x/${encodeURIComponent(userScores.username)}`
-                        : 'https://ethos.network'}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{ color: '#22c55e', textDecoration: 'none' }}
-                    >
-                      Ethos Profile →
-                    </a>
-                  </div>
-                )}
-              </div>
+                );
+              })()}
             </div>
           ) : (
             <p className="fc-subtle" style={{ textAlign: 'center', padding: '1rem' }}>

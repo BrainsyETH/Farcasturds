@@ -11,6 +11,54 @@ const normalizeValue = (value: string | null, fallback = 'N/A') => {
   return trimmed && trimmed !== 'null' && trimmed !== 'undefined' ? trimmed : fallback;
 };
 
+// Get Ethos score color based on score level (matching Ethos native color scheme)
+function getEthosColor(score: string | null): { color: string; background: string; border: string } {
+  if (!score || score === 'N/A') {
+    return {
+      color: '#86efac',
+      background: 'linear-gradient(135deg, rgba(34,197,94,0.22), rgba(34,197,94,0.1))',
+      border: '1.5px solid rgba(34,197,94,0.35)',
+    };
+  }
+
+  const numScore = parseInt(score, 10);
+
+  // Ethos native color gradient: red (untrusted) to purple (exemplary)
+  if (numScore >= 2000) {
+    return {
+      color: '#d8b4fe', // Purple - Exemplary
+      background: 'linear-gradient(135deg, rgba(168,85,247,0.22), rgba(168,85,247,0.1))',
+      border: '1.5px solid rgba(168,85,247,0.35)',
+    };
+  }
+  if (numScore >= 1600) {
+    return {
+      color: '#86efac', // Green - Reputable
+      background: 'linear-gradient(135deg, rgba(34,197,94,0.22), rgba(34,197,94,0.1))',
+      border: '1.5px solid rgba(34,197,94,0.35)',
+    };
+  }
+  if (numScore >= 1200) {
+    return {
+      color: '#fde047', // Yellow - Neutral
+      background: 'linear-gradient(135deg, rgba(234,179,8,0.22), rgba(234,179,8,0.1))',
+      border: '1.5px solid rgba(234,179,8,0.35)',
+    };
+  }
+  if (numScore >= 800) {
+    return {
+      color: '#fdba74', // Orange - Questionable
+      background: 'linear-gradient(135deg, rgba(249,115,22,0.22), rgba(249,115,22,0.1))',
+      border: '1.5px solid rgba(249,115,22,0.35)',
+    };
+  }
+  return {
+    color: '#fca5a5', // Red - Untrusted
+    background: 'linear-gradient(135deg, rgba(239,68,68,0.22), rgba(239,68,68,0.1))',
+    border: '1.5px solid rgba(239,68,68,0.35)',
+  };
+}
+
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
@@ -22,6 +70,7 @@ export async function GET(req: NextRequest) {
     const username = normalizeValue(searchParams.get('username'), 'User');
 
     const spamScore = spamScoreRaw ? spamScoreRaw : null;
+    const ethosStyle = getEthosColor(ethosScore);
 
     return new ImageResponse(
       (
@@ -102,8 +151,8 @@ export async function GET(req: NextRequest) {
 
               <div
                 style={{
-                  background: 'linear-gradient(135deg, rgba(59,130,246,0.22), rgba(59,130,246,0.1))',
-                  border: '1.5px solid rgba(59,130,246,0.35)',
+                  background: 'linear-gradient(135deg, rgba(0,82,255,0.22), rgba(0,122,255,0.1))',
+                  border: '1.5px solid rgba(0,82,255,0.45)',
                   borderRadius: '18px',
                   padding: '20px',
                   display: 'flex',
@@ -112,16 +161,16 @@ export async function GET(req: NextRequest) {
                   flex: '1 1 48%',
                 }}
               >
-                <span style={{ color: '#dceafe', fontSize: '20px', fontWeight: 700 }}>Builder Score</span>
-                <span style={{ color: '#93c5fd', fontSize: '40px', fontWeight: 800 }}>{builderScore}</span>
+                <span style={{ color: '#bfdbfe', fontSize: '20px', fontWeight: 700 }}>Base Onchain</span>
+                <span style={{ color: '#60a5fa', fontSize: '40px', fontWeight: 800 }}>{builderScore}</span>
               </div>
 
               <div
                 style={{
                   background: spamScore
                     ? 'linear-gradient(135deg, rgba(251,146,60,0.22), rgba(251,146,60,0.1))'
-                    : 'linear-gradient(135deg, rgba(34,197,94,0.22), rgba(34,197,94,0.1))',
-                  border: spamScore ? '1.5px solid rgba(251,146,60,0.38)' : '1.5px solid rgba(34,197,94,0.35)',
+                    : ethosStyle.background,
+                  border: spamScore ? '1.5px solid rgba(251,146,60,0.38)' : ethosStyle.border,
                   borderRadius: '18px',
                   padding: '20px',
                   display: 'flex',
@@ -131,11 +180,11 @@ export async function GET(req: NextRequest) {
                 }}
               >
                 <span style={{ color: '#e5e7eb', fontSize: '20px', fontWeight: 700 }}>
-                  {spamScore ? 'Spam Score' : 'Ethos Onchain'}
+                  {spamScore ? 'Spam Score' : 'Ethos Credibility'}
                 </span>
                 <span
                   style={{
-                    color: spamScore ? '#fbbf24' : '#86efac',
+                    color: spamScore ? '#fbbf24' : ethosStyle.color,
                     fontSize: '40px',
                     fontWeight: 800,
                   }}
