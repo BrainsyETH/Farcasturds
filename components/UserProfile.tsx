@@ -789,12 +789,10 @@ export default function UserProfile({ userFid }: UserProfileProps) {
                         ) : 'N/A'}
                       </div>
                     </div>
-                    {userScores.ethosScore === null ? (
-                      <div style={{ fontSize: '0.75rem', color: 'var(--fc-text-soft)' }}>
-                        No verified address or score not available
-                      </div>
-                    ) : (
-                      <div style={{ fontSize: '0.75rem', color: 'var(--fc-text-soft)' }}>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--fc-text-soft)' }}>
+                      {userScores.ethosScore === 1213 ? (
+                        <span>Default neutral score • Not yet active on Ethos</span>
+                      ) : (
                         <a
                           href={userScores.username
                             ? `https://app.ethos.network/profile/x/${encodeURIComponent(userScores.username)}`
@@ -809,8 +807,8 @@ export default function UserProfile({ userFid }: UserProfileProps) {
                         >
                           View Ethos Profile →
                         </a>
-                      </div>
-                    )}
+                      )}
+                    </div>
                   </div>
                 );
               })()}
