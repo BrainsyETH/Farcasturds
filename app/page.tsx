@@ -458,6 +458,9 @@ export default function HomePage() {
           address: CONTRACT_ADDRESS,
           abi: farcasturdsV3Abi,
           functionName: 'mintFor',
+          chain: base,
+          chainId: base.id,
+          account: address,
           args: [
             address,
             BigInt(me.fid),
@@ -745,7 +748,10 @@ export default function HomePage() {
 
       // Request signature from wallet - this will trigger Farcaster's native signature UI
       console.log('[GenerateAndMint] Requesting signature for message:', message.substring(0, 100) + '...');
-      signMessage({ message });
+      signMessage({
+        message,
+        account: address,
+      });
     } catch (err: any) {
       console.error('[GenerateAndMint] Error:', err);
       setStatus(`⚠️ Failed to start mint: ${err.message}`);
@@ -813,7 +819,10 @@ export default function HomePage() {
 
       // Request signature from wallet - this will trigger Farcaster's native signature UI
       console.log('[Mint] Requesting signature for message:', message.substring(0, 100) + '...');
-      signMessage({ message });
+      signMessage({
+        message,
+        account: address,
+      });
     } catch (err: any) {
       console.error('[Mint] Error:', err);
       setStatus(`⚠️ Failed to start mint: ${err.message}`);

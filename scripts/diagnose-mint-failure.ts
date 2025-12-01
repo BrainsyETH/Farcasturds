@@ -26,15 +26,16 @@ async function diagnose() {
     address: CONTRACT_ADDRESS,
     abi: farcasturdsV3Abi,
     functionName: 'owner'
-  })
-  console.log('Contract Owner:', owner)
+  } as any)
+  const ownerAddress = String(owner)
+  console.log('Contract Owner:', ownerAddress)
 
   // Check 2: Backend signer address
   if (BACKEND_PRIVATE_KEY) {
     console.log('\n--- Check 2: Backend Signer ---')
     const account = privateKeyToAccount(BACKEND_PRIVATE_KEY)
     console.log('Backend Signer:', account.address)
-    console.log('✓ Match:', owner.toLowerCase() === account.address.toLowerCase() ? '✅ YES' : '❌ NO - THIS IS THE PROBLEM!')
+    console.log('✓ Match:', ownerAddress.toLowerCase() === account.address.toLowerCase() ? '✅ YES' : '❌ NO - THIS IS THE PROBLEM!')
   } else {
     console.log('\n❌ FARCASTURDS_BACKEND_PRIVATE_KEY not set!')
   }
@@ -45,7 +46,7 @@ async function diagnose() {
     address: CONTRACT_ADDRESS,
     abi: farcasturdsV3Abi,
     functionName: 'paused'
-  })
+  } as any)
   console.log('Paused:', paused ? '❌ YES - Contract is paused!' : '✅ No')
 
   // Check 4: Mint price
@@ -54,7 +55,7 @@ async function diagnose() {
     address: CONTRACT_ADDRESS,
     abi: farcasturdsV3Abi,
     functionName: 'mintPrice'
-  })
+  } as any)
   console.log('Mint Price:', mintPrice, 'wei')
   console.log('Mint Price:', Number(mintPrice) / 1e18, 'ETH')
 
@@ -64,7 +65,7 @@ async function diagnose() {
     address: CONTRACT_ADDRESS,
     abi: farcasturdsV3Abi,
     functionName: 'treasury'
-  })
+  } as any)
   console.log('Treasury:', treasury)
 
   // Check 6: Test with a specific FID (example)
@@ -75,7 +76,7 @@ async function diagnose() {
     abi: farcasturdsV3Abi,
     functionName: 'hasMinted',
     args: [BigInt(testFid)]
-  })
+  } as any)
   console.log(`FID ${testFid} has minted:`, hasMinted ? '❌ YES - Already minted!' : '✅ No')
 
   // Check 7: Total supply
@@ -84,7 +85,7 @@ async function diagnose() {
     address: CONTRACT_ADDRESS,
     abi: farcasturdsV3Abi,
     functionName: 'totalSupply'
-  })
+  } as any)
   console.log('Total Minted:', totalSupply.toString())
 
   console.log('\n✅ Diagnostic complete!')

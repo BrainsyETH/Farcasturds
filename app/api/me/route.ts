@@ -99,13 +99,14 @@ export async function GET(req: NextRequest) {
     // Check V3 contract first
     if (CONTRACT_V3) {
       try {
-        hasMinted = await publicClient.readContract({
+        const mintedOnV3 = await publicClient.readContract({
           address: CONTRACT_V3,
           abi: farcasturdsV3Abi,
           functionName: "hasMinted",
           args: [BigInt(user.fid)],
         } as any);
 
+        hasMinted = Boolean(mintedOnV3);
         console.log(`[/api/me] V3 hasMinted check for FID ${user.fid}:`, hasMinted);
       } catch (err) {
         console.error(`[/api/me] Error reading hasMinted from V3 for FID ${user.fid}:`, err);
@@ -115,13 +116,14 @@ export async function GET(req: NextRequest) {
     // If not minted on V3, check V2 contract (for backward compatibility)
     if (!hasMinted && CONTRACT_V2) {
       try {
-        hasMinted = await publicClient.readContract({
+        const mintedOnV2 = await publicClient.readContract({
           address: CONTRACT_V2,
           abi: farcasturdsV2Abi,
           functionName: "hasMinted",
           args: [BigInt(user.fid)],
         } as any);
 
+        hasMinted = Boolean(mintedOnV2);
         console.log(`[/api/me] V2 hasMinted check for FID ${user.fid}:`, hasMinted);
       } catch (err) {
         console.error(`[/api/me] Error reading hasMinted from V2 for FID ${user.fid}:`, err);

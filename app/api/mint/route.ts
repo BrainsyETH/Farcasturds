@@ -30,7 +30,7 @@ function getClients() {
     transport: http(RPC),
   });
 
-  return { CONTRACT, publicClient, walletClient };
+  return { CONTRACT, publicClient, walletClient, account };
 }
 
 export async function POST(req: NextRequest) {
@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
     // Current implementation trusts the frontend - NOT SECURE for production
 
     // Initialize clients at request time
-    const { CONTRACT, publicClient, walletClient } = getClients();
+    const { CONTRACT, publicClient, walletClient, account } = getClients();
 
     // Check if this FID already minted
     const already = await publicClient.readContract({
@@ -77,9 +77,9 @@ export async function POST(req: NextRequest) {
       abi: farcasturdsAbi,
       functionName: "hasMinted",
       args: [BigInt(fid)],
-    });
+    } as any);
 
-    if (already) {
+    if (Boolean(already)) {
       return NextResponse.json(
         { error: "Farcasturd already minted for this FID" },
         { status: 409 }
@@ -91,6 +91,8 @@ export async function POST(req: NextRequest) {
       address: CONTRACT,
       abi: farcasturdsAbi,
       functionName: "mintFor",
+      chain: baseSepolia,
+      account,
       args: [to as `0x${string}`, BigInt(fid)],
     });
 

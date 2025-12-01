@@ -31,9 +31,10 @@ async function main() {
       address: CONTRACT_ADDRESS,
       abi,
       functionName: 'owner',
-    })
+    } as any)
 
-    console.log('Contract Owner:', owner)
+    const ownerAddress = String(owner)
+    console.log('Contract Owner:', ownerAddress)
 
     // If private key is provided, check if it matches
     const privateKey = process.env.FARCASTURDS_BACKEND_PRIVATE_KEY as `0x${string}` | undefined
@@ -42,7 +43,7 @@ async function main() {
       const account = privateKeyToAccount(privateKey)
       console.log('\nBackend Signer:', account.address)
 
-      if (account.address.toLowerCase() === owner.toLowerCase()) {
+      if (account.address.toLowerCase() === ownerAddress.toLowerCase()) {
         console.log('\n✅ Backend private key matches contract owner!')
       } else {
         console.log('\n❌ ERROR: Backend private key does NOT match contract owner!')
