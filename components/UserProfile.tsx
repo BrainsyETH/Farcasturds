@@ -209,7 +209,7 @@ export default function UserProfile({ userFid }: UserProfileProps) {
 
       // Create cast text with only the miniapp link so the preview image is used instead of an inline asset
       const castText = `Check out my reputation scores on Farcasturds! 💩`;
-      const embeds = [miniappUrl.toString()];
+      const embeds: [string] = [miniappUrl.toString()];
 
       // Use miniapp SDK to open the composer in the main Farcaster app and close the mini app view
       try {

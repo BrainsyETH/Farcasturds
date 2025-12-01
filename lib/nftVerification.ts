@@ -34,13 +34,14 @@ export async function checkUserHasNFT(fid: number): Promise<boolean> {
     // Check V3 contract first (current)
     if (CONTRACT_V3) {
       try {
-        hasMinted = await publicClient.readContract({
+        const mintedOnV3 = await publicClient.readContract({
           address: CONTRACT_V3,
           abi: farcasturdsV3Abi,
           functionName: "hasMinted",
           args: [BigInt(fid)],
         } as any);
 
+        hasMinted = Boolean(mintedOnV3);
         console.log(`[NFT Check] V3 FID ${fid} hasMinted:`, hasMinted);
       } catch (err) {
         console.error(`[NFT Check] Error checking V3 for FID ${fid}:`, err);
@@ -50,13 +51,14 @@ export async function checkUserHasNFT(fid: number): Promise<boolean> {
     // If not minted on V3, check V2 contract (backward compatibility)
     if (!hasMinted && CONTRACT_V2) {
       try {
-        hasMinted = await publicClient.readContract({
+        const mintedOnV2 = await publicClient.readContract({
           address: CONTRACT_V2,
           abi: farcasturdsV2Abi,
           functionName: "hasMinted",
           args: [BigInt(fid)],
         } as any);
 
+        hasMinted = Boolean(mintedOnV2);
         console.log(`[NFT Check] V2 FID ${fid} hasMinted:`, hasMinted);
       } catch (err) {
         console.error(`[NFT Check] Error checking V2 for FID ${fid}:`, err);

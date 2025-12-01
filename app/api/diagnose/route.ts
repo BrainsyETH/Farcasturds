@@ -16,14 +16,13 @@ export async function GET(req: NextRequest) {
     try {
         const results = [];
 
-        // Check 1: Contract owner (Error line 29 fix)
+        // Check 1: Contract owner
         const owner = await client.readContract({
             address: CONTRACT_ADDRESS,
             abi: farcasturdsV3Abi,
             functionName: 'owner',
-            // FIX: Add missing required property for viem compatibility
-            authorizationList: [],
-        }) as Address; 
+            authorizationList: undefined,
+        }) as Address;
         
         results.push({ name: "Contract Owner", status: "OK", value: owner });
 
@@ -32,9 +31,8 @@ export async function GET(req: NextRequest) {
             address: CONTRACT_ADDRESS,
             abi: farcasturdsV3Abi,
             functionName: 'mintPrice',
-            // FIX: Add missing required property for viem compatibility
-            authorizationList: [],
-        }) as bigint; 
+            authorizationList: undefined,
+        }) as bigint;
 
         results.push({ name: "Mint Price (Wei)", status: "OK", value: mintPrice.toString() });
 
@@ -43,9 +41,8 @@ export async function GET(req: NextRequest) {
             address: CONTRACT_ADDRESS,
             abi: farcasturdsV3Abi,
             functionName: 'paused',
-            // FIX: Add missing required property for viem compatibility
-            authorizationList: [],
-        }) as boolean; 
+            authorizationList: undefined,
+        }) as boolean;
 
         results.push({ name: "Paused Status", status: "OK", value: isPaused.toString() });
 
@@ -54,9 +51,8 @@ export async function GET(req: NextRequest) {
             address: CONTRACT_ADDRESS,
             abi: farcasturdsV3Abi,
             functionName: 'totalSupply',
-            // FIX: Add missing required property for viem compatibility
-            authorizationList: [],
-        }) as bigint; 
+            authorizationList: undefined,
+        }) as bigint;
 
         results.push({ name: "Total Supply", status: "OK", value: totalSupply.toString() });
 

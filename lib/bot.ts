@@ -94,7 +94,7 @@ export async function processTurdCommand(cast: any): Promise<TurdCommand | null>
 export async function lookupUserByUsername(username: string) {
   try {
     const client = getNeynarClient();
-    const response = await client.searchUser(username, 1);
+    const response = await client.searchUser({ q: username, limit: 1 });
     return response.result.users[0] || null;
   } catch (error) {
     console.error('Error looking up user:', error);
