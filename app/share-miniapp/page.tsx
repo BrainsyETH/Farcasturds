@@ -1,3 +1,5 @@
+"use client"; // <--- ADDED THIS DIRECTIVE
+
 import { useEffect, useState } from 'react';
 import { useAccount, useWaitForTransactionReceipt, useWriteContract } from 'wagmi';
 import { BaseError, parseEther } from 'viem';
