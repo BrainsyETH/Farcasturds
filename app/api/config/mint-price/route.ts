@@ -1,42 +1,40 @@
-// app/api/config/mint-price/route.ts
-import { NextResponse } from "next/server";
-import { createPublicClient, http, formatEther } from "viem";
-import { base } from "viem/chains";
-import { farcasturdsV3Abi } from "@/abi/FarcasturdsV3";
+import { NextRequest, NextResponse } from 'next/server';
+import { createPublicClient, http, formatEther } from 'viem';
+import { base } from 'viem/chains';
+// Assuming this is the named export based on the ABI content provided by the user
+import { farcasturdsV3Abi } from '@/abi/FarcasturdsV3'; 
+import { FarcasturdsAddress } from '@/lib/wagmi'; 
 
-export async function GET() {
-  const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_FARCASTURDS_ADDRESS as `0x${string}`;
-  const RPC_URL = process.env.BASE_RPC_URL || "https://mainnet.base.org";
+// Use the address from the common lib
+const CONTRACT_ADDRESS = FarcasturdsAddress;
+const BASE_RPC_URL = process.env.BASE_RPC_URL || 'https://mainnet.base.org';
 
+const client = createPublicClient({
+    chain: base,
+    transport: http(BASE_RPC_URL),
+});
+
+export async function GET(req: NextRequest) {
   try {
-    // Fetch mint price directly from the contract
-    const client = createPublicClient({
-      chain: base,
-      transport: http(RPC_URL),
-    });
-
     const mintPriceWei = await client.readContract({
       address: CONTRACT_ADDRESS,
       abi: farcasturdsV3Abi,
       functionName: "mintPrice",
+      // FIX: Add missing required property for viem compatibility
+      authorizationList: [], 
     });
 
-    const mintPriceEth = formatEther(mintPriceWei);
+    const priceEth = formatEther(mintPriceWei);
 
     return NextResponse.json({
-      price: mintPriceEth,
-      priceWei: mintPriceWei.toString(),
-      isFree: mintPriceWei === 0n,
-    });
-  } catch (error: any) {
-    console.error("[mint-price] Error fetching from contract:", error);
+      price: priceEth,
+    }, { status: 200 });
 
-    // Fallback to environment variable if contract read fails
-    const fallbackPrice = process.env.MINT_PRICE_ETH || "0";
-    return NextResponse.json({
-      price: fallbackPrice,
-      isFree: fallbackPrice === "0",
-      error: "Failed to fetch from contract, using fallback",
-    });
+  } catch (error) {
+    console.error("Error fetching mint price:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch mint price" },
+      { status: 500 }
+    );
   }
 }
