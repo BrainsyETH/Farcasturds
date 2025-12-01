@@ -3,65 +3,57 @@ import { NextRequest } from 'next/server';
 
 export const runtime = 'edge';
 
+const normalizeValue = (value: string | null, fallback = 'N/A') => {
+  if (!value) return fallback;
+  const trimmed = value.trim();
+  return trimmed && trimmed !== 'null' && trimmed !== 'undefined' ? trimmed : fallback;
+};
+
+// Get Turd Score gradient color (green to red based on percentile)
+function getTurdScoreColor(score: string | null): string {
+  if (!score || score === 'N/A') return '#86efac';
+
+  const numScore = parseFloat(score);
+  if (isNaN(numScore)) return '#86efac';
+
+  // 0% = green (#22c55e = rgb(34, 197, 94))
+  // 99% = red (#ef4444 = rgb(239, 68, 68))
+  const clampedScore = Math.min(Math.max(numScore, 0), 99);
+  const ratio = clampedScore / 99;
+
+  const r = Math.round(34 + (239 - 34) * ratio);
+  const g = Math.round(197 + (68 - 197) * ratio);
+  const b = Math.round(94 + (68 - 94) * ratio);
+
+  return `rgb(${r}, ${g}, ${b})`;
+}
+
 // Get Ethos score color based on score level (matching Ethos native color scheme)
-function getEthosColor(score: string | null): { color: string; background: string; border: string } {
-  if (!score || score === 'N/A') {
-    return {
-      color: '#6b7280',
-      background: 'rgba(107, 114, 128, 0.15)',
-      border: 'rgba(107, 114, 128, 0.35)',
-    };
-  }
+function getEthosColor(score: string | null): string {
+  if (!score || score === 'N/A') return '#9ca3af';
 
   const numScore = parseInt(score, 10);
 
   // Ethos native color gradient: red (untrusted) to purple (exemplary)
-  if (numScore >= 2000) {
-    return {
-      color: '#a855f7', // Purple - Exemplary
-      background: 'rgba(168, 85, 247, 0.15)',
-      border: 'rgba(168, 85, 247, 0.35)',
-    };
-  }
-  if (numScore >= 1600) {
-    return {
-      color: '#22c55e', // Green - Reputable
-      background: 'rgba(34, 197, 94, 0.15)',
-      border: 'rgba(34, 197, 94, 0.35)',
-    };
-  }
-  if (numScore >= 1200) {
-    return {
-      color: '#eab308', // Yellow - Neutral
-      background: 'rgba(234, 179, 8, 0.15)',
-      border: 'rgba(234, 179, 8, 0.35)',
-    };
-  }
-  if (numScore >= 800) {
-    return {
-      color: '#f97316', // Orange - Questionable
-      background: 'rgba(249, 115, 22, 0.15)',
-      border: 'rgba(249, 115, 22, 0.35)',
-    };
-  }
-  return {
-    color: '#ef4444', // Red - Untrusted
-    background: 'rgba(239, 68, 68, 0.15)',
-    border: 'rgba(239, 68, 68, 0.35)',
-  };
+  if (numScore >= 2000) return '#c084fc'; // Purple - Exemplary
+  if (numScore >= 1600) return '#4ade80'; // Green - Reputable
+  if (numScore >= 1200) return '#fbbf24'; // Yellow - Neutral
+  if (numScore >= 800) return '#fb923c'; // Orange - Questionable
+  return '#f87171'; // Red - Untrusted
 }
 
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const fid = searchParams.get('fid');
-    const neynarScore = searchParams.get('neynarScore');
-    const spamScore = searchParams.get('spamScore');
-    const builderScore = searchParams.get('builderScore');
-    const ethosScore = searchParams.get('ethosScore');
-    const username = searchParams.get('username') || 'User';
+    const fid = normalizeValue(searchParams.get('fid'), 'N/A');
+    const neynarScore = normalizeValue(searchParams.get('neynarScore'));
+    const builderScore = normalizeValue(searchParams.get('builderScore'));
+    const ethosScore = normalizeValue(searchParams.get('ethosScore'));
+    const turdScore = normalizeValue(searchParams.get('turdScore'));
+    const username = normalizeValue(searchParams.get('username'), 'User');
 
-    const ethosStyle = getEthosColor(ethosScore);
+    const turdColor = getTurdScoreColor(turdScore);
+    const ethosColor = getEthosColor(ethosScore);
 
     return new ImageResponse(
       (
@@ -72,149 +64,192 @@ export async function GET(req: NextRequest) {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            background: 'linear-gradient(135deg, #511974, #1e2329, #501f7b, #371479)',
-            padding: '40px',
+            background: 'linear-gradient(135deg, #1a0b2e 0%, #2d1b4e 25%, #16213e 50%, #0f0919 100%)',
+            position: 'relative',
           }}
         >
-          {/* Main Card */}
+          {/* Animated gradient orbs */}
           <div
             style={{
-              background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.9))',
-              borderRadius: '24px',
-              padding: '40px 60px',
-              width: '100%',
-              maxWidth: '1100px',
+              position: 'absolute',
+              top: '10%',
+              left: '15%',
+              width: '400px',
+              height: '400px',
+              borderRadius: '50%',
+              background: 'radial-gradient(circle, rgba(139,92,246,0.4) 0%, transparent 70%)',
+              filter: 'blur(60px)',
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              bottom: '10%',
+              right: '15%',
+              width: '350px',
+              height: '350px',
+              borderRadius: '50%',
+              background: 'radial-gradient(circle, rgba(34,197,94,0.3) 0%, transparent 70%)',
+              filter: 'blur(60px)',
+            }}
+          />
+
+          {/* Main container */}
+          <div
+            style={{
+              width: '1100px',
+              height: '550px',
+              background: 'linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02))',
+              borderRadius: '32px',
+              border: '2px solid rgba(255,255,255,0.1)',
+              boxShadow: '0 40px 100px rgba(0,0,0,0.6), inset 0 0 60px rgba(255,255,255,0.03)',
+              padding: '40px 50px',
               display: 'flex',
               flexDirection: 'column',
               gap: '24px',
-              boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+              backdropFilter: 'blur(20px)',
             }}
           >
             {/* Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                <h1 style={{ fontSize: '40px', fontWeight: 'bold', margin: 0, color: '#1b0a33' }}>
-                  Reputation Scores
-                </h1>
-                <p style={{ fontSize: '18px', margin: 0, color: '#6e5c88' }}>
-                  @{username} • FID {fid}
-                </p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <span style={{ fontSize: '48px' }}>💩</span>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <span
+                    style={{
+                      color: '#c4b5fd',
+                      letterSpacing: '0.08em',
+                      fontSize: '20px',
+                      fontWeight: 800,
+                      textTransform: 'uppercase',
+                    }}
+                  >
+                    Reputation Scores
+                  </span>
+                  <span style={{ color: '#e5e7eb', fontSize: '26px', fontWeight: 700 }}>
+                    @{username} • FID {fid}
+                  </span>
+                </div>
               </div>
-              <div style={{ fontSize: '20px', color: '#8b5cf6', fontWeight: 600 }}>
+              <div
+                style={{
+                  background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
+                  color: '#fff',
+                  padding: '12px 20px',
+                  borderRadius: '14px',
+                  fontWeight: 800,
+                  fontSize: '18px',
+                  boxShadow: '0 8px 32px rgba(139,92,246,0.5)',
+                }}
+              >
                 farcasturds.xyz
               </div>
             </div>
 
-            {/* Scores Grid - 2 columns */}
-            <div style={{ display: 'flex', gap: '16px' }}>
-              {/* Left Column */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', flex: 1 }}>
-                {/* Neynar Score */}
-                <div
-                  style={{
-                    background: 'rgba(139, 92, 246, 0.15)',
-                    border: '2px solid rgba(139, 92, 246, 0.35)',
-                    borderRadius: '16px',
-                    padding: '20px',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                  }}
-                >
-                  <span style={{ fontSize: '22px', fontWeight: 600, color: '#1b0a33' }}>
-                    Neynar Quality
-                  </span>
-                  <span style={{ fontSize: '40px', fontWeight: 700, color: '#8b5cf6' }}>
-                    {neynarScore || 'N/A'}
-                  </span>
+            {/* Scores Grid - 4 columns */}
+            <div style={{ display: 'flex', gap: '16px', flex: 1 }}>
+              {/* Turd Score */}
+              <div
+                style={{
+                  background: 'linear-gradient(145deg, rgba(139,92,246,0.15), rgba(168,85,247,0.08))',
+                  border: '2px solid rgba(139,92,246,0.4)',
+                  borderRadius: '20px',
+                  padding: '24px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  flex: 1,
+                  boxShadow: '0 8px 32px rgba(139,92,246,0.2)',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ fontSize: '28px' }}>💩</span>
+                  <span style={{ color: '#e0e7ff', fontSize: '20px', fontWeight: 700 }}>Turd</span>
                 </div>
-
-                {/* Base Onchain Score */}
-                <div
-                  style={{
-                    background: 'linear-gradient(135deg, rgba(0, 82, 255, 0.18), rgba(0, 122, 255, 0.12))',
-                    border: '2px solid rgba(0, 82, 255, 0.5)',
-                    borderRadius: '16px',
-                    padding: '20px',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                  }}
-                >
-                  <span style={{ fontSize: '22px', fontWeight: 600, color: '#1b0a33' }}>
-                    Base Onchain
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
+                  <span style={{ color: turdColor, fontSize: '52px', fontWeight: 900, lineHeight: 1 }}>
+                    {turdScore}
                   </span>
-                  <span style={{ fontSize: '40px', fontWeight: 700, color: '#0052ff' }}>
-                    {builderScore || 'N/A'}
-                  </span>
+                  <span style={{ color: '#c4b5fd', fontSize: '28px', fontWeight: 700 }}>%</span>
                 </div>
               </div>
 
-              {/* Right Column */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', flex: 1 }}>
-                {/* Spam Score or Ethos Score */}
-                {spamScore && spamScore !== 'null' ? (
-                  <div
-                    style={{
-                      background: 'rgba(251, 146, 60, 0.15)',
-                      border: '2px solid rgba(251, 146, 60, 0.35)',
-                      borderRadius: '16px',
-                      padding: '20px',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                    }}
-                  >
-                    <span style={{ fontSize: '22px', fontWeight: 600, color: '#1b0a33' }}>
-                      Spam Score
-                    </span>
-                    <span style={{ fontSize: '40px', fontWeight: 700, color: '#fb923c' }}>
-                      {spamScore}
-                    </span>
-                  </div>
-                ) : (
-                  <div
-                    style={{
-                      background: 'rgba(75, 85, 99, 0.25)',
-                      border: '2px solid rgba(75, 85, 99, 0.5)',
-                      borderRadius: '16px',
-                      padding: '20px',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                    }}
-                  >
-                    <span style={{ fontSize: '22px', fontWeight: 600, color: '#1b0a33' }}>
-                      Ethos Credibility
-                    </span>
-                    <span style={{ fontSize: '40px', fontWeight: 700, color: ethosStyle.color }}>
-                      {ethosScore || 'N/A'}
-                    </span>
-                  </div>
-                )}
-
-                {/* Ethos Score (if spam score exists) */}
-                {spamScore && spamScore !== 'null' && (
-                  <div
-                    style={{
-                      background: 'rgba(75, 85, 99, 0.25)',
-                      border: '2px solid rgba(75, 85, 99, 0.5)',
-                      borderRadius: '16px',
-                      padding: '20px',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                    }}
-                  >
-                    <span style={{ fontSize: '22px', fontWeight: 600, color: '#1b0a33' }}>
-                      Ethos Credibility
-                    </span>
-                    <span style={{ fontSize: '40px', fontWeight: 700, color: ethosStyle.color }}>
-                      {ethosScore || 'N/A'}
-                    </span>
-                  </div>
-                )}
+              {/* Neynar Score */}
+              <div
+                style={{
+                  background: 'linear-gradient(145deg, rgba(99,102,241,0.15), rgba(99,102,241,0.08))',
+                  border: '2px solid rgba(99,102,241,0.4)',
+                  borderRadius: '20px',
+                  padding: '24px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  flex: 1,
+                  boxShadow: '0 8px 32px rgba(99,102,241,0.2)',
+                }}
+              >
+                <span style={{ color: '#e0e7ff', fontSize: '20px', fontWeight: 700 }}>Neynar</span>
+                <span style={{ color: '#818cf8', fontSize: '52px', fontWeight: 900, lineHeight: 1 }}>
+                  {neynarScore}
+                </span>
               </div>
+
+              {/* Base Score */}
+              <div
+                style={{
+                  background: 'linear-gradient(145deg, rgba(0,82,255,0.18), rgba(0,122,255,0.1))',
+                  border: '2px solid rgba(0,82,255,0.5)',
+                  borderRadius: '20px',
+                  padding: '24px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  flex: 1,
+                  boxShadow: '0 8px 32px rgba(0,82,255,0.25)',
+                }}
+              >
+                <span style={{ color: '#dbeafe', fontSize: '20px', fontWeight: 700 }}>Base</span>
+                <span style={{ color: '#60a5fa', fontSize: '52px', fontWeight: 900, lineHeight: 1 }}>
+                  {builderScore}
+                </span>
+              </div>
+
+              {/* Ethos Score */}
+              <div
+                style={{
+                  background: 'linear-gradient(145deg, rgba(75,85,99,0.2), rgba(75,85,99,0.1))',
+                  border: '2px solid rgba(75,85,99,0.4)',
+                  borderRadius: '20px',
+                  padding: '24px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  flex: 1,
+                  boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+                }}
+              >
+                <span style={{ color: '#e5e7eb', fontSize: '20px', fontWeight: 700 }}>Ethos</span>
+                <span style={{ color: ethosColor, fontSize: '52px', fontWeight: 900, lineHeight: 1 }}>
+                  {ethosScore}
+                </span>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div
+              style={{
+                background: 'linear-gradient(90deg, rgba(139,92,246,0.1) 0%, rgba(34,197,94,0.1) 100%)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: '16px',
+                padding: '12px 20px',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              <span style={{ color: '#f3f4f6', fontSize: '18px', fontWeight: 700, textAlign: 'center' }}>
+                Tap to view full reputation & mint turds 💩
+              </span>
             </div>
           </div>
         </div>
