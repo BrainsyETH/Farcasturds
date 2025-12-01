@@ -424,7 +424,7 @@ export default function HomePage() {
   // Trigger mint transaction when authorization is ready
   useEffect(() => {
     async function executeMint() {
-      if (!mintAuthorization || !address || !me || minting === false) return;
+      if (!mintAuthorization || !address || !me) return;
 
       // Prevent duplicate calls
       if (isMintPending || isMintConfirming) {
