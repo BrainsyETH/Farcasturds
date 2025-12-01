@@ -1,4 +1,3 @@
-// app/api/auth/verify/route.ts
 import { NextRequest, NextResponse } from 'next/server'
 import { SiweMessage } from 'siwe'
 import { getFarcasterProfile } from '@/lib/farcasterClient'
@@ -91,12 +90,12 @@ export async function POST(req: NextRequest) {
         // Fallback to SIWE library verification if manual recovery fails
         try {
           console.log('[Auth] Attempting SIWE library verification...')
+          // FIX: Removed 'provider: baseProvider' which caused the Type error.
           fields = await siweMessage.verify({
             signature,
             nonce,
             domain: siweMessage.domain,
             time: siweMessage.issuedAt,
-            provider: baseProvider
           })
           console.log('[Auth] ✓ SIWE library verification successful')
         } catch (verifyError: any) {
