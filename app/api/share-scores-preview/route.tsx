@@ -152,11 +152,11 @@ export async function GET(req: NextRequest) {
               </div>
             </div>
 
-            {/* Score grid */}
+            {/* Score grid - flex to avoid Satori grid limitations */}
             <div
               style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+                display: 'flex',
+                flexWrap: 'wrap',
                 gap: '12px',
               }}
             >
@@ -174,6 +174,8 @@ export async function GET(req: NextRequest) {
                   flexDirection: 'column',
                   gap: '8px',
                   boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+                  flex: '1 1 calc(50% - 6px)',
+                  minWidth: '0',
                 }}
               >
                 <span style={{ fontSize: '18px', fontWeight: 400, display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -202,6 +204,8 @@ export async function GET(req: NextRequest) {
                   flexDirection: 'column',
                   gap: '8px',
                   boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+                  flex: '1 1 calc(50% - 6px)',
+                  minWidth: '0',
                 }}
               >
                 <span style={{ fontSize: '18px', fontWeight: 400 }}>Neynar Score</span>
@@ -223,6 +227,8 @@ export async function GET(req: NextRequest) {
                   flexDirection: 'column',
                   gap: '8px',
                   boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+                  flex: '1 1 calc(50% - 6px)',
+                  minWidth: '0',
                 }}
               >
                 <span style={{ fontSize: '18px', fontWeight: 400 }}>Base Score</span>
@@ -244,6 +250,8 @@ export async function GET(req: NextRequest) {
                   flexDirection: 'column',
                   gap: '8px',
                   boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+                  flex: '1 1 calc(50% - 6px)',
+                  minWidth: '0',
                 }}
               >
                 <span style={{ fontSize: '18px', fontWeight: 400 }}>Ethos Score</span>
