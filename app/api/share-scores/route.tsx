@@ -175,8 +175,8 @@ export async function GET(req: NextRequest) {
                 ) : (
                   <div
                     style={{
-                      background: ethosStyle.background,
-                      border: `2px solid ${ethosStyle.border}`,
+                      background: 'rgba(107, 114, 128, 0.15)',
+                      border: '2px solid rgba(107, 114, 128, 0.35)',
                       borderRadius: '16px',
                       padding: '20px',
                       display: 'flex',
@@ -197,8 +197,8 @@ export async function GET(req: NextRequest) {
                 {spamScore && spamScore !== 'null' && (
                   <div
                     style={{
-                      background: ethosStyle.background,
-                      border: `2px solid ${ethosStyle.border}`,
+                      background: 'rgba(107, 114, 128, 0.15)',
+                      border: '2px solid rgba(107, 114, 128, 0.35)',
                       borderRadius: '16px',
                       padding: '20px',
                       display: 'flex',

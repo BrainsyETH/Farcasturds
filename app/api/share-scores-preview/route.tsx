@@ -169,8 +169,8 @@ export async function GET(req: NextRequest) {
                 style={{
                   background: spamScore
                     ? 'linear-gradient(135deg, rgba(251,146,60,0.22), rgba(251,146,60,0.1))'
-                    : ethosStyle.background,
-                  border: spamScore ? '1.5px solid rgba(251,146,60,0.38)' : ethosStyle.border,
+                    : 'linear-gradient(135deg, rgba(107,114,128,0.22), rgba(107,114,128,0.1))',
+                  border: spamScore ? '1.5px solid rgba(251,146,60,0.38)' : '1.5px solid rgba(107,114,128,0.35)',
                   borderRadius: '18px',
                   padding: '20px',
                   display: 'flex',

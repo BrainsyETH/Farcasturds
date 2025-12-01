@@ -695,9 +695,9 @@ export default function UserProfile({ userFid }: UserProfileProps) {
                 return (
                   <div style={{
                     padding: '1rem',
-                    background: ethosStyle.background,
+                    background: 'rgba(107, 114, 128, 0.15)',
                     borderRadius: '12px',
-                    border: `1.5px solid ${ethosStyle.border}`,
+                    border: '1.5px solid rgba(107, 114, 128, 0.35)',
                     transition: 'all 0.3s ease'
                   }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
@@ -790,24 +790,24 @@ export default function UserProfile({ userFid }: UserProfileProps) {
                       </div>
                     </div>
                     <div style={{ fontSize: '0.75rem', color: 'var(--fc-text-soft)' }}>
-                      {userScores.ethosScore === 1213 ? (
-                        <span>Default neutral score • Not yet active on Ethos</span>
-                      ) : (
-                        <a
-                          href={userScores.username
-                            ? `https://app.ethos.network/profile/x/${encodeURIComponent(userScores.username)}`
-                            : 'https://ethos.network'}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          style={{
-                            color: ethosStyle.color,
-                            textDecoration: 'none',
-                            fontWeight: 500
-                          }}
-                        >
-                          View Ethos Profile →
-                        </a>
-                      )}
+                      <a
+                        href={userScores.username
+                          ? `https://app.ethos.network/profile/x/${encodeURIComponent(userScores.username)}`
+                          : 'https://ethos.network'}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          color: ethosStyle.color,
+                          textDecoration: 'none',
+                          fontWeight: 500
+                        }}
+                      >
+                        {userScores.ethosScore === 1213 ? (
+                          <>Default neutral score • Not yet active on Ethos</>
+                        ) : (
+                          <>View Ethos Profile →</>
+                        )}
+                      </a>
                     </div>
                   </div>
                 );
