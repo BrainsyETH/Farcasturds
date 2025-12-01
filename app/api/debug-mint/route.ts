@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createPublicClient, createWalletClient, http, privateKeyToAccount, Address } from 'viem'
+import { createPublicClient, createWalletClient, http, Address } from 'viem'
+// FIX: Import privateKeyToAccount from 'viem/accounts'
+import { privateKeyToAccount } from 'viem/accounts' 
 import { base } from 'viem/chains'
 // Assuming named export based on user provided ABI content
 import { farcasturdsV3Abi as farcasturdsAbi } from '@/abi/FarcasturdsV3'; 
@@ -100,7 +102,7 @@ export async function POST(req: NextRequest) {
         address: CONTRACT,
         abi: farcasturdsAbi,
         functionName: "minter", // Assuming a minter function exists
-        // FIX: Add missing required property for viem compatibility (Line 63 fix)
+        // FIX: Add missing required property for viem compatibility
         authorizationList: [],
     }) as Address;
 
