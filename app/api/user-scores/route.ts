@@ -227,7 +227,8 @@ export async function GET(req: NextRequest) {
     console.log(`[/api/user-scores] Checking ${addressesToCheck.length} addresses for reputation scores`);
 
     // Get Ethos score from any of the addresses
-    const ethosScore = await getEthosScoreFromAddresses(addressesToCheck);
+    // Default to 1213 (neutral) if no score is found, matching Ethos's default neutral score
+    const ethosScore = await getEthosScoreFromAddresses(addressesToCheck) ?? 1213;
 
     // Get Talent Protocol Builder Score (official Base reputation) from primary address
     let builderScore: number | null = null;

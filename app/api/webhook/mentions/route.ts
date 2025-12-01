@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { processTurdCommand, replyToCast } from '@/lib/bot';
-import { recordTurd, checkRateLimit, checkIfCastProcessed, getRandomMeme, markCastAsProcessed } from '@/lib/database';
+import { recordTurd, checkRateLimit, checkIfCastProcessed, getRandomMeme, markCastAsProcessed, checkAndRecordNFTReplyRateLimit } from '@/lib/database';
 import { checkUserHasNFT } from '@/lib/nftVerification';
 
 export async function POST(request: Request) {
@@ -70,17 +70,26 @@ export async function POST(request: Request) {
     if (!hasNFT) {
       console.log(`🚫 NFT required for FID ${command.senderFid} (@${command.senderUsername})`);
 
-      await replyToCast(
-        cast.hash,
-        `@${command.senderUsername} You need to mint a Farcasturd NFT to send turds!`,
-        ['https://farcasturds.vercel.app']
-      );
+      // Check if we should send the NFT-required reply (rate limited to 1/day)
+      const nftReplyCheck = await checkAndRecordNFTReplyRateLimit(command.senderFid);
+
+      if (nftReplyCheck.shouldReply) {
+        await replyToCast(
+          cast.hash,
+          `@${command.senderUsername} You need to mint a Farcasturd NFT to send turds!`,
+          ['https://farcasturds.vercel.app']
+        );
+        console.log(`✓ Sent NFT-required reply to @${command.senderUsername}`);
+      } else {
+        console.log(`⏭️  Skipping NFT-required reply for @${command.senderUsername}: ${nftReplyCheck.reason}`);
+      }
 
       await markCastAsProcessed(cast.hash, 'nft_required', command.senderFid, command.senderUsername);
 
       return NextResponse.json({
         status: 'nft_required',
-        reason: 'User must own a Farcasturd NFT to send turds'
+        reason: 'User must own a Farcasturd NFT to send turds',
+        replySent: nftReplyCheck.shouldReply
       });
     }
     // ============================================================

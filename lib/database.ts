@@ -169,6 +169,60 @@ export async function checkRateLimit(fid: number): Promise<{
 }
 
 // ============================================================================
+// NFT-REQUIRED REPLY RATE LIMITING
+// ============================================================================
+
+export async function checkAndRecordNFTReplyRateLimit(fid: number): Promise<{
+  shouldReply: boolean;
+  reason?: string;
+}> {
+  // Check if we've already replied to this user about NFT requirement in the last 24 hours
+  const { data, error } = await supabase
+    .from('nft_required_replies')
+    .select('*')
+    .eq('fid', fid)
+    .single();
+
+  const now = new Date();
+  const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
+  // First time - allow reply and create record
+  if (!data || error) {
+    await supabase
+      .from('nft_required_replies')
+      .upsert([{
+        fid: fid,
+        last_reply_at: now.toISOString(),
+        reply_count: 1,
+      }], { onConflict: 'fid' });
+
+    return { shouldReply: true };
+  }
+
+  const lastReplyAt = new Date(data.last_reply_at);
+
+  // If last reply was more than 24 hours ago, allow reply
+  if (lastReplyAt < oneDayAgo) {
+    await supabase
+      .from('nft_required_replies')
+      .update({
+        last_reply_at: now.toISOString(),
+        reply_count: data.reply_count + 1,
+      })
+      .eq('fid', fid);
+
+    return { shouldReply: true };
+  }
+
+  // Within 24 hours - don't reply again
+  const hoursUntilNextReply = Math.ceil((lastReplyAt.getTime() + 24 * 60 * 60 * 1000 - now.getTime()) / (60 * 60 * 1000));
+  return {
+    shouldReply: false,
+    reason: `Already notified about NFT requirement. Next reminder in ~${hoursUntilNextReply}h.`
+  };
+}
+
+// ============================================================================
 // HELPER FUNCTIONS
 // ============================================================================
 
