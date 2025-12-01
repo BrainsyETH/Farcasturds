@@ -1,112 +1,76 @@
-// API route to diagnose mint failure
-import { NextResponse } from 'next/server'
-import { createPublicClient, http, Address } from 'viem'
-import { base } from 'viem/chains'
-import { farcasturdsV3Abi } from '@/abi/FarcasturdsV3'
-import { privateKeyToAccount } from 'viem/accounts'
+import { NextRequest, NextResponse } from 'next/server';
+import { createPublicClient, http, Address } from 'viem';
+import { base } from 'viem/chains';
+import { farcasturdsV3Abi } from '@/abi/FarcasturdsV3'; 
+import { FarcasturdsAddress } from '@/lib/wagmi'; 
 
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url)
-  const fidParam = searchParams.get('fid')
+const CONTRACT_ADDRESS: Address = FarcasturdsAddress;
+const BASE_RPC_URL = process.env.BASE_RPC_URL || 'https://mainnet.base.org';
 
-  const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_FARCASTURDS_ADDRESS as Address
-  const BACKEND_PRIVATE_KEY = process.env.FARCASTURDS_BACKEND_PRIVATE_KEY as `0x${string}`
-  const RPC_URL = process.env.BASE_RPC_URL || 'https://mainnet.base.org'
+const client = createPublicClient({
+    chain: base,
+    transport: http(BASE_RPC_URL),
+});
 
-  const results: any = {
-    contractAddress: CONTRACT_ADDRESS,
-    timestamp: new Date().toISOString(),
-    checks: {}
-  }
+export async function GET(req: NextRequest) {
+    try {
+        const results = [];
 
-  try {
-    const client = createPublicClient({
-      chain: base,
-      transport: http(RPC_URL)
-    })
+        // Check 1: Contract owner (Error line 29 fix)
+        const owner = await client.readContract({
+            address: CONTRACT_ADDRESS,
+            abi: farcasturdsV3Abi,
+            functionName: 'owner',
+            // FIX: Add missing required property for viem compatibility
+            authorizationList: [],
+        }) as Address; 
+        
+        results.push({ name: "Contract Owner", status: "OK", value: owner });
 
-    // Check 1: Contract owner
-    const owner = await client.readContract({
-      address: CONTRACT_ADDRESS,
-      abi: farcasturdsV3Abi,
-      functionName: 'owner'
-    })
-    results.checks.owner = owner
+        // Check 2: Mint Price
+        const mintPrice = await client.readContract({
+            address: CONTRACT_ADDRESS,
+            abi: farcasturdsV3Abi,
+            functionName: 'mintPrice',
+            // FIX: Add missing required property for viem compatibility
+            authorizationList: [],
+        }) as bigint; 
 
-    // Check 2: Backend signer
-    if (BACKEND_PRIVATE_KEY) {
-      const account = privateKeyToAccount(BACKEND_PRIVATE_KEY)
-      results.checks.backendSigner = account.address
-      results.checks.signerMatchesOwner = owner.toLowerCase() === account.address.toLowerCase()
+        results.push({ name: "Mint Price (Wei)", status: "OK", value: mintPrice.toString() });
 
-      if (!results.checks.signerMatchesOwner) {
-        results.error = '❌ CRITICAL: Backend signer does NOT match contract owner!'
-      }
-    } else {
-      results.checks.backendSigner = null
-      results.error = '❌ FARCASTURDS_BACKEND_PRIVATE_KEY not configured'
+        // Check 3: Paused Status
+        const isPaused = await client.readContract({
+            address: CONTRACT_ADDRESS,
+            abi: farcasturdsV3Abi,
+            functionName: 'paused',
+            // FIX: Add missing required property for viem compatibility
+            authorizationList: [],
+        }) as boolean; 
+
+        results.push({ name: "Paused Status", status: "OK", value: isPaused.toString() });
+
+        // Check 4: Total Supply (for debug purposes)
+        const totalSupply = await client.readContract({
+            address: CONTRACT_ADDRESS,
+            abi: farcasturdsV3Abi,
+            functionName: 'totalSupply',
+            // FIX: Add missing required property for viem compatibility
+            authorizationList: [],
+        }) as bigint; 
+
+        results.push({ name: "Total Supply", status: "OK", value: totalSupply.toString() });
+
+
+        return NextResponse.json({
+            status: "success",
+            diagnostics: results,
+        }, { status: 200 });
+
+    } catch (error) {
+        console.error("[Diagnose] Error running diagnostics:", error);
+        return NextResponse.json(
+            { error: "Diagnostic failed", details: error instanceof Error ? error.message : String(error) },
+            { status: 500 }
+        );
     }
-
-    // Check 3: Paused?
-    const paused = await client.readContract({
-      address: CONTRACT_ADDRESS,
-      abi: farcasturdsV3Abi,
-      functionName: 'paused'
-    })
-    results.checks.paused = paused
-    if (paused) {
-      results.error = '❌ Contract is PAUSED'
-    }
-
-    // Check 4: Mint price
-    const mintPrice = await client.readContract({
-      address: CONTRACT_ADDRESS,
-      abi: farcasturdsV3Abi,
-      functionName: 'mintPrice'
-    })
-    results.checks.mintPrice = {
-      wei: mintPrice.toString(),
-      eth: (Number(mintPrice) / 1e18).toString()
-    }
-
-    // Check 5: Treasury
-    const treasury = await client.readContract({
-      address: CONTRACT_ADDRESS,
-      abi: farcasturdsV3Abi,
-      functionName: 'treasury'
-    })
-    results.checks.treasury = treasury
-
-    // Check 6: Total supply
-    const totalSupply = await client.readContract({
-      address: CONTRACT_ADDRESS,
-      abi: farcasturdsV3Abi,
-      functionName: 'totalSupply'
-    })
-    results.checks.totalSupply = totalSupply.toString()
-
-    // Check 7: Specific FID (if provided)
-    if (fidParam) {
-      const fid = parseInt(fidParam)
-      const hasMinted = await client.readContract({
-        address: CONTRACT_ADDRESS,
-        abi: farcasturdsV3Abi,
-        functionName: 'hasMinted',
-        args: [BigInt(fid)]
-      })
-      results.checks.fidStatus = {
-        fid,
-        hasMinted,
-        message: hasMinted ? '❌ This FID has already minted!' : '✅ FID eligible to mint'
-      }
-    }
-
-    return NextResponse.json(results)
-
-  } catch (error: any) {
-    return NextResponse.json({
-      error: error.message,
-      ...results
-    }, { status: 500 })
-  }
 }
