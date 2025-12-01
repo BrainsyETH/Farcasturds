@@ -1,4 +1,4 @@
-// lib/farcasturdStore.ts
+import { create } from 'zustand';
 import { getFarcasterProfile } from "./farcasterClient";
 import { generateFarcasterdImage } from "./farcasturdAi";
 import { getFarcasturdRow, insertFarcasturdRow, type FarcasturdRow } from "./db";
@@ -6,20 +6,35 @@ import { getFarcasturdRow, insertFarcasturdRow, type FarcasturdRow } from "./db"
 // Fallback to a relative URL if APP_BASE_URL is not set
 const APP_BASE_URL = process.env.APP_BASE_URL || "";
 
+// FIX: Define the needed FarcasturdRecord structure for the store and public use
 export type FarcasturdRecord = {
   fid: number;
   imageUrl: string;
   prompt: string;
   createdAt: string;
+  isMinted?: boolean; // Added for store logic consistency with page.tsx
 };
 
+interface FarcasturdState {
+  farcasturd: FarcasturdRecord | null;
+  mintPrice: number | null;
+  fetchFarcasturd: (fid: string | number) => Promise<void>;
+  fetchMintPrice: () => Promise<void>;
+}
+
+
 function mapRowToRecord(row: FarcasturdRow): FarcasturdRecord {
+  // Assuming isMinted comes from a derived field or a separate check, mocking the derivation.
+  // This logic should be refined based on where the mint status is truly stored.
+  const isMinted = row.fid > 0; 
+  
   return {
     fid: row.fid,
     // Image is served by our image route
     imageUrl: `${APP_BASE_URL}/api/image/${row.fid}`,
     prompt: row.prompt ?? "",
     createdAt: row.created_at,
+    isMinted: isMinted,
   };
 }
 
@@ -90,3 +105,42 @@ export function buildPlaceholderMetadata(fid: number) {
     ],
   };
 }
+
+// FIX: Add the missing Zustand store definition and hook export
+export const useFarcasturdStore = create<FarcasturdState>((set, get) => ({
+  farcasturd: null,
+  mintPrice: 0.001, // Mocked initial price for the UI
+  
+  fetchFarcasturd: async (fid: string | number) => {
+    // This action handles fetching or triggering generation of the NFT data
+    try {
+        const numFid = Number(fid);
+        if (isNaN(numFid) || numFid <= 0) return;
+        
+        // Calls API route /api/generate which ensures data exists in backend
+        const response = await fetch(`/api/generate?fid=${numFid}`);
+        const data = await response.json();
+        
+        if (data && data.fid) {
+          // Assuming API response structure is clean and ready for state
+          set({ farcasturd: { ...data, isMinted: data.isMinted || false } });
+        }
+      } catch (error) {
+        console.error("Failed to fetch/generate Farcasturd:", error);
+      }
+  },
+  
+  fetchMintPrice: async () => {
+    // Calls API route /api/config/mint-price to get the latest price
+    try {
+        const response = await fetch(`/api/config/mint-price`);
+        const { price } = await response.json(); 
+        
+        if (price !== undefined) {
+          set({ mintPrice: Number(price) });
+        }
+      } catch (error) {
+        console.error("Failed to fetch mint price:", error);
+      }
+  },
+}));
