@@ -210,32 +210,48 @@ export async function GET(req: NextRequest) {
       console.log(`[/api/user-scores] Found ${user.verifications.length} verified addresses`);
     }
 
-    // 2. Try to resolve ENS name if available
-    const ensName = user.username ? `${user.username}.eth` : null;
-    if (ensName) {
-      const ensAddress = await resolveENS(ensName);
-      if (ensAddress) {
-        addressesToCheck.push(ensAddress);
-      }
-    }
-
     // 3. Add custody address as fallback
     if (user.custody_address) {
       addressesToCheck.push(user.custody_address);
     }
 
-    console.log(`[/api/user-scores] Checking ${addressesToCheck.length} addresses for reputation scores`);
-
-    // Get Ethos score from any of the addresses
-    // Default to 1213 (neutral) if no score is found, matching Ethos's default neutral score
-    const ethosScore = await getEthosScoreFromAddresses(addressesToCheck) ?? 1213;
-
-    // Get Talent Protocol Builder Score (official Base reputation) from primary address
-    let builderScore: number | null = null;
+    // Get primary address for Talent Protocol
     const primaryAddress = user.verifications?.[0] || user.custody_address;
-    if (primaryAddress) {
-      builderScore = await getTalentBuilderScore(primaryAddress);
+
+    // Parallelize all external API calls for faster loading
+    const [ensResult, ethosResult, builderResult] = await Promise.allSettled([
+      // 2. Try to resolve ENS name if available (run in parallel)
+      (async () => {
+        const ensName = user.username ? `${user.username}.eth` : null;
+        if (ensName) {
+          const ensAddress = await resolveENS(ensName);
+          return ensAddress;
+        }
+        return null;
+      })(),
+      // Get Ethos score from any of the addresses
+      getEthosScoreFromAddresses(addressesToCheck),
+      // Get Talent Protocol Builder Score from primary address
+      primaryAddress ? getTalentBuilderScore(primaryAddress) : Promise.resolve(null)
+    ]);
+
+    // Add ENS address to addressesToCheck if resolved
+    if (ensResult.status === 'fulfilled' && ensResult.value) {
+      addressesToCheck.push(ensResult.value);
+      console.log(`[ENS] ✓ Resolved to ${ensResult.value}`);
     }
+
+    // Extract Ethos score or default to 1213 (neutral)
+    const ethosScore = (ethosResult.status === 'fulfilled' && ethosResult.value !== null)
+      ? ethosResult.value
+      : 1213;
+
+    // Extract Builder score
+    const builderScore = (builderResult.status === 'fulfilled')
+      ? builderResult.value
+      : null;
+
+    console.log(`[/api/user-scores] Checking ${addressesToCheck.length} addresses for reputation scores`);
 
     console.log(`[/api/user-scores] ✓ Scores for FID ${fid}:`, { neynarScore, neynarSpamScore, ethosScore, builderScore });
 

@@ -175,8 +175,8 @@ export async function GET(req: NextRequest) {
                 ) : (
                   <div
                     style={{
-                      background: 'rgba(107, 114, 128, 0.15)',
-                      border: '2px solid rgba(107, 114, 128, 0.35)',
+                      background: 'rgba(75, 85, 99, 0.25)',
+                      border: '2px solid rgba(75, 85, 99, 0.5)',
                       borderRadius: '16px',
                       padding: '20px',
                       display: 'flex',
@@ -197,8 +197,8 @@ export async function GET(req: NextRequest) {
                 {spamScore && spamScore !== 'null' && (
                   <div
                     style={{
-                      background: 'rgba(107, 114, 128, 0.15)',
-                      border: '2px solid rgba(107, 114, 128, 0.35)',
+                      background: 'rgba(75, 85, 99, 0.25)',
+                      border: '2px solid rgba(75, 85, 99, 0.5)',
                       borderRadius: '16px',
                       padding: '20px',
                       display: 'flex',

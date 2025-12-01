@@ -169,8 +169,8 @@ export async function GET(req: NextRequest) {
                 style={{
                   background: spamScore
                     ? 'linear-gradient(135deg, rgba(251,146,60,0.22), rgba(251,146,60,0.1))'
-                    : 'linear-gradient(135deg, rgba(107,114,128,0.22), rgba(107,114,128,0.1))',
-                  border: spamScore ? '1.5px solid rgba(251,146,60,0.38)' : '1.5px solid rgba(107,114,128,0.35)',
+                    : 'linear-gradient(135deg, rgba(75,85,99,0.3), rgba(75,85,99,0.15))',
+                  border: spamScore ? '1.5px solid rgba(251,146,60,0.38)' : '1.5px solid rgba(75,85,99,0.5)',
                   borderRadius: '18px',
                   padding: '20px',
                   display: 'flex',
