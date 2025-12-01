@@ -103,6 +103,7 @@ export async function GET(req: NextRequest) {
 
           {/* Content card scaled for Farcaster OG ratio */}
           <div
+            // Keep inner content inside a square safe area so Warpcast's composer/frame preview doesn't crop edges
             style={{
               width: '800px',
               maxWidth: '100%',
