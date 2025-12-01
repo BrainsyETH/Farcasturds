@@ -11,52 +11,37 @@ const normalizeValue = (value: string | null, fallback = 'N/A') => {
   return trimmed && trimmed !== 'null' && trimmed !== 'undefined' ? trimmed : fallback;
 };
 
+// Get Turd Score gradient color (green to red based on percentile)
+function getTurdScoreColor(score: string | null): string {
+  if (!score || score === 'N/A') return '#86efac';
+
+  const numScore = parseFloat(score);
+  if (isNaN(numScore)) return '#86efac';
+
+  // 0% = green (#22c55e = rgb(34, 197, 94))
+  // 99% = red (#ef4444 = rgb(239, 68, 68))
+  const clampedScore = Math.min(Math.max(numScore, 0), 99);
+  const ratio = clampedScore / 99;
+
+  const r = Math.round(34 + (239 - 34) * ratio);
+  const g = Math.round(197 + (68 - 197) * ratio);
+  const b = Math.round(94 + (68 - 94) * ratio);
+
+  return `rgb(${r}, ${g}, ${b})`;
+}
+
 // Get Ethos score color based on score level (matching Ethos native color scheme)
-function getEthosColor(score: string | null): { color: string; background: string; border: string } {
-  if (!score || score === 'N/A') {
-    return {
-      color: '#86efac',
-      background: 'linear-gradient(135deg, rgba(34,197,94,0.22), rgba(34,197,94,0.1))',
-      border: '1.5px solid rgba(34,197,94,0.35)',
-    };
-  }
+function getEthosColor(score: string | null): string {
+  if (!score || score === 'N/A') return '#9ca3af';
 
   const numScore = parseInt(score, 10);
 
   // Ethos native color gradient: red (untrusted) to purple (exemplary)
-  if (numScore >= 2000) {
-    return {
-      color: '#d8b4fe', // Purple - Exemplary
-      background: 'linear-gradient(135deg, rgba(168,85,247,0.22), rgba(168,85,247,0.1))',
-      border: '1.5px solid rgba(168,85,247,0.35)',
-    };
-  }
-  if (numScore >= 1600) {
-    return {
-      color: '#86efac', // Green - Reputable
-      background: 'linear-gradient(135deg, rgba(34,197,94,0.22), rgba(34,197,94,0.1))',
-      border: '1.5px solid rgba(34,197,94,0.35)',
-    };
-  }
-  if (numScore >= 1200) {
-    return {
-      color: '#fde047', // Yellow - Neutral
-      background: 'linear-gradient(135deg, rgba(234,179,8,0.22), rgba(234,179,8,0.1))',
-      border: '1.5px solid rgba(234,179,8,0.35)',
-    };
-  }
-  if (numScore >= 800) {
-    return {
-      color: '#fdba74', // Orange - Questionable
-      background: 'linear-gradient(135deg, rgba(249,115,22,0.22), rgba(249,115,22,0.1))',
-      border: '1.5px solid rgba(249,115,22,0.35)',
-    };
-  }
-  return {
-    color: '#fca5a5', // Red - Untrusted
-    background: 'linear-gradient(135deg, rgba(239,68,68,0.22), rgba(239,68,68,0.1))',
-    border: '1.5px solid rgba(239,68,68,0.35)',
-  };
+  if (numScore >= 2000) return '#c084fc'; // Purple - Exemplary
+  if (numScore >= 1600) return '#4ade80'; // Green - Reputable
+  if (numScore >= 1200) return '#fbbf24'; // Yellow - Neutral
+  if (numScore >= 800) return '#fb923c'; // Orange - Questionable
+  return '#f87171'; // Red - Untrusted
 }
 
 export async function GET(req: NextRequest) {
@@ -64,13 +49,13 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const fid = normalizeValue(searchParams.get('fid'), 'N/A');
     const neynarScore = normalizeValue(searchParams.get('neynarScore'));
-    const spamScoreRaw = normalizeValue(searchParams.get('spamScore'), '');
     const builderScore = normalizeValue(searchParams.get('builderScore'));
     const ethosScore = normalizeValue(searchParams.get('ethosScore'));
+    const turdScore = normalizeValue(searchParams.get('turdScore'));
     const username = normalizeValue(searchParams.get('username'), 'User');
 
-    const spamScore = spamScoreRaw ? spamScoreRaw : null;
-    const ethosStyle = getEthosColor(ethosScore);
+    const turdColor = getTurdScoreColor(turdScore);
+    const ethosColor = getEthosColor(ethosScore);
 
     return new ImageResponse(
       (
@@ -81,146 +66,215 @@ export async function GET(req: NextRequest) {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            background:
-              'radial-gradient(circle at 20% 20%, rgba(105,56,199,0.24), transparent 40%), radial-gradient(circle at 78% 78%, rgba(34,197,94,0.18), transparent 36%), linear-gradient(135deg, #0c0b14, #1d0f2d 55%, #0f1928)',
-            padding: '48px',
+            background: 'linear-gradient(135deg, #1a0b2e 0%, #2d1b4e 25%, #16213e 50%, #0f0919 100%)',
+            position: 'relative',
           }}
         >
+          {/* Animated gradient orbs */}
           <div
             style={{
-              width: '100%',
-              height: '100%',
-              maxWidth: '900px',
-              maxHeight: '900px',
-              background: 'linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.03))',
-              borderRadius: '32px',
-              border: '1px solid rgba(255,255,255,0.08)',
-              boxShadow: '0 30px 120px rgba(0,0,0,0.55)',
-              padding: '36px',
+              position: 'absolute',
+              top: '10%',
+              left: '15%',
+              width: '400px',
+              height: '400px',
+              borderRadius: '50%',
+              background: 'radial-gradient(circle, rgba(139,92,246,0.4) 0%, transparent 70%)',
+              filter: 'blur(60px)',
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              bottom: '10%',
+              right: '15%',
+              width: '350px',
+              height: '350px',
+              borderRadius: '50%',
+              background: 'radial-gradient(circle, rgba(34,197,94,0.3) 0%, transparent 70%)',
+              filter: 'blur(60px)',
+            }}
+          />
+
+          {/* Main container */}
+          <div
+            style={{
+              width: '900px',
+              height: '900px',
+              background: 'linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02))',
+              borderRadius: '40px',
+              border: '2px solid rgba(255,255,255,0.1)',
+              boxShadow: '0 40px 100px rgba(0,0,0,0.6), inset 0 0 60px rgba(255,255,255,0.03)',
+              padding: '50px',
               display: 'flex',
               flexDirection: 'column',
-              gap: '24px',
+              gap: '30px',
+              backdropFilter: 'blur(20px)',
             }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <span style={{ color: '#c4b5fd', letterSpacing: '0.12em', fontSize: '18px', fontWeight: 700 }}>
-                  Farcasturds Reputation
+            {/* Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <span style={{ fontSize: '56px' }}>💩</span>
+                  <span
+                    style={{
+                      color: '#c4b5fd',
+                      letterSpacing: '0.08em',
+                      fontSize: '24px',
+                      fontWeight: 800,
+                      textTransform: 'uppercase',
+                    }}
+                  >
+                    Reputation Scores
+                  </span>
+                </div>
+                <span style={{ color: '#e5e7eb', fontSize: '32px', fontWeight: 700 }}>
+                  @{username}
                 </span>
-                <span style={{ color: '#f3f4f6', fontSize: '34px', fontWeight: 800 }}>
-                  @{username} • FID {fid}
+                <span style={{ color: '#9ca3af', fontSize: '20px', fontWeight: 600 }}>
+                  FID {fid}
                 </span>
               </div>
               <div
                 style={{
-                  background: 'linear-gradient(135deg, rgba(105,56,199,0.9), rgba(59,130,246,0.9))',
+                  background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
                   color: '#fff',
-                  padding: '10px 18px',
-                  borderRadius: '14px',
-                  fontWeight: 700,
-                  fontSize: '18px',
-                  boxShadow: '0 12px 30px rgba(105,56,199,0.4)',
+                  padding: '14px 24px',
+                  borderRadius: '16px',
+                  fontWeight: 800,
+                  fontSize: '20px',
+                  boxShadow: '0 8px 32px rgba(139,92,246,0.5)',
+                  letterSpacing: '0.02em',
                 }}
               >
                 farcasturds.xyz
               </div>
             </div>
 
+            {/* Scores Grid - 2x2 */}
             <div
               style={{
                 display: 'flex',
-                flexWrap: 'wrap',
-                gap: '18px',
+                flexDirection: 'column',
+                gap: '20px',
+                flex: 1,
               }}
             >
-              <div
-                style={{
-                  background: 'linear-gradient(135deg, rgba(105,56,199,0.22), rgba(139,92,246,0.12))',
-                  border: '1.5px solid rgba(139,92,246,0.35)',
-                  borderRadius: '18px',
-                  padding: '20px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '8px',
-                  flex: '1 1 48%',
-                }}
-              >
-                <span style={{ color: '#e0def5', fontSize: '20px', fontWeight: 700 }}>Neynar Quality</span>
-                <span style={{ color: '#c084fc', fontSize: '40px', fontWeight: 800 }}>{neynarScore}</span>
-              </div>
-
-              <div
-                style={{
-                  background: 'linear-gradient(135deg, rgba(0,82,255,0.22), rgba(0,122,255,0.1))',
-                  border: '1.5px solid rgba(0,82,255,0.45)',
-                  borderRadius: '18px',
-                  padding: '20px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '8px',
-                  flex: '1 1 48%',
-                }}
-              >
-                <span style={{ color: '#bfdbfe', fontSize: '20px', fontWeight: 700 }}>Base Onchain</span>
-                <span style={{ color: '#60a5fa', fontSize: '40px', fontWeight: 800 }}>{builderScore}</span>
-              </div>
-
-              <div
-                style={{
-                  background: spamScore
-                    ? 'linear-gradient(135deg, rgba(251,146,60,0.22), rgba(251,146,60,0.1))'
-                    : 'linear-gradient(135deg, rgba(75,85,99,0.3), rgba(75,85,99,0.15))',
-                  border: spamScore ? '1.5px solid rgba(251,146,60,0.38)' : '1.5px solid rgba(75,85,99,0.5)',
-                  borderRadius: '18px',
-                  padding: '20px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '8px',
-                  flex: '1 1 48%',
-                }}
-              >
-                <span style={{ color: '#e5e7eb', fontSize: '20px', fontWeight: 700 }}>
-                  {spamScore ? 'Spam Score' : 'Ethos Credibility'}
-                </span>
-                <span
+              {/* Row 1 */}
+              <div style={{ display: 'flex', gap: '20px', flex: 1 }}>
+                {/* Turd Score - Featured with emoji */}
+                <div
                   style={{
-                    color: spamScore ? '#fbbf24' : ethosStyle.color,
-                    fontSize: '40px',
-                    fontWeight: 800,
+                    background: 'linear-gradient(145deg, rgba(139,92,246,0.15), rgba(168,85,247,0.08))',
+                    border: '2px solid rgba(139,92,246,0.4)',
+                    borderRadius: '24px',
+                    padding: '32px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    flex: 1,
+                    boxShadow: '0 8px 32px rgba(139,92,246,0.2)',
                   }}
                 >
-                  {spamScore || ethosScore}
-                </span>
-              </div>
-
-              <div
-                style={{
-                  background: 'linear-gradient(135deg, rgba(255,255,255,0.07), rgba(255,255,255,0.04))',
-                  border: '1.5px solid rgba(255,255,255,0.08)',
-                  borderRadius: '18px',
-                  padding: '20px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '12px',
-                  justifyContent: 'space-between',
-                  flex: '1 1 48%',
-                }}
-              >
-                <span style={{ color: '#d1d5db', fontSize: '18px', fontWeight: 700 }}>Share your scores</span>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <span style={{
-                    color: '#f9fafb',
-                    fontSize: '22px',
-                    fontWeight: 800,
-                    letterSpacing: '0.01em',
-                  }}>
-                    Mint a Turd on Farcasturds
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <span style={{ fontSize: '36px' }}>💩</span>
+                    <span style={{ color: '#e0e7ff', fontSize: '28px', fontWeight: 700 }}>Turd Score</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+                    <span style={{ color: turdColor, fontSize: '72px', fontWeight: 900, lineHeight: 1 }}>
+                      {turdScore}
+                    </span>
+                    <span style={{ color: '#c4b5fd', fontSize: '36px', fontWeight: 700 }}>%</span>
+                  </div>
+                  <span style={{ color: '#a78bfa', fontSize: '18px', fontWeight: 600 }}>
+                    {turdScore !== 'N/A' && parseFloat(turdScore) >= 90 ? 'Top tier bad takes!' : 'Percentile rank'}
                   </span>
                 </div>
-                <span style={{ color: '#9ca3af', fontSize: '16px' }}>
-                  Stand out in casts with a dedicated reputation preview that links straight to the mini app.
-                </span>
+
+                {/* Neynar Score */}
+                <div
+                  style={{
+                    background: 'linear-gradient(145deg, rgba(99,102,241,0.15), rgba(99,102,241,0.08))',
+                    border: '2px solid rgba(99,102,241,0.4)',
+                    borderRadius: '24px',
+                    padding: '32px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    flex: 1,
+                    boxShadow: '0 8px 32px rgba(99,102,241,0.2)',
+                  }}
+                >
+                  <span style={{ color: '#e0e7ff', fontSize: '28px', fontWeight: 700 }}>Neynar Score</span>
+                  <span style={{ color: '#818cf8', fontSize: '72px', fontWeight: 900, lineHeight: 1 }}>
+                    {neynarScore}
+                  </span>
+                  <span style={{ color: '#a5b4fc', fontSize: '18px', fontWeight: 600 }}>Quality score</span>
+                </div>
               </div>
+
+              {/* Row 2 */}
+              <div style={{ display: 'flex', gap: '20px', flex: 1 }}>
+                {/* Base Score */}
+                <div
+                  style={{
+                    background: 'linear-gradient(145deg, rgba(0,82,255,0.18), rgba(0,122,255,0.1))',
+                    border: '2px solid rgba(0,82,255,0.5)',
+                    borderRadius: '24px',
+                    padding: '32px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    flex: 1,
+                    boxShadow: '0 8px 32px rgba(0,82,255,0.25)',
+                  }}
+                >
+                  <span style={{ color: '#dbeafe', fontSize: '28px', fontWeight: 700 }}>Base Score</span>
+                  <span style={{ color: '#60a5fa', fontSize: '72px', fontWeight: 900, lineHeight: 1 }}>
+                    {builderScore}
+                  </span>
+                  <span style={{ color: '#93c5fd', fontSize: '18px', fontWeight: 600 }}>Onchain activity</span>
+                </div>
+
+                {/* Ethos Score */}
+                <div
+                  style={{
+                    background: 'linear-gradient(145deg, rgba(75,85,99,0.2), rgba(75,85,99,0.1))',
+                    border: '2px solid rgba(75,85,99,0.4)',
+                    borderRadius: '24px',
+                    padding: '32px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    flex: 1,
+                    boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+                  }}
+                >
+                  <span style={{ color: '#e5e7eb', fontSize: '28px', fontWeight: 700 }}>Ethos Score</span>
+                  <span style={{ color: ethosColor, fontSize: '72px', fontWeight: 900, lineHeight: 1 }}>
+                    {ethosScore}
+                  </span>
+                  <span style={{ color: '#d1d5db', fontSize: '18px', fontWeight: 600 }}>Credibility rating</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer CTA */}
+            <div
+              style={{
+                background: 'linear-gradient(90deg, rgba(139,92,246,0.1) 0%, rgba(34,197,94,0.1) 100%)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: '20px',
+                padding: '20px 28px',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              <span style={{ color: '#f3f4f6', fontSize: '22px', fontWeight: 700, textAlign: 'center' }}>
+                Tap to view full reputation & mint turds 💩
+              </span>
             </div>
           </div>
         </div>
