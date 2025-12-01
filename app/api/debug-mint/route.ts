@@ -58,9 +58,8 @@ export async function POST(req: NextRequest) {
             abi: farcasturdsAbi,
             functionName: "hasMinted",
             args: [fid],
-            // FIX: Add missing required property for viem compatibility
-            authorizationList: [],
-        }) as boolean; 
+            authorizationList: undefined,
+        }) as boolean;
 
         if (isMinted) {
             console.log(`[DebugMint] FID ${fid} already minted.`);
@@ -77,8 +76,7 @@ export async function POST(req: NextRequest) {
         address: CONTRACT,
         abi: farcasturdsAbi,
         functionName: "paused",
-        // FIX: Add missing required property for viem compatibility
-        authorizationList: [],
+        authorizationList: undefined,
     }) as boolean;
 
     if (isPaused) {
@@ -91,8 +89,7 @@ export async function POST(req: NextRequest) {
         address: CONTRACT,
         abi: farcasturdsAbi,
         functionName: "mintPrice",
-        // FIX: Add missing required property for viem compatibility
-        authorizationList: [],
+        authorizationList: undefined,
     }) as bigint;
 
     // 4. Check bot's ETH balance
@@ -107,9 +104,8 @@ export async function POST(req: NextRequest) {
     const contractOwner = await publicClient.readContract({
         address: CONTRACT,
         abi: farcasturdsAbi,
-        functionName: "owner", 
-        // FIX: Add missing required property for viem compatibility
-        authorizationList: [],
+        functionName: "owner",
+        authorizationList: undefined,
     }) as Address;
 
     // NOTE: Changed variable name to contractOwner to match the function name
