@@ -63,6 +63,8 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: `Farcasturd for FID ${fid} already minted.` }, { status: 400 });
         }
     } catch (e) {
+        // If hasMinted throws (e.g., if FID is invalid), we catch and log, but assume not minted to proceed.
+        // For production, this should likely be a hard fail unless the contract gracefully handles non-existent tokens/FIDs.
         console.error(`[DebugMint] Failed to check if already minted for FID ${fid}. Proceeding with assumption not minted.`, e);
     }
     
@@ -97,23 +99,25 @@ export async function POST(req: NextRequest) {
     }
 
     // 5. Check contract minter
-    // NOTE: Assuming minter function exists and is publicly readable (common for custom mint logic)
-    const contractMinter = await publicClient.readContract({
+    // FIX: Replaced non-existent 'minter' with 'owner' which is present in the ABI.
+    const contractOwner = await publicClient.readContract({
         address: CONTRACT,
         abi: farcasturdsAbi,
-        functionName: "minter", // Assuming a minter function exists
+        functionName: "owner", 
         // FIX: Add missing required property for viem compatibility
         authorizationList: [],
     }) as Address;
 
-    if (contractMinter.toLowerCase() !== botAccount.address.toLowerCase()) {
-        console.log(`[DebugMint] Bot is not the approved minter.`);
-        return NextResponse.json({ error: `Bot address ${botAccount.address} is not the contract minter ${contractMinter}.` }, { status: 403 });
+    // NOTE: Changed variable name to contractOwner to match the function name
+    if (contractOwner.toLowerCase() !== botAccount.address.toLowerCase()) {
+        console.log(`[DebugMint] Bot is not the approved minter/owner.`);
+        return NextResponse.json({ error: `Bot address ${botAccount.address} is not the contract owner ${contractOwner}.` }, { status: 403 });
     }
 
     // === Transaction Execution (writeContract) ===
 
     // 6. Execute the mintFor transaction
+    // Assuming the bot (owner/minter) has the authority to mint without a full authorization signature/deadline check in this debug route
     const { request } = await publicClient.simulateContract({
         account: botAccount,
         address: CONTRACT,
@@ -123,7 +127,7 @@ export async function POST(req: NextRequest) {
             recipient,
             fid,
             BigInt(Date.now() + 1000 * 60 * 5), // 5 minutes deadline (mocked authorization)
-            '0x' as `0x${string}` // Mock signature (since this is a debug/admin mint, assuming minter bypasses signature check or we adjust abi)
+            '0x' as `0x${string}` // Mock signature
         ],
         value: mintPriceWei,
     });
