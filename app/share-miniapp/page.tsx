@@ -1,10 +1,12 @@
-"use client"; // <--- ADDED THIS DIRECTIVE
+"use client";
 
 import { useEffect, useState } from 'react';
 import { useAccount, useWaitForTransactionReceipt, useWriteContract } from 'wagmi';
 import { BaseError, parseEther } from 'viem';
 import { useSearchParams } from 'next/navigation';
-import { FarcasturdsV3 as FarcasturdsContract } from '@/abi/FarcasturdsV3';
+// FIX: Correctly import the named ABI constant directly.
+// This resolves the "FarcasturdsV3 is not exported" error.
+import { farcasturdsV3Abi } from '@/abi/FarcasturdsV3'; 
 import { useFarcasturdStore } from '@/lib/farcasturdStore';
 import { FarcasturdsAddress } from '@/lib/wagmi';
 
@@ -67,7 +69,8 @@ export default function ShareMiniApp() {
 
       writeContract({
         address: FarcasturdsAddress,
-        abi: FarcasturdsContract.abi,
+        // Using the correctly imported ABI constant
+        abi: farcasturdsV3Abi, 
         functionName: 'mint',
         args: [
           address, // recipient
@@ -226,6 +229,7 @@ export default function ShareMiniApp() {
            <div className="flex flex-col items-center space-y-4">
               <h2 className="text-xl font-semibold text-center">Mint Your Farcasturd</h2>
               <p className="text-gray-400 text-center">
+                {/* Ensure mintPrice is formatted */}
                 Mint Price: {mintPrice?.toString() || 'Loading...'} ETH
               </p>
               <button 
