@@ -1,3 +1,6 @@
+import { FarcasterProfile } from "./farcasterClient";
+import { ColorPalette } from "./colorExtractor";
+
 export function buildFarcasterdPrompt(
   fid: number,
   profile: FarcasterProfile,

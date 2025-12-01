@@ -8,30 +8,34 @@ import { farcasturdsV3Abi as farcasturdsAbi } from '@/abi/FarcasturdsV3';
 import { FarcasturdsAddress } from '@/lib/wagmi'
 
 // --- Configuration (Local/Server-Side Only) ---
-const CONTRACT: Address = FarcasturdsAddress; 
-const BOT_PRIVATE_KEY = process.env.BOT_PRIVATE_KEY as `0x${string}`;
-
-if (!BOT_PRIVATE_KEY) {
-  throw new Error("BOT_PRIVATE_KEY is not set in the environment variables.");
-}
-
-const botAccount = privateKeyToAccount(BOT_PRIVATE_KEY);
+const CONTRACT: Address = FarcasturdsAddress;
 const BASE_RPC_URL = process.env.BASE_RPC_URL || 'https://mainnet.base.org';
-
-const publicClient = createPublicClient({
-    chain: base,
-    transport: http(BASE_RPC_URL),
-});
-
-const walletClient = createWalletClient({
-    chain: base,
-    transport: http(BASE_RPC_URL),
-    account: botAccount,
-});
 // ---------------------------------------------
 
 export async function POST(req: NextRequest) {
   try {
+    const botPrivateKey = process.env.BOT_PRIVATE_KEY as `0x${string}` | undefined;
+
+    if (!botPrivateKey) {
+      return NextResponse.json(
+        { error: "BOT_PRIVATE_KEY is not set in the environment variables." },
+        { status: 500 }
+      );
+    }
+
+    const botAccount = privateKeyToAccount(botPrivateKey);
+
+    const publicClient = createPublicClient({
+        chain: base,
+        transport: http(BASE_RPC_URL),
+    });
+
+    const walletClient = createWalletClient({
+        chain: base,
+        transport: http(BASE_RPC_URL),
+        account: botAccount,
+    });
+
     const { targetFid, targetAddress } = await req.json();
 
     if (!targetFid || !targetAddress) {
@@ -54,9 +58,8 @@ export async function POST(req: NextRequest) {
             abi: farcasturdsAbi,
             functionName: "hasMinted",
             args: [fid],
-            // FIX: Add missing required property for viem compatibility
-            authorizationList: [],
-        }) as boolean; 
+            authorizationList: undefined,
+        }) as boolean;
 
         if (isMinted) {
             console.log(`[DebugMint] FID ${fid} already minted.`);
@@ -73,8 +76,7 @@ export async function POST(req: NextRequest) {
         address: CONTRACT,
         abi: farcasturdsAbi,
         functionName: "paused",
-        // FIX: Add missing required property for viem compatibility
-        authorizationList: [],
+        authorizationList: undefined,
     }) as boolean;
 
     if (isPaused) {
@@ -87,8 +89,7 @@ export async function POST(req: NextRequest) {
         address: CONTRACT,
         abi: farcasturdsAbi,
         functionName: "mintPrice",
-        // FIX: Add missing required property for viem compatibility
-        authorizationList: [],
+        authorizationList: undefined,
     }) as bigint;
 
     // 4. Check bot's ETH balance
@@ -103,9 +104,8 @@ export async function POST(req: NextRequest) {
     const contractOwner = await publicClient.readContract({
         address: CONTRACT,
         abi: farcasturdsAbi,
-        functionName: "owner", 
-        // FIX: Add missing required property for viem compatibility
-        authorizationList: [],
+        functionName: "owner",
+        authorizationList: undefined,
     }) as Address;
 
     // NOTE: Changed variable name to contractOwner to match the function name

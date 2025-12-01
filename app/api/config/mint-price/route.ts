@@ -20,8 +20,7 @@ export async function GET(req: NextRequest) {
       address: CONTRACT_ADDRESS,
       abi: farcasturdsV3Abi,
       functionName: "mintPrice",
-      // FIX: Add missing required property for viem compatibility
-      authorizationList: [], 
+      authorizationList: undefined,
     });
 
     const priceEth = formatEther(mintPriceWei);

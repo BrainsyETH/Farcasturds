@@ -54,7 +54,7 @@ async function main() {
       address: CONTRACT_ADDRESS,
       abi,
       functionName: 'mintPrice',
-    })
+    } as any)
 
     console.log('Current Mint Price:', Number(currentPrice) / 1e18, 'ETH')
     console.log('Current Mint Price (wei):', currentPrice.toString())
@@ -72,7 +72,7 @@ async function main() {
       abi,
       functionName: 'setMintPrice',
       args: [NEW_MINT_PRICE],
-    })
+    } as any)
 
     console.log('Transaction hash:', hash)
     console.log('Waiting for confirmation...')
@@ -88,7 +88,7 @@ async function main() {
         address: CONTRACT_ADDRESS,
         abi,
         functionName: 'mintPrice',
-      })
+      } as any)
 
       console.log('\n==========================================')
       console.log('Update Successful!')

@@ -26,9 +26,11 @@ async function checkFidStatus(fid: number) {
       abi: farcasturdsAbi,
       functionName: 'hasMinted',
       args: [BigInt(fid)],
-    })
+    } as any)
 
-    console.log(`✓ Has minted: ${hasMinted ? '✅ YES' : '❌ NO'}`)
+    const minted = Boolean(hasMinted)
+
+    console.log(`✓ Has minted: ${minted ? '✅ YES' : '❌ NO'}`)
 
     // Get current mint price from contract
     const mintPrice = await client.readContract({
@@ -36,7 +38,7 @@ async function checkFidStatus(fid: number) {
       abi: farcasturdsAbi,
       functionName: 'mintPrice',
       args: [],
-    })
+    } as any)
 
     console.log(`✓ Contract mint price: ${formatEther(mintPrice as bigint)} ETH`)
 
@@ -48,7 +50,7 @@ async function checkFidStatus(fid: number) {
           abi: farcasturdsAbi,
           functionName: 'ownerOfFid',
           args: [BigInt(fid)],
-        })
+        } as any)
         console.log(`✓ Owner address: ${owner}`)
       } catch (err) {
         console.log(`⚠️  Could not fetch owner (might not have ownerOfFid function)`)
@@ -61,7 +63,7 @@ async function checkFidStatus(fid: number) {
       abi: farcasturdsAbi,
       functionName: 'totalSupply',
       args: [],
-    })
+    } as any)
 
     console.log(`✓ Total minted: ${totalSupply}`)
 

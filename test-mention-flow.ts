@@ -61,25 +61,25 @@ async function testContractConnection() {
           address: CONTRACT_V3,
           abi: farcasturdsV3Abi,
           functionName: "name",
-        });
+        } as any);
 
         const symbol = await publicClient.readContract({
           address: CONTRACT_V3,
           abi: farcasturdsV3Abi,
           functionName: "symbol",
-        });
+        } as any);
 
         const totalSupply = await publicClient.readContract({
           address: CONTRACT_V3,
           abi: farcasturdsV3Abi,
           functionName: "totalSupply",
-        });
+        } as any);
 
         const mintPrice = await publicClient.readContract({
           address: CONTRACT_V3,
           abi: farcasturdsV3Abi,
           functionName: "mintPrice",
-        });
+        } as any);
 
         console.log(`\n✅ V3 Contract Name: ${name}`);
         console.log(`✅ V3 Contract Symbol: ${symbol}`);
@@ -99,25 +99,25 @@ async function testContractConnection() {
           address: CONTRACT_V2,
           abi: farcasturdsV2Abi,
           functionName: "name",
-        });
+        } as any);
 
         const symbol = await publicClient.readContract({
           address: CONTRACT_V2,
           abi: farcasturdsV2Abi,
           functionName: "symbol",
-        });
+        } as any);
 
         const totalSupply = await publicClient.readContract({
           address: CONTRACT_V2,
           abi: farcasturdsV2Abi,
           functionName: "totalSupply",
-        });
+        } as any);
 
         const mintPrice = await publicClient.readContract({
           address: CONTRACT_V2,
           abi: farcasturdsV2Abi,
           functionName: "mintPrice",
-        });
+        } as any);
 
         console.log(`\n✅ V2 Contract Name: ${name}`);
         console.log(`✅ V2 Contract Symbol: ${symbol}`);

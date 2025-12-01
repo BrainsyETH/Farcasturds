@@ -1,6 +1,7 @@
-import { http, createConfig, type Address } from 'wagmi'
+import { http, createConfig } from 'wagmi'
 import { base } from 'wagmi/chains'
 import { farcasterMiniApp } from '@farcaster/miniapp-wagmi-connector'
+import { type Address } from 'viem'
 
 // Wagmi configuration for Farcaster Mini App on Base Mainnet
 export const config = createConfig({
