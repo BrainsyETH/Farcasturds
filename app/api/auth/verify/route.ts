@@ -144,7 +144,7 @@ export async function POST(req: NextRequest) {
             address: siweMessage.address as `0x${string}`,
             functionName: 'isValidSignature',
             args: [messageHash, signature as `0x${string}`],
-            // FIX: Add missing required property for viem compatibility (Line 131 fix)
+            // FIX: Add missing required property for viem compatibility
             authorizationList: [],
           })
 
