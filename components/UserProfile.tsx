@@ -695,9 +695,9 @@ export default function UserProfile({ userFid }: UserProfileProps) {
                 return (
                   <div style={{
                     padding: '1rem',
-                    background: 'rgba(107, 114, 128, 0.15)',
+                    background: 'rgba(75, 85, 99, 0.25)',
                     borderRadius: '12px',
-                    border: '1.5px solid rgba(107, 114, 128, 0.35)',
+                    border: '1.5px solid rgba(75, 85, 99, 0.5)',
                     transition: 'all 0.3s ease'
                   }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
@@ -802,11 +802,7 @@ export default function UserProfile({ userFid }: UserProfileProps) {
                           fontWeight: 500
                         }}
                       >
-                        {userScores.ethosScore === 1213 ? (
-                          <>Default neutral score • Not yet active on Ethos</>
-                        ) : (
-                          <>View Ethos Profile →</>
-                        )}
+                        Full Ethos Score →
                       </a>
                     </div>
                   </div>
