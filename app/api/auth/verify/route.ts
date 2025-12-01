@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
         // Fallback to SIWE library verification if manual recovery fails
         try {
           console.log('[Auth] Attempting SIWE library verification...')
-          // FIX: Removed 'provider: baseProvider' which caused the Type error.
+          // FIX: Removed 'provider: baseProvider' which caused the Type error in a previous iteration.
           fields = await siweMessage.verify({
             signature,
             nonce,
@@ -143,7 +143,9 @@ export async function POST(req: NextRequest) {
             ],
             address: siweMessage.address as `0x${string}`,
             functionName: 'isValidSignature',
-            args: [messageHash, signature as `0x${string}`]
+            args: [messageHash, signature as `0x${string}`],
+            // FIX: Add missing required property for viem compatibility (Line 131 fix)
+            authorizationList: [],
           })
 
           console.log('[Auth] isValidSignature returned:', result)
