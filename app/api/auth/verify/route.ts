@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { SiweMessage } from 'siwe'
 import { getFarcasterProfile } from '@/lib/farcasterClient'
 import { JsonRpcProvider } from 'ethers'
-import { createPublicClient, http, hashMessage } from 'viem'
+import { createPublicClient, http, hashMessage, recoverMessageAddress } from 'viem'
 import { base } from 'viem/chains'
 
 // Shared provider for SIWE verification (supports EIP-1271 smart accounts)
@@ -70,6 +70,20 @@ export async function POST(req: NextRequest) {
           time: siweMessage.issuedAt,
           address: siweMessage.address
         })
+
+        // First, try to recover the address from the signature to see what we get
+        try {
+          const recoveredAddress = await recoverMessageAddress({
+            message: message,
+            signature: signature as `0x${string}`
+          })
+          console.log('[Auth] Address recovered from signature:', recoveredAddress)
+          console.log('[Auth] Expected address from SIWE message:', siweMessage.address)
+          console.log('[Auth] Addresses match:', recoveredAddress.toLowerCase() === siweMessage.address.toLowerCase())
+        } catch (recoverError: any) {
+          console.error('[Auth] Failed to recover address from signature:', recoverError.message)
+        }
+
         fields = await siweMessage.verify({
           signature,
           nonce,
@@ -80,9 +94,11 @@ export async function POST(req: NextRequest) {
         console.log('[Auth] ✓ Primary SIWE verification successful')
       } catch (verifyError: any) {
         console.error('[Auth] Standard verification failed!')
-        console.error('[Auth] Error name:', verifyError.name)
-        console.error('[Auth] Error message:', verifyError.message)
-        console.error('[Auth] Error stack:', verifyError.stack)
+        console.error('[Auth] Error type:', typeof verifyError)
+        console.error('[Auth] Error name:', verifyError?.name)
+        console.error('[Auth] Error message:', verifyError?.message)
+        console.error('[Auth] Error stack:', verifyError?.stack)
+        console.error('[Auth] Full error object:', JSON.stringify(verifyError, null, 2))
         fields.success = false
       }
     } else {
