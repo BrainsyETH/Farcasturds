@@ -40,8 +40,15 @@ export async function POST(req: NextRequest) {
     // Parse and verify the SIWE message
     const siweMessage = new SiweMessage(message)
 
+    console.log('[Auth] ========== VERIFICATION DEBUG INFO ==========')
     console.log('[Auth] Verifying SIWE signature for address:', siweMessage.address)
+    console.log('[Auth] Domain:', siweMessage.domain)
+    console.log('[Auth] Chain ID:', siweMessage.chainId)
+    console.log('[Auth] Nonce:', siweMessage.nonce)
+    console.log('[Auth] Message length:', message.length)
     console.log('[Auth] Signature type check - length:', signature.length)
+    console.log('[Auth] Full message:', message)
+    console.log('[Auth] Full signature:', signature)
 
     // Check if this is a passkey/WebAuthn signature (much longer than standard 132 chars)
     // Standard ECDSA signatures are 132 characters (0x + 130 hex chars)
@@ -56,6 +63,13 @@ export async function POST(req: NextRequest) {
     if (!isPasskeySignature) {
       try {
         console.log('[Auth] Attempting standard SIWE verification...')
+        console.log('[Auth] Verification params:', {
+          signatureLength: signature.length,
+          nonce,
+          domain: siweMessage.domain,
+          time: siweMessage.issuedAt,
+          address: siweMessage.address
+        })
         fields = await siweMessage.verify({
           signature,
           nonce,
@@ -65,7 +79,10 @@ export async function POST(req: NextRequest) {
         })
         console.log('[Auth] ✓ Primary SIWE verification successful')
       } catch (verifyError: any) {
-        console.log('[Auth] Standard verification failed:', verifyError.message)
+        console.error('[Auth] Standard verification failed!')
+        console.error('[Auth] Error name:', verifyError.name)
+        console.error('[Auth] Error message:', verifyError.message)
+        console.error('[Auth] Error stack:', verifyError.stack)
         fields.success = false
       }
     } else {
