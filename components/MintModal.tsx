@@ -143,7 +143,10 @@ export function MintModal({ isOpen, onClose, fid, imageUrl, onSuccess }: MintMod
       setSiweMessage(message)
 
       // Request signature from wallet
-      signMessage({ message })
+      signMessage({
+        message,
+        account: address,
+      })
     } catch (err: any) {
       console.error('Signature request error:', err)
       setError(err.message || 'Failed to request signature')
@@ -255,6 +258,9 @@ export function MintModal({ isOpen, onClose, fid, imageUrl, onSuccess }: MintMod
         address: CONTRACT_ADDRESS,
         abi: farcasturdsV3Abi,
         functionName: 'mintFor',
+        chain: base,
+        chainId: base.id,
+        account: address,
         args: [
           address,
           BigInt(fid),

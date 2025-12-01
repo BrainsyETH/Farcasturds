@@ -6,9 +6,10 @@ import { BaseError, parseEther } from 'viem';
 import { useSearchParams } from 'next/navigation';
 // FIX: Correctly import the named ABI constant directly.
 // This resolves the "FarcasturdsV3 is not exported" error.
-import { farcasturdsV3Abi } from '@/abi/FarcasturdsV3'; 
+import { farcasturdsV3Abi } from '@/abi/FarcasturdsV3';
 import { useFarcasturdStore } from '@/lib/farcasturdStore';
 import { FarcasturdsAddress } from '@/lib/wagmi';
+import { base } from 'wagmi/chains';
 
 // Define the shape of the UI state for the mini-app
 type UiState = 'initial' | 'generating' | 'generated' | 'minting' | 'minted' | 'error';
@@ -70,11 +71,16 @@ export default function ShareMiniApp() {
       writeContract({
         address: FarcasturdsAddress,
         // Using the correctly imported ABI constant
-        abi: farcasturdsV3Abi, 
-        functionName: 'mint',
+        abi: farcasturdsV3Abi,
+        functionName: 'mintFor',
+        chain: base,
+        chainId: base.id,
+        account: address,
         args: [
           address, // recipient
-          fid ? BigInt(fid) : 0n // fid
+          fid ? BigInt(fid) : 0n, // fid
+          0n, // deadline placeholder
+          '0x', // signature placeholder
         ],
         value: mintValue,
         gas: 500000n, // Set a fixed gas limit as a fallback
