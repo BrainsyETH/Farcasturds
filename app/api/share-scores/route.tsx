@@ -3,6 +3,54 @@ import { NextRequest } from 'next/server';
 
 export const runtime = 'edge';
 
+// Get Ethos score color based on score level (matching Ethos native color scheme)
+function getEthosColor(score: string | null): { color: string; background: string; border: string } {
+  if (!score || score === 'N/A') {
+    return {
+      color: '#6b7280',
+      background: 'rgba(107, 114, 128, 0.15)',
+      border: 'rgba(107, 114, 128, 0.35)',
+    };
+  }
+
+  const numScore = parseInt(score, 10);
+
+  // Ethos native color gradient: red (untrusted) to purple (exemplary)
+  if (numScore >= 2000) {
+    return {
+      color: '#a855f7', // Purple - Exemplary
+      background: 'rgba(168, 85, 247, 0.15)',
+      border: 'rgba(168, 85, 247, 0.35)',
+    };
+  }
+  if (numScore >= 1600) {
+    return {
+      color: '#22c55e', // Green - Reputable
+      background: 'rgba(34, 197, 94, 0.15)',
+      border: 'rgba(34, 197, 94, 0.35)',
+    };
+  }
+  if (numScore >= 1200) {
+    return {
+      color: '#eab308', // Yellow - Neutral
+      background: 'rgba(234, 179, 8, 0.15)',
+      border: 'rgba(234, 179, 8, 0.35)',
+    };
+  }
+  if (numScore >= 800) {
+    return {
+      color: '#f97316', // Orange - Questionable
+      background: 'rgba(249, 115, 22, 0.15)',
+      border: 'rgba(249, 115, 22, 0.35)',
+    };
+  }
+  return {
+    color: '#ef4444', // Red - Untrusted
+    background: 'rgba(239, 68, 68, 0.15)',
+    border: 'rgba(239, 68, 68, 0.35)',
+  };
+}
+
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
@@ -12,6 +60,8 @@ export async function GET(req: NextRequest) {
     const builderScore = searchParams.get('builderScore');
     const ethosScore = searchParams.get('ethosScore');
     const username = searchParams.get('username') || 'User';
+
+    const ethosStyle = getEthosColor(ethosScore);
 
     return new ImageResponse(
       (
@@ -79,11 +129,11 @@ export async function GET(req: NextRequest) {
                   </span>
                 </div>
 
-                {/* Builder Score */}
+                {/* Base Onchain Score */}
                 <div
                   style={{
-                    background: 'rgba(59, 130, 246, 0.15)',
-                    border: '2px solid rgba(59, 130, 246, 0.35)',
+                    background: 'linear-gradient(135deg, rgba(0, 82, 255, 0.18), rgba(0, 122, 255, 0.12))',
+                    border: '2px solid rgba(0, 82, 255, 0.5)',
                     borderRadius: '16px',
                     padding: '20px',
                     display: 'flex',
@@ -92,9 +142,9 @@ export async function GET(req: NextRequest) {
                   }}
                 >
                   <span style={{ fontSize: '22px', fontWeight: 600, color: '#1b0a33' }}>
-                    Builder Score
+                    Base Onchain
                   </span>
-                  <span style={{ fontSize: '40px', fontWeight: 700, color: '#3b82f6' }}>
+                  <span style={{ fontSize: '40px', fontWeight: 700, color: '#0052ff' }}>
                     {builderScore || 'N/A'}
                   </span>
                 </div>
@@ -125,8 +175,8 @@ export async function GET(req: NextRequest) {
                 ) : (
                   <div
                     style={{
-                      background: 'rgba(34, 197, 94, 0.15)',
-                      border: '2px solid rgba(34, 197, 94, 0.35)',
+                      background: ethosStyle.background,
+                      border: `2px solid ${ethosStyle.border}`,
                       borderRadius: '16px',
                       padding: '20px',
                       display: 'flex',
@@ -135,9 +185,9 @@ export async function GET(req: NextRequest) {
                     }}
                   >
                     <span style={{ fontSize: '22px', fontWeight: 600, color: '#1b0a33' }}>
-                      Ethos Onchain
+                      Ethos Credibility
                     </span>
-                    <span style={{ fontSize: '40px', fontWeight: 700, color: '#22c55e' }}>
+                    <span style={{ fontSize: '40px', fontWeight: 700, color: ethosStyle.color }}>
                       {ethosScore || 'N/A'}
                     </span>
                   </div>
@@ -147,8 +197,8 @@ export async function GET(req: NextRequest) {
                 {spamScore && spamScore !== 'null' && (
                   <div
                     style={{
-                      background: 'rgba(34, 197, 94, 0.15)',
-                      border: '2px solid rgba(34, 197, 94, 0.35)',
+                      background: ethosStyle.background,
+                      border: `2px solid ${ethosStyle.border}`,
                       borderRadius: '16px',
                       padding: '20px',
                       display: 'flex',
@@ -157,9 +207,9 @@ export async function GET(req: NextRequest) {
                     }}
                   >
                     <span style={{ fontSize: '22px', fontWeight: 600, color: '#1b0a33' }}>
-                      Ethos Onchain
+                      Ethos Credibility
                     </span>
-                    <span style={{ fontSize: '40px', fontWeight: 700, color: '#22c55e' }}>
+                    <span style={{ fontSize: '40px', fontWeight: 700, color: ethosStyle.color }}>
                       {ethosScore || 'N/A'}
                     </span>
                   </div>
