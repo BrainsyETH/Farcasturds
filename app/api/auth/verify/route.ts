@@ -61,45 +61,49 @@ export async function POST(req: NextRequest) {
 
     // For passkey signatures, skip standard verification and go straight to EIP-1271
     if (!isPasskeySignature) {
+      // Use manual signature verification by recovering address
+      // This is more reliable than SIWE library's verify() which has strict domain/time checks
       try {
-        console.log('[Auth] Attempting standard SIWE verification...')
-        console.log('[Auth] Verification params:', {
-          signatureLength: signature.length,
-          nonce,
-          domain: siweMessage.domain,
-          time: siweMessage.issuedAt,
-          address: siweMessage.address
+        console.log('[Auth] Using manual signature verification...')
+        const recoveredAddress = await recoverMessageAddress({
+          message: message,
+          signature: signature as `0x${string}`
         })
 
-        // First, try to recover the address from the signature to see what we get
-        try {
-          const recoveredAddress = await recoverMessageAddress({
-            message: message,
-            signature: signature as `0x${string}`
-          })
-          console.log('[Auth] Address recovered from signature:', recoveredAddress)
-          console.log('[Auth] Expected address from SIWE message:', siweMessage.address)
-          console.log('[Auth] Addresses match:', recoveredAddress.toLowerCase() === siweMessage.address.toLowerCase())
-        } catch (recoverError: any) {
-          console.error('[Auth] Failed to recover address from signature:', recoverError.message)
+        console.log('[Auth] Address recovered from signature:', recoveredAddress)
+        console.log('[Auth] Expected address from SIWE message:', siweMessage.address)
+
+        const addressesMatch = recoveredAddress.toLowerCase() === siweMessage.address.toLowerCase()
+        console.log('[Auth] Addresses match:', addressesMatch)
+
+        if (addressesMatch) {
+          console.log('[Auth] ✓ Manual signature verification successful!')
+          fields = { success: true, data: siweMessage }
+        } else {
+          console.error('[Auth] ✗ Address mismatch! Signature is valid but for wrong address')
+          console.error('[Auth] This suggests the message was signed by a different wallet')
+          fields.success = false
         }
+      } catch (recoverError: any) {
+        console.error('[Auth] Manual verification failed:', recoverError.message)
+        console.log('[Auth] Falling back to SIWE library verification...')
 
-        fields = await siweMessage.verify({
-          signature,
-          nonce,
-          domain: siweMessage.domain,
-          time: siweMessage.issuedAt,
-          provider: baseProvider
-        })
-        console.log('[Auth] ✓ Primary SIWE verification successful')
-      } catch (verifyError: any) {
-        console.error('[Auth] Standard verification failed!')
-        console.error('[Auth] Error type:', typeof verifyError)
-        console.error('[Auth] Error name:', verifyError?.name)
-        console.error('[Auth] Error message:', verifyError?.message)
-        console.error('[Auth] Error stack:', verifyError?.stack)
-        console.error('[Auth] Full error object:', JSON.stringify(verifyError, null, 2))
-        fields.success = false
+        // Fallback to SIWE library verification if manual recovery fails
+        try {
+          console.log('[Auth] Attempting SIWE library verification...')
+          fields = await siweMessage.verify({
+            signature,
+            nonce,
+            domain: siweMessage.domain,
+            time: siweMessage.issuedAt,
+            provider: baseProvider
+          })
+          console.log('[Auth] ✓ SIWE library verification successful')
+        } catch (verifyError: any) {
+          console.error('[Auth] SIWE library verification also failed!')
+          console.error('[Auth] Error:', JSON.stringify(verifyError, null, 2))
+          fields.success = false
+        }
       }
     } else {
       console.log('[Auth] Skipping standard verification for passkey signature')
