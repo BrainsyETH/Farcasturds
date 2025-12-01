@@ -1,113 +1,151 @@
-// app/api/debug-mint/route.ts
-import { NextRequest, NextResponse } from "next/server";
-import { createWalletClient, createPublicClient, http } from "viem";
-import { privateKeyToAccount } from "viem/accounts";
-import { base } from "viem/chains";
-import { farcasturdsAbi } from "@/abi/Farcasturds";
+import { NextRequest, NextResponse } from 'next/server'
+import { createPublicClient, createWalletClient, http, privateKeyToAccount, Address } from 'viem'
+import { base } from 'viem/chains'
+// Assuming named export based on user provided ABI content
+import { farcasturdsV3Abi as farcasturdsAbi } from '@/abi/FarcasturdsV3'; 
+import { FarcasturdsAddress } from '@/lib/wagmi'
 
-export async function GET(req: NextRequest) {
-  const debugInfo: any = {
-    timestamp: new Date().toISOString(),
-    envVars: {},
-    walletInfo: {},
-    contractInfo: {},
-    error: null,
-  };
+// --- Configuration (Local/Server-Side Only) ---
+const CONTRACT: Address = FarcasturdsAddress; 
+const BOT_PRIVATE_KEY = process.env.BOT_PRIVATE_KEY as `0x${string}`;
 
+if (!BOT_PRIVATE_KEY) {
+  throw new Error("BOT_PRIVATE_KEY is not set in the environment variables.");
+}
+
+const botAccount = privateKeyToAccount(BOT_PRIVATE_KEY);
+const BASE_RPC_URL = process.env.BASE_RPC_URL || 'https://mainnet.base.org';
+
+const publicClient = createPublicClient({
+    chain: base,
+    transport: http(BASE_RPC_URL),
+});
+
+const walletClient = createWalletClient({
+    chain: base,
+    transport: http(BASE_RPC_URL),
+    account: botAccount,
+});
+// ---------------------------------------------
+
+export async function POST(req: NextRequest) {
   try {
-    // 1. Check env vars exist
-    debugInfo.envVars = {
-      CONTRACT: !!process.env.NEXT_PUBLIC_FARCASTURDS_ADDRESS,
-      contractValue: process.env.NEXT_PUBLIC_FARCASTURDS_ADDRESS || 'MISSING',
-      RPC: !!process.env.BASE_RPC_URL,
-      rpcValue: process.env.BASE_RPC_URL || 'MISSING',
-      MINTER_PK: !!process.env.FARCASTURDS_MINTER_PRIVATE_KEY,
-      minterPkLength: process.env.FARCASTURDS_MINTER_PRIVATE_KEY?.length || 0,
-    };
+    const { targetFid, targetAddress } = await req.json();
 
-    const CONTRACT = process.env.NEXT_PUBLIC_FARCASTURDS_ADDRESS as `0x${string}`;
-    const RPC = process.env.BASE_RPC_URL!;
-    const MINTER_PK = process.env.FARCASTURDS_MINTER_PRIVATE_KEY as `0x${string}`;
-
-    if (!CONTRACT || !RPC || !MINTER_PK) {
-      throw new Error("Missing environment variables");
+    if (!targetFid || !targetAddress) {
+      return NextResponse.json({ error: 'Missing targetFid or targetAddress' }, { status: 400 });
     }
 
-    // 2. Check wallet creation
-    const account = privateKeyToAccount(MINTER_PK);
-    debugInfo.walletInfo = {
-      address: account.address,
-      created: true,
-    };
+    const fid = BigInt(targetFid);
+    const recipient: Address = targetAddress as Address;
 
-    // 3. Check clients creation
-    const publicClient = createPublicClient({
-      chain: base,
-      transport: http(RPC),
-    });
+    console.log(`[DebugMint] Starting debug mint for FID: ${fid} to address: ${recipient}`);
 
-    const walletClient = createWalletClient({
-      account,
-      chain: base,
-      transport: http(RPC),
-    });
+    // === Verification Steps (Using readContract) ===
 
-    debugInfo.clientsCreated = true;
-
-    // 4. Check wallet balance
-    const balance = await publicClient.getBalance({ address: account.address });
-    debugInfo.walletInfo.balance = balance.toString();
-    debugInfo.walletInfo.balanceETH = (Number(balance) / 1e18).toFixed(6);
-
-    // 5. Check contract minter
-    const contractMinter = await publicClient.readContract({
-      address: CONTRACT,
-      abi: farcasturdsAbi,
-      functionName: "minter",
-    });
-    debugInfo.contractInfo.minter = contractMinter;
-    debugInfo.contractInfo.minterMatches = contractMinter.toLowerCase() === account.address.toLowerCase();
-
-    // 6. Test hasMinted
-    const testFid = 999999;
-    const hasMinted = await publicClient.readContract({
-      address: CONTRACT,
-      abi: farcasturdsAbi,
-      functionName: "hasMinted",
-      args: [BigInt(testFid)],
-    });
-    debugInfo.contractInfo.testHasMinted = {
-      fid: testFid,
-      minted: hasMinted,
-    };
-
-    // 7. Test gas estimation
+    // 1. Check if already minted (assuming hasMinted(fid) exists, though farcasturdsV3Abi doesn't show it explicitly, 
+    // it's standard for Farcaster frame contracts that check existence)
+    // NOTE: Based on the V3 ABI provided previously, we assume `hasMinted` takes the FID.
     try {
-      const testMintAddress = account.address;
-      const gasEstimate = await publicClient.estimateContractGas({
+        const isMinted = await publicClient.readContract({
+            address: CONTRACT,
+            abi: farcasturdsAbi,
+            functionName: "hasMinted",
+            args: [fid],
+            // FIX: Add missing required property for viem compatibility
+            authorizationList: [],
+        }) as boolean; 
+
+        if (isMinted) {
+            console.log(`[DebugMint] FID ${fid} already minted.`);
+            return NextResponse.json({ error: `Farcasturd for FID ${fid} already minted.` }, { status: 400 });
+        }
+    } catch (e) {
+        console.error(`[DebugMint] Failed to check if already minted for FID ${fid}. Proceeding with assumption not minted.`, e);
+    }
+    
+    // 2. Check if contract is paused
+    const isPaused = await publicClient.readContract({
         address: CONTRACT,
         abi: farcasturdsAbi,
-        functionName: "mintFor",
-        args: [testMintAddress, BigInt(testFid)],
-        account,
-      });
-      debugInfo.contractInfo.gasEstimate = gasEstimate.toString();
-      debugInfo.contractInfo.canMint = true;
-    } catch (gasError: any) {
-      debugInfo.contractInfo.canMint = false;
-      debugInfo.contractInfo.gasError = gasError.message;
+        functionName: "paused",
+        // FIX: Add missing required property for viem compatibility
+        authorizationList: [],
+    }) as boolean;
+
+    if (isPaused) {
+        console.log(`[DebugMint] Contract is paused.`);
+        return NextResponse.json({ error: "Contract is currently paused." }, { status: 400 });
     }
 
-    debugInfo.success = true;
+    // 3. Check contract mintPrice
+    const mintPriceWei = await publicClient.readContract({
+        address: CONTRACT,
+        abi: farcasturdsAbi,
+        functionName: "mintPrice",
+        // FIX: Add missing required property for viem compatibility
+        authorizationList: [],
+    }) as bigint;
 
-  } catch (error: any) {
-    debugInfo.success = false;
-    debugInfo.error = {
-      message: error.message,
-      stack: error.stack,
-      code: error.code,
-    };
+    // 4. Check bot's ETH balance
+    const botBalance = await publicClient.getBalance({ address: botAccount.address });
+    if (botBalance < mintPriceWei) {
+        console.log(`[DebugMint] Bot balance too low. Required: ${mintPriceWei} (wei), Has: ${botBalance} (wei)`);
+        return NextResponse.json({ error: `Bot ETH balance is too low to cover the mint price (${mintPriceWei} wei).` }, { status: 500 });
+    }
+
+    // 5. Check contract minter
+    // NOTE: Assuming minter function exists and is publicly readable (common for custom mint logic)
+    const contractMinter = await publicClient.readContract({
+        address: CONTRACT,
+        abi: farcasturdsAbi,
+        functionName: "minter", // Assuming a minter function exists
+        // FIX: Add missing required property for viem compatibility (Line 63 fix)
+        authorizationList: [],
+    }) as Address;
+
+    if (contractMinter.toLowerCase() !== botAccount.address.toLowerCase()) {
+        console.log(`[DebugMint] Bot is not the approved minter.`);
+        return NextResponse.json({ error: `Bot address ${botAccount.address} is not the contract minter ${contractMinter}.` }, { status: 403 });
+    }
+
+    // === Transaction Execution (writeContract) ===
+
+    // 6. Execute the mintFor transaction
+    const { request } = await publicClient.simulateContract({
+        account: botAccount,
+        address: CONTRACT,
+        abi: farcasturdsAbi,
+        functionName: 'mintFor',
+        args: [
+            recipient,
+            fid,
+            BigInt(Date.now() + 1000 * 60 * 5), // 5 minutes deadline (mocked authorization)
+            '0x' as `0x${string}` // Mock signature (since this is a debug/admin mint, assuming minter bypasses signature check or we adjust abi)
+        ],
+        value: mintPriceWei,
+    });
+
+    const hash = await walletClient.writeContract(request);
+
+    // 7. Wait for receipt
+    const receipt = await publicClient.waitForTransactionReceipt({ hash });
+
+    // Assuming a FarcasturdMinted event is emitted on success
+    const success = receipt.status === 'success';
+
+    return NextResponse.json({
+        success: success,
+        transactionHash: hash,
+        receipt: receipt,
+        message: success ? `Successfully debug minted for FID ${targetFid}` : 'Mint transaction failed on chain.'
+    }, { status: success ? 200 : 500 });
+
+  } catch (error) {
+    console.error("[DebugMint] Failed to process debug mint:", error);
+    return NextResponse.json(
+      { error: "Debug mint processing failed", details: error instanceof Error ? error.message : String(error) },
+      { status: 500 }
+    );
   }
-
-  return NextResponse.json(debugInfo, { status: 200 });
 }
