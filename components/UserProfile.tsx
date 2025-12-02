@@ -224,14 +224,14 @@ export default function UserProfile({ userFid }: UserProfileProps) {
 
       // Create cast with both image and share URL for proper preview and linking
       const castText = `Check out my reputation scores on Farcasturds! 💩`;
-      const embeds: string[] = [imageUrl.toString(), shareUrl];
+      const embeds: [string, string] = [imageUrl.toString(), shareUrl];
 
       // Use miniapp SDK to open the composer in the main Farcaster app
       try {
         await sdk.actions.composeCast({ text: castText, embeds });
       } catch (sdkError) {
         console.error('SDK compose failed, falling back to Warpcast URL:', sdkError);
-        const composerUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(castText)}&embeds[]=${encodeURIComponent(shareUrl)}`;
+        const composerUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(castText)}&embeds[]=${encodeURIComponent(imageUrl.toString())}&embeds[]=${encodeURIComponent(shareUrl)}`;
         window.location.href = composerUrl;
       }
 
