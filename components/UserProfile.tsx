@@ -218,22 +218,20 @@ export default function UserProfile({ userFid }: UserProfileProps) {
         // Continue anyway - the image might still work
       }
 
-      // Miniapp URL for link embed - use share-specific route to inject reputation image as OG preview
-      const miniappUrl = new URL('/share-miniapp', baseUrl);
-      miniappUrl.searchParams.set('preview', imageUrl.toString());
-      miniappUrl.searchParams.set('username', username);
+      // Miniapp URL for link embed - points to main app to open user's profile
+      const miniappUrl = new URL('/', baseUrl);
       miniappUrl.searchParams.set('fid', userFid.toString());
 
-      // Create cast text with only the miniapp link so the preview image is used instead of an inline asset
+      // Create cast text with the miniapp link and embed both the image and the miniapp URL
       const castText = `Check out my reputation scores on Farcasturds! 💩`;
-      const embeds: [string] = [miniappUrl.toString()];
+      const embeds: [string, string] = [imageUrl.toString(), miniappUrl.toString()];
 
       // Use miniapp SDK to open the composer in the main Farcaster app
       try {
         await sdk.actions.composeCast({ text: castText, embeds });
       } catch (sdkError) {
         console.error('SDK compose failed, falling back to Warpcast URL:', sdkError);
-        const composerUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(castText)}&embeds[]=${encodeURIComponent(miniappUrl.toString())}`;
+        const composerUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(castText)}&embeds[]=${encodeURIComponent(imageUrl.toString())}&embeds[]=${encodeURIComponent(miniappUrl.toString())}`;
         window.location.href = composerUrl;
       }
 
