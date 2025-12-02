@@ -14,6 +14,7 @@ interface UserScores {
   openRankScore: number | null;
   openRankRank: number | null;
   username: string | null;
+  pfpUrl: string | null;
   followerCount: number;
   followingCount: number;
   neynarSpamScore: number | null;
@@ -190,10 +191,11 @@ export default function UserProfile({ userFid }: UserProfileProps) {
       const imageUrl = new URL('/api/share-scores', baseUrl);
       imageUrl.searchParams.set('fid', userFid.toString());
       imageUrl.searchParams.set('username', username);
+      imageUrl.searchParams.set('pfpUrl', userScores.pfpUrl || 'https://farcasturds.vercel.app/splash.png');
       imageUrl.searchParams.set('neynarScore', userScores.neynarScore?.toFixed(2) || 'N/A');
       imageUrl.searchParams.set('builderScore', userScores.builderScore?.toString() || 'N/A');
       imageUrl.searchParams.set('ethosScore', userScores.ethosScore?.toString() || 'N/A');
-      imageUrl.searchParams.set('openRankScore', userScores.openRankScore?.toFixed(4) || 'N/A');
+      imageUrl.searchParams.set('openRankScore', userScores.openRankScore?.toFixed(2) || 'N/A');
       imageUrl.searchParams.set('turdScore', userStats.turdScore?.toString() || 'N/A');
 
       // Miniapp URL for link embed - use share-specific route to inject reputation image as OG preview
@@ -878,7 +880,7 @@ export default function UserProfile({ userFid }: UserProfileProps) {
                     WebkitTextFillColor: 'transparent',
                     backgroundClip: 'text'
                   }}>
-                    {userScores.openRankScore !== null ? userScores.openRankScore.toFixed(4) : 'N/A'}
+                    {userScores.openRankScore !== null ? userScores.openRankScore.toFixed(2) : 'N/A'}
                   </div>
                 </div>
                 {userScores.openRankScore === null ? (

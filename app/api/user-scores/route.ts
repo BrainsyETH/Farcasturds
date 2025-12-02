@@ -314,6 +314,7 @@ export async function GET(req: NextRequest) {
       openRankScore: openRankData.score,
       openRankRank: openRankData.rank,
       username: user.username || null,
+      pfpUrl: user.pfp_url || null,
       followerCount: user.follower_count || 0,
       followingCount: user.following_count || 0,
     });
