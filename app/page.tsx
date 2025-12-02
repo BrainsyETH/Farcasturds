@@ -53,7 +53,14 @@ export default function HomePage() {
   const [authNonce, setAuthNonce] = useState<string | null>(null);
   const [sharing, setSharing] = useState(false);
   const [hasShared, setHasShared] = useState(false);
-  const [activeTab, setActiveTab] = useState<TabId>('mint');
+  // Default to 'howitworks' tab if FID param is present in URL (for shared links)
+  const [activeTab, setActiveTab] = useState<TabId>(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('fid') ? 'howitworks' : 'mint';
+    }
+    return 'mint';
+  });
   const [metadataLoading, setMetadataLoading] = useState(true);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isSignatureRequested, setIsSignatureRequested] = useState(false);
