@@ -506,7 +506,7 @@ export default function UserProfile({ userFid }: UserProfileProps) {
                       )}
                     </span>
                   </div>
-                  <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#8b5cf6' }}>
+                  <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#ffffff' }}>
                     {userScores.neynarScore !== null ? userScores.neynarScore.toFixed(2) : 'N/A'}
                   </div>
                 </div>
@@ -598,7 +598,7 @@ export default function UserProfile({ userFid }: UserProfileProps) {
                         )}
                       </span>
                     </div>
-                    <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#fb923c' }}>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#ffffff' }}>
                       {userScores.neynarSpamScore.toFixed(2)}
                     </div>
                   </div>
@@ -685,10 +685,7 @@ export default function UserProfile({ userFid }: UserProfileProps) {
                   <div style={{
                     fontSize: '1.5rem',
                     fontWeight: 700,
-                    background: 'linear-gradient(135deg, #0052ff, #007aff)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text'
+                    color: '#ffffff'
                   }}>
                     {userScores.builderScore !== null ? userScores.builderScore : 'N/A'}
                   </div>
@@ -797,7 +794,7 @@ export default function UserProfile({ userFid }: UserProfileProps) {
                       <div style={{
                         fontSize: '1.5rem',
                         fontWeight: 700,
-                        color: ethosStyle.color,
+                        color: '#ffffff',
                         display: 'flex',
                         alignItems: 'center',
                         gap: '0.5rem'
@@ -811,7 +808,7 @@ export default function UserProfile({ userFid }: UserProfileProps) {
                               padding: '2px 6px',
                               borderRadius: '4px',
                               backgroundColor: `${ethosStyle.color}20`,
-                              color: ethosStyle.color,
+                              color: '#ffffff',
                               textTransform: 'uppercase',
                               letterSpacing: '0.5px'
                             }}>
@@ -919,10 +916,7 @@ export default function UserProfile({ userFid }: UserProfileProps) {
                   <div style={{
                     fontSize: '1.5rem',
                     fontWeight: 700,
-                    background: 'linear-gradient(135deg, #ffa500, #ff8c00)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text'
+                    color: '#ffffff'
                   }}>
                     {userScores.openRankRank !== null ? `#${userScores.openRankRank.toLocaleString()}` : 'N/A'}
                   </div>
