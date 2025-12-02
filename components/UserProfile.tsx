@@ -224,7 +224,7 @@ export default function UserProfile({ userFid }: UserProfileProps) {
 
       // Create cast text with the miniapp link and embed both the image and the miniapp URL
       const castText = `Check out my reputation scores on Farcasturds! 💩`;
-      const embeds: string[] = [imageUrl.toString(), miniappUrl.toString()];
+      const embeds: [string, string] = [imageUrl.toString(), miniappUrl.toString()];
 
       // Use miniapp SDK to open the composer in the main Farcaster app
       try {
