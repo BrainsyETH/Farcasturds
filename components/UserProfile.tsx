@@ -218,22 +218,16 @@ export default function UserProfile({ userFid }: UserProfileProps) {
         // Continue anyway - the image might still work
       }
 
-      // Use share-miniapp URL which includes the image as OG preview
-      const shareUrl = new URL('/share-miniapp', baseUrl);
-      shareUrl.searchParams.set('preview', imageUrl.toString());
-      shareUrl.searchParams.set('username', username);
-      shareUrl.searchParams.set('fid', userFid.toString());
-
-      // Create cast with only the share URL - the image will be the OG preview
+      // Create cast with the image - Farcaster will display it as a nice preview
       const castText = `Check out my reputation scores on Farcasturds! 💩`;
-      const embeds: [string] = [shareUrl.toString()];
+      const embeds: [string] = [imageUrl.toString()];
 
       // Use miniapp SDK to open the composer in the main Farcaster app
       try {
         await sdk.actions.composeCast({ text: castText, embeds });
       } catch (sdkError) {
         console.error('SDK compose failed, falling back to Warpcast URL:', sdkError);
-        const composerUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(castText)}&embeds[]=${encodeURIComponent(shareUrl.toString())}`;
+        const composerUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(castText)}&embeds[]=${encodeURIComponent(imageUrl.toString())}`;
         window.location.href = composerUrl;
       }
 
