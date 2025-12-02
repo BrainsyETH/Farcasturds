@@ -51,10 +51,13 @@ export async function GET(req: NextRequest) {
     const neynarScore = normalizeValue(searchParams.get('neynarScore'));
     const builderScore = normalizeValue(searchParams.get('builderScore'));
     const ethosScore = normalizeValue(searchParams.get('ethosScore'));
-    const openRankScore = normalizeValue(searchParams.get('openRankScore'));
+    const openRankRank = normalizeValue(searchParams.get('openRankRank'));
     const turdScore = normalizeValue(searchParams.get('turdScore'));
     const username = normalizeValue(searchParams.get('username'), 'User');
     const pfpUrl = normalizeValue(searchParams.get('pfpUrl'), 'https://farcasturds.vercel.app/splash.png');
+
+    // Format OpenRank rank with # prefix if it's a number
+    const openRankDisplay = openRankRank !== 'N/A' ? `#${parseInt(openRankRank).toLocaleString()}` : 'N/A';
 
     const turdColor = getTurdScoreColor(turdScore);
     const ethosColor = getEthosColor(ethosScore);
@@ -266,7 +269,7 @@ export async function GET(req: NextRequest) {
               >
                 <span style={{ color: '#fef3c7', fontSize: '30px', fontWeight: 800, textAlign: 'center' }}>OpenRank</span>
                 <span style={{ color: '#fbbf24', fontSize: '56px', fontWeight: 900, lineHeight: 1, textAlign: 'center' }}>
-                  {openRankScore}
+                  {openRankDisplay}
                 </span>
               </div>
             </div>

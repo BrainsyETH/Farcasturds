@@ -195,7 +195,7 @@ export default function UserProfile({ userFid }: UserProfileProps) {
       imageUrl.searchParams.set('neynarScore', userScores.neynarScore?.toFixed(2) || 'N/A');
       imageUrl.searchParams.set('builderScore', userScores.builderScore?.toString() || 'N/A');
       imageUrl.searchParams.set('ethosScore', userScores.ethosScore?.toString() || 'N/A');
-      imageUrl.searchParams.set('openRankScore', userScores.openRankScore?.toFixed(2) || 'N/A');
+      imageUrl.searchParams.set('openRankRank', userScores.openRankRank?.toString() || 'N/A');
       imageUrl.searchParams.set('turdScore', userStats.turdScore?.toString() || 'N/A');
 
       // Miniapp URL for link embed - use share-specific route to inject reputation image as OG preview
@@ -853,8 +853,8 @@ export default function UserProfile({ userFid }: UserProfileProps) {
                             textAlign: 'center'
                           }}
                         >
-                          Global engagement score from OpenRank.<br />
-                          Based on your social graph interactions.
+                          Your rank among all Farcaster users.<br />
+                          Based on global engagement scores from OpenRank.
                           <span
                             style={{
                               position: 'absolute',
@@ -880,20 +880,15 @@ export default function UserProfile({ userFid }: UserProfileProps) {
                     WebkitTextFillColor: 'transparent',
                     backgroundClip: 'text'
                   }}>
-                    {userScores.openRankScore !== null ? userScores.openRankScore.toFixed(2) : 'N/A'}
+                    {userScores.openRankRank !== null ? `#${userScores.openRankRank.toLocaleString()}` : 'N/A'}
                   </div>
                 </div>
-                {userScores.openRankScore === null ? (
+                {userScores.openRankRank === null ? (
                   <div style={{ fontSize: '0.75rem', color: 'var(--fc-text-soft)' }}>
-                    Score not available from OpenRank
+                    Rank not available from OpenRank
                   </div>
                 ) : (
-                  <div style={{ fontSize: '0.75rem', color: 'var(--fc-text-soft)', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                    {userScores.openRankRank !== null && (
-                      <span style={{ fontWeight: 500 }}>
-                        Global Rank: #{userScores.openRankRank.toLocaleString()}
-                      </span>
-                    )}
+                  <div style={{ fontSize: '0.75rem', color: 'var(--fc-text-soft)' }}>
                     <a
                       href="https://docs.openrank.com/integrations/farcaster/openrank-scores-onchain"
                       target="_blank"
