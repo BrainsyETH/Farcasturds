@@ -44,6 +44,22 @@ function getEthosColor(score: string | null): string {
   return '#f87171'; // Red - Untrusted
 }
 
+// Convert image URL to data URI for use in ImageResponse
+async function imageToDataUri(imageUrl: string): Promise<string> {
+  try {
+    const response = await fetch(imageUrl);
+    const arrayBuffer = await response.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+    const base64 = buffer.toString('base64');
+    const contentType = response.headers.get('content-type') || 'image/png';
+    return `data:${contentType};base64,${base64}`;
+  } catch (error) {
+    console.error(`Failed to fetch image: ${imageUrl}`, error);
+    // Return empty data URI on error
+    return '';
+  }
+}
+
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
@@ -61,6 +77,14 @@ export async function GET(req: NextRequest) {
 
     const turdColor = getTurdScoreColor(turdScore);
     const ethosColor = getEthosColor(ethosScore);
+
+    // Fetch and convert logo images to data URIs
+    const [neynarLogo, baseLogo, ethosLogo, openRankLogo] = await Promise.all([
+      imageToDataUri('https://b4b0aaz7b39hhkor.public.blob.vercel-storage.com/neynar.png'),
+      imageToDataUri('https://b4b0aaz7b39hhkor.public.blob.vercel-storage.com/baseimage.png'),
+      imageToDataUri('https://b4b0aaz7b39hhkor.public.blob.vercel-storage.com/ethos.png'),
+      imageToDataUri('https://b4b0aaz7b39hhkor.public.blob.vercel-storage.com/openrank.png'),
+    ]);
 
     return new ImageResponse(
       (
@@ -204,11 +228,13 @@ export async function GET(req: NextRequest) {
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <img
-                    src="https://b4b0aaz7b39hhkor.public.blob.vercel-storage.com/neynar.png"
-                    alt="Neynar"
-                    style={{ width: '32px', height: '32px' }}
-                  />
+                  {neynarLogo && (
+                    <img
+                      src={neynarLogo}
+                      alt="Neynar"
+                      style={{ width: '32px', height: '32px' }}
+                    />
+                  )}
                   <span style={{ color: '#e0e7ff', fontSize: '30px', fontWeight: 800 }}>Neynar</span>
                 </div>
                 <span style={{ color: '#818cf8', fontSize: '56px', fontWeight: 900, lineHeight: 1, textAlign: 'center' }}>
@@ -233,11 +259,13 @@ export async function GET(req: NextRequest) {
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <img
-                    src="https://b4b0aaz7b39hhkor.public.blob.vercel-storage.com/baseimage.png"
-                    alt="Base"
-                    style={{ width: '32px', height: '32px' }}
-                  />
+                  {baseLogo && (
+                    <img
+                      src={baseLogo}
+                      alt="Base"
+                      style={{ width: '32px', height: '32px' }}
+                    />
+                  )}
                   <span style={{ color: '#dbeafe', fontSize: '30px', fontWeight: 800 }}>Base</span>
                 </div>
                 <span style={{ color: '#60a5fa', fontSize: '56px', fontWeight: 900, lineHeight: 1, textAlign: 'center' }}>
@@ -265,11 +293,13 @@ export async function GET(req: NextRequest) {
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <img
-                    src="https://b4b0aaz7b39hhkor.public.blob.vercel-storage.com/ethos.png"
-                    alt="Ethos"
-                    style={{ width: '32px', height: '32px' }}
-                  />
+                  {ethosLogo && (
+                    <img
+                      src={ethosLogo}
+                      alt="Ethos"
+                      style={{ width: '32px', height: '32px' }}
+                    />
+                  )}
                   <span style={{ color: '#e5e7eb', fontSize: '30px', fontWeight: 800 }}>Ethos</span>
                 </div>
                 <span style={{ color: ethosColor, fontSize: '56px', fontWeight: 900, lineHeight: 1, textAlign: 'center' }}>
@@ -294,11 +324,13 @@ export async function GET(req: NextRequest) {
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <img
-                    src="https://b4b0aaz7b39hhkor.public.blob.vercel-storage.com/openrank.png"
-                    alt="OpenRank"
-                    style={{ width: '32px', height: '32px' }}
-                  />
+                  {openRankLogo && (
+                    <img
+                      src={openRankLogo}
+                      alt="OpenRank"
+                      style={{ width: '32px', height: '32px' }}
+                    />
+                  )}
                   <span style={{ color: '#fef3c7', fontSize: '30px', fontWeight: 800 }}>OpenRank</span>
                 </div>
                 <span style={{ color: '#fbbf24', fontSize: '44px', fontWeight: 900, lineHeight: 1, textAlign: 'center' }}>
