@@ -138,7 +138,7 @@ export async function GET(req: NextRequest) {
           <div
             style={{
               width: '1100px',
-              height: '550px',
+              height: '580px',
               background: 'linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02))',
               borderRadius: '32px',
               border: '2px solid rgba(255,255,255,0.1)',
@@ -146,7 +146,7 @@ export async function GET(req: NextRequest) {
               padding: '40px 50px',
               display: 'flex',
               flexDirection: 'column',
-              gap: '24px',
+              gap: '28px',
               backdropFilter: 'blur(20px)',
             }}
           >
@@ -185,9 +185,9 @@ export async function GET(req: NextRequest) {
             </div>
 
             {/* Scores Grid - 2 rows: 3 cards on top, 2 cards on bottom */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', flex: 1 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', flex: 1 }}>
               {/* First Row - Top 3 scores */}
-              <div style={{ display: 'flex', gap: '12px', flex: 1 }}>
+              <div style={{ display: 'flex', gap: '16px', flex: 1 }}>
               {/* Turd Score */}
               <div
                 style={{
@@ -280,7 +280,7 @@ export async function GET(req: NextRequest) {
               </div>
 
               {/* Second Row - Bottom 2 scores */}
-              <div style={{ display: 'flex', gap: '12px', flex: 1, justifyContent: 'center' }}>
+              <div style={{ display: 'flex', gap: '16px', flex: 1, justifyContent: 'center' }}>
               {/* Ethos Score */}
               <div
                 style={{
@@ -339,29 +339,6 @@ export async function GET(req: NextRequest) {
                 </span>
               </div>
               </div>
-            </div>
-
-            {/* Footer */}
-            <div
-              style={{
-                background: 'linear-gradient(90deg, rgba(139,92,246,0.1) 0%, rgba(34,197,94,0.1) 100%)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                borderRadius: '16px',
-                padding: '12px 20px',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                gap: '8px',
-              }}
-            >
-              <span style={{ color: '#f3f4f6', fontSize: '18px', fontWeight: 700, textAlign: 'center' }}>
-                Tap to view full onchain scores & mint turds
-              </span>
-              <img
-                src="https://farcasturds.vercel.app/splash.png"
-                alt="Turd"
-                style={{ width: '20px', height: '20px' }}
-              />
             </div>
           </div>
         </div>
