@@ -11,6 +11,8 @@ interface UserScores {
   neynarScore: number | null;
   ethosScore: number | null;
   builderScore: number | null;
+  openRankScore: number | null;
+  openRankRank: number | null;
   username: string | null;
   followerCount: number;
   followingCount: number;
@@ -191,6 +193,7 @@ export default function UserProfile({ userFid }: UserProfileProps) {
       imageUrl.searchParams.set('neynarScore', userScores.neynarScore?.toFixed(2) || 'N/A');
       imageUrl.searchParams.set('builderScore', userScores.builderScore?.toString() || 'N/A');
       imageUrl.searchParams.set('ethosScore', userScores.ethosScore?.toString() || 'N/A');
+      imageUrl.searchParams.set('openRankScore', userScores.openRankScore?.toFixed(4) || 'N/A');
       imageUrl.searchParams.set('turdScore', userStats.turdScore?.toString() || 'N/A');
 
       // Miniapp URL for link embed - use share-specific route to inject reputation image as OG preview
@@ -796,6 +799,114 @@ export default function UserProfile({ userFid }: UserProfileProps) {
                   </div>
                 );
               })()}
+
+              {/* OpenRank Onchain Score */}
+              <div style={{
+                padding: '1rem',
+                background: 'linear-gradient(135deg, rgba(255, 165, 0, 0.12), rgba(255, 140, 0, 0.08))',
+                borderRadius: '12px',
+                border: '1.5px solid rgba(255, 165, 0, 0.4)',
+                boxShadow: '0 2px 8px rgba(255, 165, 0, 0.1)'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontWeight: 600, fontSize: '0.95rem' }}>
+                    OpenRank Score
+                    <span
+                      ref={(el) => (tooltipRefs.current['openRankScore'] = el)}
+                      onPointerEnter={handleTooltipPointerEnter('openRankScore')}
+                      onPointerLeave={handleTooltipPointerLeave}
+                      onClick={toggleTooltip('openRankScore')}
+                      style={{
+                        cursor: 'help',
+                        fontSize: '0.7rem',
+                        color: 'var(--fc-text-soft)',
+                        backgroundColor: 'rgba(0,0,0,0.1)',
+                        borderRadius: '50%',
+                        width: '14px',
+                        height: '14px',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontWeight: 'bold',
+                        position: 'relative'
+                      }}
+                    >
+                      i
+                      {activeTooltip === 'openRankScore' && (
+                        <span
+                          style={{
+                            position: 'absolute',
+                            bottom: '125%',
+                            left: '50%',
+                            transform: 'translateX(-50%)',
+                            backgroundColor: '#1a1a1a',
+                            color: '#fff',
+                            padding: '0.5rem 0.75rem',
+                            borderRadius: '6px',
+                            fontSize: '0.7rem',
+                            whiteSpace: 'nowrap',
+                            zIndex: 1000,
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+                            minWidth: '220px',
+                            textAlign: 'center'
+                          }}
+                        >
+                          Global engagement score from OpenRank.<br />
+                          Based on your social graph interactions.
+                          <span
+                            style={{
+                              position: 'absolute',
+                              top: '100%',
+                              left: '50%',
+                              transform: 'translateX(-50%)',
+                              width: 0,
+                              height: 0,
+                              borderLeft: '6px solid transparent',
+                              borderRight: '6px solid transparent',
+                              borderTop: '6px solid #1a1a1a'
+                            }}
+                          ></span>
+                        </span>
+                      )}
+                    </span>
+                  </div>
+                  <div style={{
+                    fontSize: '1.5rem',
+                    fontWeight: 700,
+                    background: 'linear-gradient(135deg, #ffa500, #ff8c00)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text'
+                  }}>
+                    {userScores.openRankScore !== null ? userScores.openRankScore.toFixed(4) : 'N/A'}
+                  </div>
+                </div>
+                {userScores.openRankScore === null ? (
+                  <div style={{ fontSize: '0.75rem', color: 'var(--fc-text-soft)' }}>
+                    Score not available from OpenRank
+                  </div>
+                ) : (
+                  <div style={{ fontSize: '0.75rem', color: 'var(--fc-text-soft)', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                    {userScores.openRankRank !== null && (
+                      <span style={{ fontWeight: 500 }}>
+                        Global Rank: #{userScores.openRankRank.toLocaleString()}
+                      </span>
+                    )}
+                    <a
+                      href="https://docs.openrank.com/integrations/farcaster/openrank-scores-onchain"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        color: '#ff8c00',
+                        textDecoration: 'none',
+                        fontWeight: 500
+                      }}
+                    >
+                      Learn about OpenRank →
+                    </a>
+                  </div>
+                )}
+              </div>
             </div>
           ) : (
             <p className="fc-subtle" style={{ textAlign: 'center', padding: '1rem' }}>
