@@ -44,28 +44,31 @@ function getEthosColor(score: string | null): string {
   return '#f87171'; // Red - Untrusted
 }
 
-// Convert image URL to data URI for use in ImageResponse
-async function imageToDataUri(imageUrl: string): Promise<string> {
-  try {
-    console.log(`[ImageResponse] Fetching image: ${imageUrl}`);
-    const response = await fetch(imageUrl);
+// Inline SVG logos as data URIs - no external fetching needed for edge runtime
+const LOGOS = {
+  neynar: `<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect width="32" height="32" rx="6" fill="#6366f1"/>
+    <path d="M8 22V10h3.5l6.5 8.5V10H21v12h-3.5L11 13.5V22H8z" fill="white"/>
+  </svg>`,
+  base: `<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="16" cy="16" r="16" fill="#0052FF"/>
+    <path d="M16 28C22.627 28 28 22.627 28 16C28 9.373 22.627 4 16 4C9.98 4 4.94 8.35 4 14.1h17v3.8H4C4.94 23.65 9.98 28 16 28z" fill="white"/>
+  </svg>`,
+  ethos: `<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect width="32" height="32" rx="6" fill="#6b7280"/>
+    <path d="M16 6l-8 5v8c0 5 3.5 9.5 8 11 4.5-1.5 8-6 8-11v-8l-8-5zm-1 16h-4v-2h4v2zm0-4h-4v-2h4v2zm0-4h-4v-2h4v2zm6 8h-4v-2h4v2zm0-4h-4v-2h4v2zm0-4h-4v-2h4v2z" fill="white"/>
+  </svg>`,
+  openrank: `<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect width="32" height="32" rx="6" fill="#ff8c00"/>
+    <path d="M16 4c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12S22.627 4 16 4zm0 21c-4.971 0-9-4.029-9-9s4.029-9 9-9 9 4.029 9 9-4.029 9-9 9z" fill="white"/>
+    <path d="M16 9c-3.866 0-7 3.134-7 7s3.134 7 7 7 7-3.134 7-7-3.134-7-7-7zm0 11c-2.209 0-4-1.791-4-4s1.791-4 4-4 4 1.791 4 4-1.791 4-4 4z" fill="white"/>
+  </svg>`,
+};
 
-    if (!response.ok) {
-      console.error(`[ImageResponse] Failed to fetch ${imageUrl}: ${response.status} ${response.statusText}`);
-      return '';
-    }
-
-    const arrayBuffer = await response.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-    const base64 = buffer.toString('base64');
-    const contentType = response.headers.get('content-type') || 'image/png';
-    console.log(`[ImageResponse] Successfully converted ${imageUrl} to data URI (${buffer.length} bytes)`);
-    return `data:${contentType};base64,${base64}`;
-  } catch (error) {
-    console.error(`[ImageResponse] Error fetching image ${imageUrl}:`, error);
-    // Return empty data URI on error
-    return '';
-  }
+// Convert SVG to data URI for use in ImageResponse
+function svgToDataUri(svg: string): string {
+  const base64 = Buffer.from(svg).toString('base64');
+  return `data:image/svg+xml;base64,${base64}`;
 }
 
 export async function GET(req: NextRequest) {
@@ -86,28 +89,11 @@ export async function GET(req: NextRequest) {
     const turdColor = getTurdScoreColor(turdScore);
     const ethosColor = getEthosColor(ethosScore);
 
-    // Fetch and convert logo images to data URIs
-    // Note: Try with and without .png extension in case of naming differences
-    const logoUrls = {
-      neynar: 'https://b4b0aaz7b39hhkor.public.blob.vercel-storage.com/neynar.png',
-      base: 'https://b4b0aaz7b39hhkor.public.blob.vercel-storage.com/baseimage.png',
-      ethos: 'https://b4b0aaz7b39hhkor.public.blob.vercel-storage.com/ethos.png',
-      openrank: 'https://b4b0aaz7b39hhkor.public.blob.vercel-storage.com/openrank.png',
-    };
-
-    const [neynarLogo, baseLogo, ethosLogo, openRankLogo] = await Promise.all([
-      imageToDataUri(logoUrls.neynar),
-      imageToDataUri(logoUrls.base),
-      imageToDataUri(logoUrls.ethos),
-      imageToDataUri(logoUrls.openrank),
-    ]);
-
-    console.log('[ImageResponse] Logo fetch results:', {
-      neynar: neynarLogo ? `${neynarLogo.substring(0, 50)}... (${neynarLogo.length} chars)` : 'FAILED',
-      base: baseLogo ? `${baseLogo.substring(0, 50)}... (${baseLogo.length} chars)` : 'FAILED',
-      ethos: ethosLogo ? `${ethosLogo.substring(0, 50)}... (${ethosLogo.length} chars)` : 'FAILED',
-      openRank: openRankLogo ? `${openRankLogo.substring(0, 50)}... (${openRankLogo.length} chars)` : 'FAILED',
-    });
+    // Convert inline SVG logos to data URIs - no external fetching needed
+    const neynarLogo = svgToDataUri(LOGOS.neynar);
+    const baseLogo = svgToDataUri(LOGOS.base);
+    const ethosLogo = svgToDataUri(LOGOS.ethos);
+    const openRankLogo = svgToDataUri(LOGOS.openrank);
 
     return new ImageResponse(
       (
@@ -208,29 +194,29 @@ export async function GET(req: NextRequest) {
                   background: 'linear-gradient(145deg, rgba(139,92,246,0.15), rgba(168,85,247,0.08))',
                   border: '2px solid rgba(139,92,246,0.4)',
                   borderRadius: '18px',
-                  padding: '20px',
+                  padding: '24px 20px',
                   display: 'flex',
                   flexDirection: 'column',
-                  justifyContent: 'center',
+                  justifyContent: 'space-between',
                   alignItems: 'center',
                   flex: 1,
-                  gap: '16px',
+                  gap: '12px',
                   boxShadow: '0 8px 32px rgba(139,92,246,0.2)',
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <img
                     src="https://farcasturds.vercel.app/splash.png"
                     alt="Turd"
                     style={{ width: '32px', height: '32px' }}
                   />
-                  <span style={{ color: '#e0e7ff', fontSize: '30px', fontWeight: 800 }}>Turd</span>
+                  <span style={{ color: '#e0e7ff', fontSize: '28px', fontWeight: 800 }}>Turd</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', justifyContent: 'center' }}>
-                  <span style={{ color: turdColor, fontSize: '56px', fontWeight: 900, lineHeight: 1 }}>
+                  <span style={{ color: turdColor, fontSize: '52px', fontWeight: 900, lineHeight: 1 }}>
                     {turdScore}
                   </span>
-                  <span style={{ color: '#c4b5fd', fontSize: '28px', fontWeight: 700 }}>%</span>
+                  <span style={{ color: '#c4b5fd', fontSize: '26px', fontWeight: 700 }}>%</span>
                 </div>
               </div>
 
@@ -240,27 +226,25 @@ export async function GET(req: NextRequest) {
                   background: 'linear-gradient(145deg, rgba(99,102,241,0.15), rgba(99,102,241,0.08))',
                   border: '2px solid rgba(99,102,241,0.4)',
                   borderRadius: '18px',
-                  padding: '20px',
+                  padding: '24px 20px',
                   display: 'flex',
                   flexDirection: 'column',
-                  justifyContent: 'center',
+                  justifyContent: 'space-between',
                   alignItems: 'center',
                   flex: 1,
-                  gap: '16px',
+                  gap: '12px',
                   boxShadow: '0 8px 32px rgba(99,102,241,0.2)',
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  {neynarLogo && (
-                    <img
-                      src={neynarLogo}
-                      alt="Neynar"
-                      style={{ width: '32px', height: '32px' }}
-                    />
-                  )}
-                  <span style={{ color: '#e0e7ff', fontSize: '30px', fontWeight: 800 }}>Neynar</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <img
+                    src={neynarLogo}
+                    alt="Neynar"
+                    style={{ width: '32px', height: '32px' }}
+                  />
+                  <span style={{ color: '#e0e7ff', fontSize: '28px', fontWeight: 800 }}>Neynar</span>
                 </div>
-                <span style={{ color: '#818cf8', fontSize: '56px', fontWeight: 900, lineHeight: 1, textAlign: 'center' }}>
+                <span style={{ color: '#818cf8', fontSize: '52px', fontWeight: 900, lineHeight: 1, textAlign: 'center' }}>
                   {neynarScore}
                 </span>
               </div>
@@ -271,27 +255,25 @@ export async function GET(req: NextRequest) {
                   background: 'linear-gradient(145deg, rgba(0,82,255,0.18), rgba(0,122,255,0.1))',
                   border: '2px solid rgba(0,82,255,0.5)',
                   borderRadius: '18px',
-                  padding: '20px',
+                  padding: '24px 20px',
                   display: 'flex',
                   flexDirection: 'column',
-                  justifyContent: 'center',
+                  justifyContent: 'space-between',
                   alignItems: 'center',
                   flex: 1,
-                  gap: '16px',
+                  gap: '12px',
                   boxShadow: '0 8px 32px rgba(0,82,255,0.25)',
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  {baseLogo && (
-                    <img
-                      src={baseLogo}
-                      alt="Base"
-                      style={{ width: '32px', height: '32px' }}
-                    />
-                  )}
-                  <span style={{ color: '#dbeafe', fontSize: '30px', fontWeight: 800 }}>Base</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <img
+                    src={baseLogo}
+                    alt="Base"
+                    style={{ width: '32px', height: '32px' }}
+                  />
+                  <span style={{ color: '#dbeafe', fontSize: '28px', fontWeight: 800 }}>Base</span>
                 </div>
-                <span style={{ color: '#60a5fa', fontSize: '56px', fontWeight: 900, lineHeight: 1, textAlign: 'center' }}>
+                <span style={{ color: '#60a5fa', fontSize: '52px', fontWeight: 900, lineHeight: 1, textAlign: 'center' }}>
                   {builderScore}
                 </span>
               </div>
@@ -305,27 +287,25 @@ export async function GET(req: NextRequest) {
                   background: 'linear-gradient(145deg, rgba(75,85,99,0.2), rgba(75,85,99,0.1))',
                   border: '2px solid rgba(75,85,99,0.4)',
                   borderRadius: '18px',
-                  padding: '20px',
+                  padding: '24px 20px',
                   display: 'flex',
                   flexDirection: 'column',
-                  justifyContent: 'center',
+                  justifyContent: 'space-between',
                   alignItems: 'center',
                   flex: 1,
-                  gap: '16px',
+                  gap: '12px',
                   boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  {ethosLogo && (
-                    <img
-                      src={ethosLogo}
-                      alt="Ethos"
-                      style={{ width: '32px', height: '32px' }}
-                    />
-                  )}
-                  <span style={{ color: '#e5e7eb', fontSize: '30px', fontWeight: 800 }}>Ethos</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <img
+                    src={ethosLogo}
+                    alt="Ethos"
+                    style={{ width: '32px', height: '32px' }}
+                  />
+                  <span style={{ color: '#e5e7eb', fontSize: '28px', fontWeight: 800 }}>Ethos</span>
                 </div>
-                <span style={{ color: ethosColor, fontSize: '56px', fontWeight: 900, lineHeight: 1, textAlign: 'center' }}>
+                <span style={{ color: ethosColor, fontSize: '52px', fontWeight: 900, lineHeight: 1, textAlign: 'center' }}>
                   {ethosScore}
                 </span>
               </div>
@@ -336,27 +316,25 @@ export async function GET(req: NextRequest) {
                   background: 'linear-gradient(145deg, rgba(255,165,0,0.18), rgba(255,140,0,0.1))',
                   border: '2px solid rgba(255,165,0,0.5)',
                   borderRadius: '18px',
-                  padding: '20px',
+                  padding: '24px 20px',
                   display: 'flex',
                   flexDirection: 'column',
-                  justifyContent: 'center',
+                  justifyContent: 'space-between',
                   alignItems: 'center',
                   flex: 1,
-                  gap: '16px',
+                  gap: '12px',
                   boxShadow: '0 8px 32px rgba(255,165,0,0.25)',
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  {openRankLogo && (
-                    <img
-                      src={openRankLogo}
-                      alt="OpenRank"
-                      style={{ width: '32px', height: '32px' }}
-                    />
-                  )}
-                  <span style={{ color: '#fef3c7', fontSize: '30px', fontWeight: 800 }}>OpenRank</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <img
+                    src={openRankLogo}
+                    alt="OpenRank"
+                    style={{ width: '32px', height: '32px' }}
+                  />
+                  <span style={{ color: '#fef3c7', fontSize: '28px', fontWeight: 800 }}>OpenRank</span>
                 </div>
-                <span style={{ color: '#fbbf24', fontSize: '44px', fontWeight: 900, lineHeight: 1, textAlign: 'center' }}>
+                <span style={{ color: '#fbbf24', fontSize: '52px', fontWeight: 900, lineHeight: 1, textAlign: 'center' }}>
                   {openRankDisplay}
                 </span>
               </div>

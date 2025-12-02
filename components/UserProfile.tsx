@@ -421,7 +421,11 @@ export default function UserProfile({ userFid }: UserProfileProps) {
                 border: '1.5px solid rgba(139, 92, 246, 0.35)'
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontWeight: 600, fontSize: '0.95rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600, fontSize: '0.95rem' }}>
+                    <svg width="20" height="20" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <rect width="32" height="32" rx="6" fill="#6366f1"/>
+                      <path d="M8 22V10h3.5l6.5 8.5V10H21v12h-3.5L11 13.5V22H8z" fill="white"/>
+                    </svg>
                     Neynar Score
                     <span
                       ref={(el) => (tooltipRefs.current['neynarScore'] = el)}
@@ -593,7 +597,11 @@ export default function UserProfile({ userFid }: UserProfileProps) {
                 boxShadow: '0 2px 8px rgba(0, 82, 255, 0.1)'
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontWeight: 600, fontSize: '0.95rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600, fontSize: '0.95rem' }}>
+                    <svg width="20" height="20" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="16" cy="16" r="16" fill="#0052FF"/>
+                      <path d="M16 28C22.627 28 28 22.627 28 16C28 9.373 22.627 4 16 4C9.98 4 4.94 8.35 4 14.1h17v3.8H4C4.94 23.65 9.98 28 16 28z" fill="white"/>
+                    </svg>
                     Base Onchain Score
                     <span
                       ref={(el) => (tooltipRefs.current['builderScore'] = el)}
@@ -670,7 +678,7 @@ export default function UserProfile({ userFid }: UserProfileProps) {
                     Pending Talent Protocol granting me API access 🙃
                   </div>
                 ) : (
-                  <div style={{ fontSize: '0.75rem', color: 'var(--fc-text-soft)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--fc-text-soft)' }}>
                     <a
                       href={userScores.username
                         ? `https://www.base.org/name/${encodeURIComponent(userScores.username.toLowerCase())}`
@@ -680,15 +688,9 @@ export default function UserProfile({ userFid }: UserProfileProps) {
                       style={{
                         color: '#0052ff',
                         textDecoration: 'none',
-                        fontWeight: 500,
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.25rem'
+                        fontWeight: 500
                       }}
                     >
-                      <svg width="14" height="14" viewBox="0 0 111 111" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ marginRight: '2px' }}>
-                        <path d="M54.921 110.034C85.359 110.034 110.034 85.402 110.034 55.017C110.034 24.6319 85.359 0 54.921 0C26.0432 0 2.35281 22.1714 0 50.3923H72.8467V59.6416H3.9565e-07C2.35281 87.8625 26.0432 110.034 54.921 110.034Z" fill="#0052FF"/>
-                      </svg>
                       View on Base →
                     </a>
                   </div>
@@ -707,7 +709,11 @@ export default function UserProfile({ userFid }: UserProfileProps) {
                     transition: 'all 0.3s ease'
                   }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontWeight: 600, fontSize: '0.95rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600, fontSize: '0.95rem' }}>
+                        <svg width="20" height="20" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <rect width="32" height="32" rx="6" fill="#6b7280"/>
+                          <path d="M16 6l-8 5v8c0 5 3.5 9.5 8 11 4.5-1.5 8-6 8-11v-8l-8-5zm-1 16h-4v-2h4v2zm0-4h-4v-2h4v2zm0-4h-4v-2h4v2zm6 8h-4v-2h4v2zm0-4h-4v-2h4v2zm0-4h-4v-2h4v2z" fill="white"/>
+                        </svg>
                         Ethos Credibility
                         <span
                           ref={(el) => (tooltipRefs.current['ethosScore'] = el)}
@@ -824,7 +830,12 @@ export default function UserProfile({ userFid }: UserProfileProps) {
                 boxShadow: '0 2px 8px rgba(255, 165, 0, 0.1)'
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontWeight: 600, fontSize: '0.95rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600, fontSize: '0.95rem' }}>
+                    <svg width="20" height="20" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <rect width="32" height="32" rx="6" fill="#ff8c00"/>
+                      <path d="M16 4c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12S22.627 4 16 4zm0 21c-4.971 0-9-4.029-9-9s4.029-9 9-9 9 4.029 9 9-4.029 9-9 9z" fill="white"/>
+                      <path d="M16 9c-3.866 0-7 3.134-7 7s3.134 7 7 7 7-3.134 7-7-3.134-7-7-7zm0 11c-2.209 0-4-1.791-4-4s1.791-4 4-4 4 1.791 4 4-1.791 4-4 4z" fill="white"/>
+                    </svg>
                     OpenRank Score
                     <span
                       ref={(el) => (tooltipRefs.current['openRankScore'] = el)}
