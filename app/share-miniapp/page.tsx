@@ -17,9 +17,11 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
   const turdScore = typeof searchParams.turdScore === 'string' ? searchParams.turdScore : '';
 
   // Construct the image URL from score parameters if we have them
-  let ogImage = `${process.env.NEXT_PUBLIC_APP_URL}/splash.png`;
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://farcasturds.vercel.app';
+  let ogImage = `${baseUrl}/splash.png`;
+
   if (fid && username) {
-    const imageUrl = new URL('/api/share-scores', process.env.NEXT_PUBLIC_APP_URL || '');
+    const imageUrl = new URL('/api/share-scores', baseUrl);
     imageUrl.searchParams.set('fid', fid);
     imageUrl.searchParams.set('username', username);
     if (pfpUrl) imageUrl.searchParams.set('pfpUrl', pfpUrl);
@@ -58,7 +60,7 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
       'fc:frame:image': ogImage,
       'fc:frame:button:1': 'View Full Profile',
       'fc:frame:button:1:action': 'link',
-      'fc:frame:button:1:target': `${process.env.NEXT_PUBLIC_APP_URL}/?fid=${fid}`,
+      'fc:frame:button:1:target': `${baseUrl}/?fid=${fid}`,
     },
   };
 }
