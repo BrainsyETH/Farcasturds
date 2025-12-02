@@ -506,7 +506,7 @@ export default function UserProfile({ userFid }: UserProfileProps) {
                       )}
                     </span>
                   </div>
-                  <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#ffffff' }}>
+                  <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#8b5cf6' }}>
                     {userScores.neynarScore !== null ? userScores.neynarScore.toFixed(2) : 'N/A'}
                   </div>
                 </div>
@@ -598,7 +598,7 @@ export default function UserProfile({ userFid }: UserProfileProps) {
                         )}
                       </span>
                     </div>
-                    <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#ffffff' }}>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#fb923c' }}>
                       {userScores.neynarSpamScore.toFixed(2)}
                     </div>
                   </div>
@@ -685,7 +685,10 @@ export default function UserProfile({ userFid }: UserProfileProps) {
                   <div style={{
                     fontSize: '1.5rem',
                     fontWeight: 700,
-                    color: '#ffffff'
+                    background: 'linear-gradient(135deg, #0052ff, #007aff)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text'
                   }}>
                     {userScores.builderScore !== null ? userScores.builderScore : 'N/A'}
                   </div>
@@ -792,30 +795,32 @@ export default function UserProfile({ userFid }: UserProfileProps) {
                         </span>
                       </div>
                       <div style={{
-                        fontSize: '1.5rem',
-                        fontWeight: 700,
-                        color: '#ffffff',
                         display: 'flex',
+                        flexDirection: 'column',
                         alignItems: 'center',
-                        gap: '0.5rem'
+                        gap: '0.25rem'
                       }}>
-                        {userScores.ethosScore !== null ? (
-                          <>
-                            {userScores.ethosScore}
-                            <span style={{
-                              fontSize: '0.65rem',
-                              fontWeight: 600,
-                              padding: '2px 6px',
-                              borderRadius: '4px',
-                              backgroundColor: `${ethosStyle.color}20`,
-                              color: '#ffffff',
-                              textTransform: 'uppercase',
-                              letterSpacing: '0.5px'
-                            }}>
-                              {ethosStyle.level}
-                            </span>
-                          </>
-                        ) : 'N/A'}
+                        <div style={{
+                          fontSize: '1.5rem',
+                          fontWeight: 700,
+                          color: '#ffffff'
+                        }}>
+                          {userScores.ethosScore !== null ? userScores.ethosScore : 'N/A'}
+                        </div>
+                        {userScores.ethosScore !== null && (
+                          <span style={{
+                            fontSize: '0.65rem',
+                            fontWeight: 600,
+                            padding: '2px 6px',
+                            borderRadius: '4px',
+                            backgroundColor: `${ethosStyle.color}20`,
+                            color: '#ffffff',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.5px'
+                          }}>
+                            {ethosStyle.level}
+                          </span>
+                        )}
                       </div>
                     </div>
                     <div style={{ fontSize: '0.75rem', color: 'var(--fc-text-soft)' }}>
@@ -916,7 +921,10 @@ export default function UserProfile({ userFid }: UserProfileProps) {
                   <div style={{
                     fontSize: '1.5rem',
                     fontWeight: 700,
-                    color: '#ffffff'
+                    background: 'linear-gradient(135deg, #ffa500, #ff8c00)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text'
                   }}>
                     {userScores.openRankRank !== null ? `#${userScores.openRankRank.toLocaleString()}` : 'N/A'}
                   </div>
