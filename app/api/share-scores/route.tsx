@@ -140,7 +140,7 @@ export async function GET(req: NextRequest) {
               <div
                 style={{
                   background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
-                  padding: '14px 24px',
+                  padding: '16px 28px',
                   borderRadius: '14px',
                   boxShadow: '0 8px 32px rgba(139,92,246,0.5)',
                   display: 'flex',
@@ -151,7 +151,7 @@ export async function GET(req: NextRequest) {
                 <img
                   src="https://farcasturds.vercel.app/farcasturdsv3.png"
                   alt="Farcasturds"
-                  style={{ height: '28px' }}
+                  style={{ height: '40px' }}
                 />
               </div>
             </div>
@@ -167,9 +167,10 @@ export async function GET(req: NextRequest) {
                   padding: '24px',
                   display: 'flex',
                   flexDirection: 'column',
-                  justifyContent: 'space-between',
+                  justifyContent: 'center',
                   alignItems: 'center',
                   flex: 1,
+                  gap: '20px',
                   boxShadow: '0 8px 32px rgba(139,92,246,0.2)',
                 }}
               >
@@ -198,9 +199,10 @@ export async function GET(req: NextRequest) {
                   padding: '24px',
                   display: 'flex',
                   flexDirection: 'column',
-                  justifyContent: 'space-between',
+                  justifyContent: 'center',
                   alignItems: 'center',
                   flex: 1,
+                  gap: '20px',
                   boxShadow: '0 8px 32px rgba(99,102,241,0.2)',
                 }}
               >
@@ -219,9 +221,10 @@ export async function GET(req: NextRequest) {
                   padding: '24px',
                   display: 'flex',
                   flexDirection: 'column',
-                  justifyContent: 'space-between',
+                  justifyContent: 'center',
                   alignItems: 'center',
                   flex: 1,
+                  gap: '20px',
                   boxShadow: '0 8px 32px rgba(0,82,255,0.25)',
                 }}
               >
@@ -240,9 +243,10 @@ export async function GET(req: NextRequest) {
                   padding: '24px',
                   display: 'flex',
                   flexDirection: 'column',
-                  justifyContent: 'space-between',
+                  justifyContent: 'center',
                   alignItems: 'center',
                   flex: 1,
+                  gap: '20px',
                   boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
                 }}
               >
