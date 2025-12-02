@@ -203,7 +203,14 @@ export async function GET(req: NextRequest) {
                   boxShadow: '0 8px 32px rgba(99,102,241,0.2)',
                 }}
               >
-                <span style={{ color: '#e0e7ff', fontSize: '30px', fontWeight: 800, textAlign: 'center' }}>Neynar</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <img
+                    src="https://b4b0aaz7b39hhkor.public.blob.vercel-storage.com/neynar.png"
+                    alt="Neynar"
+                    style={{ width: '32px', height: '32px' }}
+                  />
+                  <span style={{ color: '#e0e7ff', fontSize: '30px', fontWeight: 800 }}>Neynar</span>
+                </div>
                 <span style={{ color: '#818cf8', fontSize: '56px', fontWeight: 900, lineHeight: 1, textAlign: 'center' }}>
                   {neynarScore}
                 </span>
@@ -225,7 +232,14 @@ export async function GET(req: NextRequest) {
                   boxShadow: '0 8px 32px rgba(0,82,255,0.25)',
                 }}
               >
-                <span style={{ color: '#dbeafe', fontSize: '30px', fontWeight: 800, textAlign: 'center' }}>Base</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <img
+                    src="https://b4b0aaz7b39hhkor.public.blob.vercel-storage.com/baseimage.png"
+                    alt="Base"
+                    style={{ width: '32px', height: '32px' }}
+                  />
+                  <span style={{ color: '#dbeafe', fontSize: '30px', fontWeight: 800 }}>Base</span>
+                </div>
                 <span style={{ color: '#60a5fa', fontSize: '56px', fontWeight: 900, lineHeight: 1, textAlign: 'center' }}>
                   {builderScore}
                 </span>
@@ -250,7 +264,14 @@ export async function GET(req: NextRequest) {
                   boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
                 }}
               >
-                <span style={{ color: '#e5e7eb', fontSize: '30px', fontWeight: 800, textAlign: 'center' }}>Ethos</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <img
+                    src="https://b4b0aaz7b39hhkor.public.blob.vercel-storage.com/ethos.png"
+                    alt="Ethos"
+                    style={{ width: '32px', height: '32px' }}
+                  />
+                  <span style={{ color: '#e5e7eb', fontSize: '30px', fontWeight: 800 }}>Ethos</span>
+                </div>
                 <span style={{ color: ethosColor, fontSize: '56px', fontWeight: 900, lineHeight: 1, textAlign: 'center' }}>
                   {ethosScore}
                 </span>
@@ -272,8 +293,15 @@ export async function GET(req: NextRequest) {
                   boxShadow: '0 8px 32px rgba(255,165,0,0.25)',
                 }}
               >
-                <span style={{ color: '#fef3c7', fontSize: '30px', fontWeight: 800, textAlign: 'center' }}>OpenRank</span>
-                <span style={{ color: '#fbbf24', fontSize: '56px', fontWeight: 900, lineHeight: 1, textAlign: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <img
+                    src="https://b4b0aaz7b39hhkor.public.blob.vercel-storage.com/openrank.png"
+                    alt="OpenRank"
+                    style={{ width: '32px', height: '32px' }}
+                  />
+                  <span style={{ color: '#fef3c7', fontSize: '30px', fontWeight: 800 }}>OpenRank</span>
+                </div>
+                <span style={{ color: '#fbbf24', fontSize: '44px', fontWeight: 900, lineHeight: 1, textAlign: 'center' }}>
                   {openRankDisplay}
                 </span>
               </div>

@@ -208,9 +208,9 @@ export default function UserProfile({ userFid }: UserProfileProps) {
       const castText = `Check out my reputation scores on Farcasturds! 💩`;
       const embeds: [string] = [miniappUrl.toString()];
 
-      // Use miniapp SDK to open the composer in the main Farcaster app and close the mini app view
+      // Use miniapp SDK to open the composer in the main Farcaster app
       try {
-        await sdk.actions.composeCast({ text: castText, embeds, close: true });
+        await sdk.actions.composeCast({ text: castText, embeds });
       } catch (sdkError) {
         console.error('SDK compose failed, falling back to Warpcast URL:', sdkError);
         const composerUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(castText)}&embeds[]=${encodeURIComponent(miniappUrl.toString())}`;
