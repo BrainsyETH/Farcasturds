@@ -218,12 +218,13 @@ export default function UserProfile({ userFid }: UserProfileProps) {
         // Continue anyway - the image might still work
       }
 
-      // Use share-miniapp as a frame - it will show the image and be clickable
+      // Use both image URL and share-miniapp URL as embeds
+      // The image will show as preview, and share-miniapp will be a clickable frame
       const shareUrl = `${baseUrl}/share-miniapp?fid=${userFid}&username=${encodeURIComponent(username)}&preview=${encodeURIComponent(imageUrl.toString())}`;
 
-      // Create cast with only the share URL - it will render as a clickable frame with image
+      // Create cast with both image and share URL for proper preview and linking
       const castText = `Check out my reputation scores on Farcasturds! 💩`;
-      const embeds: [string] = [shareUrl];
+      const embeds: string[] = [imageUrl.toString(), shareUrl];
 
       // Use miniapp SDK to open the composer in the main Farcaster app
       try {
