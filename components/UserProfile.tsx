@@ -198,6 +198,26 @@ export default function UserProfile({ userFid }: UserProfileProps) {
       imageUrl.searchParams.set('openRankRank', userScores.openRankRank?.toString() || 'N/A');
       imageUrl.searchParams.set('turdScore', userStats.turdScore?.toString() || 'N/A');
 
+      // Pre-fetch the image to warm up edge function and ensure it's generated
+      // This prevents cold start issues when Farcaster tries to fetch the OG image
+      console.log('[ShareScores] Pre-fetching image to warm up edge function...');
+      try {
+        const preloadResponse = await fetch(imageUrl.toString());
+        if (!preloadResponse.ok) {
+          console.error('[ShareScores] Image pre-fetch failed:', preloadResponse.status);
+          // Retry once after a short delay
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          const retryResponse = await fetch(imageUrl.toString());
+          if (!retryResponse.ok) {
+            throw new Error(`Image generation failed: ${retryResponse.status}`);
+          }
+        }
+        console.log('[ShareScores] Image pre-fetch successful');
+      } catch (preloadError) {
+        console.error('[ShareScores] Error pre-fetching image:', preloadError);
+        // Continue anyway - the image might still work
+      }
+
       // Miniapp URL for link embed - use share-specific route to inject reputation image as OG preview
       const miniappUrl = new URL('/share-miniapp', baseUrl);
       miniappUrl.searchParams.set('preview', imageUrl.toString());
