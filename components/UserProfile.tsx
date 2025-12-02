@@ -218,20 +218,28 @@ export default function UserProfile({ userFid }: UserProfileProps) {
         // Continue anyway - the image might still work
       }
 
-      // Use share-miniapp URL as single embed with preview image in metadata
-      // This prevents duplicate previews while showing the score card image
-      const shareUrl = `${baseUrl}/share-miniapp?fid=${userFid}&username=${encodeURIComponent(username)}&preview=${encodeURIComponent(imageUrl.toString())}`;
+      // Build share-miniapp URL with score parameters (not the full image URL)
+      // The share-miniapp page will construct the image URL itself
+      const shareUrl = new URL('/share-miniapp', baseUrl);
+      shareUrl.searchParams.set('fid', userFid.toString());
+      shareUrl.searchParams.set('username', username);
+      shareUrl.searchParams.set('pfpUrl', userScores.pfpUrl || 'https://farcasturds.vercel.app/splash.png');
+      shareUrl.searchParams.set('neynarScore', userScores.neynarScore?.toFixed(2) || 'N/A');
+      shareUrl.searchParams.set('builderScore', userScores.builderScore?.toString() || 'N/A');
+      shareUrl.searchParams.set('ethosScore', userScores.ethosScore?.toString() || 'N/A');
+      shareUrl.searchParams.set('openRankRank', userScores.openRankRank?.toString() || 'N/A');
+      shareUrl.searchParams.set('turdScore', userStats.turdScore?.toString() || 'N/A');
 
       // Create cast with only share URL - it includes the score preview via OG metadata
       const castText = `Check out my reputation scores on Farcasturds! 💩`;
-      const embeds: [string] = [shareUrl];
+      const embeds: [string] = [shareUrl.toString()];
 
       // Use miniapp SDK to open the composer in the main Farcaster app
       try {
         await sdk.actions.composeCast({ text: castText, embeds });
       } catch (sdkError) {
         console.error('SDK compose failed, falling back to Warpcast URL:', sdkError);
-        const composerUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(castText)}&embeds[]=${encodeURIComponent(shareUrl)}`;
+        const composerUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(castText)}&embeds[]=${encodeURIComponent(shareUrl.toString())}`;
         window.location.href = composerUrl;
       }
 
