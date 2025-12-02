@@ -47,14 +47,22 @@ function getEthosColor(score: string | null): string {
 // Convert image URL to data URI for use in ImageResponse
 async function imageToDataUri(imageUrl: string): Promise<string> {
   try {
+    console.log(`[ImageResponse] Fetching image: ${imageUrl}`);
     const response = await fetch(imageUrl);
+
+    if (!response.ok) {
+      console.error(`[ImageResponse] Failed to fetch ${imageUrl}: ${response.status} ${response.statusText}`);
+      return '';
+    }
+
     const arrayBuffer = await response.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
     const base64 = buffer.toString('base64');
     const contentType = response.headers.get('content-type') || 'image/png';
+    console.log(`[ImageResponse] Successfully converted ${imageUrl} to data URI (${buffer.length} bytes)`);
     return `data:${contentType};base64,${base64}`;
   } catch (error) {
-    console.error(`Failed to fetch image: ${imageUrl}`, error);
+    console.error(`[ImageResponse] Error fetching image ${imageUrl}:`, error);
     // Return empty data URI on error
     return '';
   }
@@ -79,12 +87,27 @@ export async function GET(req: NextRequest) {
     const ethosColor = getEthosColor(ethosScore);
 
     // Fetch and convert logo images to data URIs
+    // Note: Try with and without .png extension in case of naming differences
+    const logoUrls = {
+      neynar: 'https://b4b0aaz7b39hhkor.public.blob.vercel-storage.com/neynar.png',
+      base: 'https://b4b0aaz7b39hhkor.public.blob.vercel-storage.com/baseimage.png',
+      ethos: 'https://b4b0aaz7b39hhkor.public.blob.vercel-storage.com/ethos.png',
+      openrank: 'https://b4b0aaz7b39hhkor.public.blob.vercel-storage.com/openrank.png',
+    };
+
     const [neynarLogo, baseLogo, ethosLogo, openRankLogo] = await Promise.all([
-      imageToDataUri('https://b4b0aaz7b39hhkor.public.blob.vercel-storage.com/neynar.png'),
-      imageToDataUri('https://b4b0aaz7b39hhkor.public.blob.vercel-storage.com/baseimage.png'),
-      imageToDataUri('https://b4b0aaz7b39hhkor.public.blob.vercel-storage.com/ethos.png'),
-      imageToDataUri('https://b4b0aaz7b39hhkor.public.blob.vercel-storage.com/openrank.png'),
+      imageToDataUri(logoUrls.neynar),
+      imageToDataUri(logoUrls.base),
+      imageToDataUri(logoUrls.ethos),
+      imageToDataUri(logoUrls.openrank),
     ]);
+
+    console.log('[ImageResponse] Logo fetch results:', {
+      neynar: neynarLogo ? `${neynarLogo.substring(0, 50)}... (${neynarLogo.length} chars)` : 'FAILED',
+      base: baseLogo ? `${baseLogo.substring(0, 50)}... (${baseLogo.length} chars)` : 'FAILED',
+      ethos: ethosLogo ? `${ethosLogo.substring(0, 50)}... (${ethosLogo.length} chars)` : 'FAILED',
+      openRank: openRankLogo ? `${openRankLogo.substring(0, 50)}... (${openRankLogo.length} chars)` : 'FAILED',
+    });
 
     return new ImageResponse(
       (
