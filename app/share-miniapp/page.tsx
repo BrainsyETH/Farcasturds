@@ -40,7 +40,8 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
       'fc:frame': 'vNext',
       'fc:frame:image': ogImage,
       'fc:frame:button:1': 'View Full Profile',
-      'fc:frame:post_url': `${process.env.NEXT_PUBLIC_APP_URL}/share-miniapp?fid=${fid}`,
+      'fc:frame:button:1:action': 'link',
+      'fc:frame:button:1:target': `${process.env.NEXT_PUBLIC_APP_URL}/?fid=${fid}`,
     },
   };
 }
