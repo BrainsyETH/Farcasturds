@@ -151,8 +151,10 @@ export async function GET(req: NextRequest) {
               </div>
             </div>
 
-            {/* Scores Grid - 5 columns */}
-            <div style={{ display: 'flex', gap: '12px', flex: 1 }}>
+            {/* Scores Grid - 2 rows: 3 cards on top, 2 cards on bottom */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', flex: 1 }}>
+              {/* First Row - Top 3 scores */}
+              <div style={{ display: 'flex', gap: '12px', flex: 1 }}>
               {/* Turd Score */}
               <div
                 style={{
@@ -228,7 +230,10 @@ export async function GET(req: NextRequest) {
                   {builderScore}
                 </span>
               </div>
+              </div>
 
+              {/* Second Row - Bottom 2 scores */}
+              <div style={{ display: 'flex', gap: '12px', flex: 1, justifyContent: 'center' }}>
               {/* Ethos Score */}
               <div
                 style={{
@@ -271,6 +276,7 @@ export async function GET(req: NextRequest) {
                 <span style={{ color: '#fbbf24', fontSize: '56px', fontWeight: 900, lineHeight: 1, textAlign: 'center' }}>
                   {openRankDisplay}
                 </span>
+              </div>
               </div>
             </div>
 
