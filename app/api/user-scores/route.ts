@@ -124,6 +124,43 @@ async function getTalentBuilderScore(address: string): Promise<number | null> {
   }
 }
 
+// Get OpenRank Onchain Score for Farcaster FID
+async function getOpenRankScore(fid: number): Promise<{ rank: number | null; score: number | null }> {
+  try {
+    console.log(`[OpenRank] Fetching score for FID ${fid}...`);
+
+    const response = await fetch('https://graph.cast.k3l.io/scores/global/engagement/fids', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify([fid]),
+      next: { revalidate: 3600 } // Cache for 1 hour
+    });
+
+    if (!response.ok) {
+      console.warn(`[OpenRank] Failed to fetch score for FID ${fid}: ${response.status}`);
+      return { rank: null, score: null };
+    }
+
+    const data = await response.json();
+    const result = data.result?.[0];
+
+    if (result) {
+      const rank = result.rank ?? null;
+      const score = result.score ?? null;
+      console.log(`[OpenRank] ✓ Score for FID ${fid}: rank=${rank}, score=${score}`);
+      return { rank, score };
+    }
+
+    console.warn(`[OpenRank] No result found for FID ${fid}`);
+    return { rank: null, score: null };
+  } catch (error) {
+    console.error(`[OpenRank] Error fetching score for FID ${fid}:`, error);
+    return { rank: null, score: null };
+  }
+}
+
 // Extract Neynar's raw reputation score (0-1 scale)
 function getNeynarScore(user: any): number | null {
   // Neynar provides a user quality score in the experimental object
@@ -219,7 +256,7 @@ export async function GET(req: NextRequest) {
     const primaryAddress = user.verifications?.[0] || user.custody_address;
 
     // Parallelize all external API calls for faster loading
-    const [ensResult, ethosResult, builderResult] = await Promise.allSettled([
+    const [ensResult, ethosResult, builderResult, openRankResult] = await Promise.allSettled([
       // 2. Try to resolve ENS name if available (run in parallel)
       (async () => {
         const ensName = user.username ? `${user.username}.eth` : null;
@@ -232,7 +269,9 @@ export async function GET(req: NextRequest) {
       // Get Ethos score from any of the addresses
       getEthosScoreFromAddresses(addressesToCheck),
       // Get Talent Protocol Builder Score from primary address
-      primaryAddress ? getTalentBuilderScore(primaryAddress) : Promise.resolve(null)
+      primaryAddress ? getTalentBuilderScore(primaryAddress) : Promise.resolve(null),
+      // Get OpenRank score from FID
+      getOpenRankScore(fid)
     ]);
 
     // Add ENS address to addressesToCheck if resolved
@@ -251,15 +290,29 @@ export async function GET(req: NextRequest) {
       ? builderResult.value
       : null;
 
+    // Extract OpenRank score
+    const openRankData = (openRankResult.status === 'fulfilled' && openRankResult.value)
+      ? openRankResult.value
+      : { rank: null, score: null };
+
     console.log(`[/api/user-scores] Checking ${addressesToCheck.length} addresses for reputation scores`);
 
-    console.log(`[/api/user-scores] ✓ Scores for FID ${fid}:`, { neynarScore, neynarSpamScore, ethosScore, builderScore });
+    console.log(`[/api/user-scores] ✓ Scores for FID ${fid}:`, {
+      neynarScore,
+      neynarSpamScore,
+      ethosScore,
+      builderScore,
+      openRankScore: openRankData.score,
+      openRankRank: openRankData.rank
+    });
 
     return NextResponse.json({
       neynarScore,
       neynarSpamScore,
       ethosScore,
       builderScore,
+      openRankScore: openRankData.score,
+      openRankRank: openRankData.rank,
       username: user.username || null,
       followerCount: user.follower_count || 0,
       followingCount: user.following_count || 0,
