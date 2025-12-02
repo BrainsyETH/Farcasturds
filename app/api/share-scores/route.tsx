@@ -54,6 +54,7 @@ export async function GET(req: NextRequest) {
     const openRankScore = normalizeValue(searchParams.get('openRankScore'));
     const turdScore = normalizeValue(searchParams.get('turdScore'));
     const username = normalizeValue(searchParams.get('username'), 'User');
+    const pfpUrl = normalizeValue(searchParams.get('pfpUrl'), 'https://farcasturds.vercel.app/splash.png');
 
     const turdColor = getTurdScoreColor(turdScore);
     const ethosColor = getEthosColor(ethosScore);
@@ -117,43 +118,33 @@ export async function GET(req: NextRequest) {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                 <img
-                  src="https://farcasturds.vercel.app/splash.png"
-                  alt="Farcasturds"
-                  style={{ width: '56px', height: '56px' }}
+                  src={pfpUrl}
+                  alt="Profile"
+                  style={{ width: '64px', height: '64px', borderRadius: '50%', border: '3px solid rgba(139,92,246,0.5)' }}
                 />
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <span
-                    style={{
-                      color: '#c4b5fd',
-                      letterSpacing: '0.08em',
-                      fontSize: '20px',
-                      fontWeight: 800,
-                      textTransform: 'uppercase',
-                    }}
-                  >
-                    Onchain Scores
-                  </span>
-                  <span style={{ color: '#e5e7eb', fontSize: '26px', fontWeight: 700 }}>
+                  <span style={{ color: '#e5e7eb', fontSize: '28px', fontWeight: 700 }}>
                     @{username} • FID {fid}
                   </span>
                 </div>
               </div>
-              <div
-                style={{
-                  background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
-                  padding: '16px 28px',
-                  borderRadius: '14px',
-                  boxShadow: '0 8px 32px rgba(139,92,246,0.5)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <img
-                  src="https://farcasturds.vercel.app/farcasturdsv3.png"
+                  src="https://farcasturds.vercel.app/splash.png"
                   alt="Farcasturds"
-                  style={{ height: '40px' }}
+                  style={{ width: '48px', height: '48px' }}
                 />
+                <span
+                  style={{
+                    color: '#c4b5fd',
+                    letterSpacing: '0.08em',
+                    fontSize: '28px',
+                    fontWeight: 900,
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  Onchain Scores
+                </span>
               </div>
             </div>
 
@@ -179,9 +170,9 @@ export async function GET(req: NextRequest) {
                   <img
                     src="https://farcasturds.vercel.app/splash.png"
                     alt="Turd"
-                    style={{ width: '28px', height: '28px' }}
+                    style={{ width: '32px', height: '32px' }}
                   />
-                  <span style={{ color: '#e0e7ff', fontSize: '24px', fontWeight: 700 }}>Turd</span>
+                  <span style={{ color: '#e0e7ff', fontSize: '30px', fontWeight: 800 }}>Turd</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', justifyContent: 'center' }}>
                   <span style={{ color: turdColor, fontSize: '56px', fontWeight: 900, lineHeight: 1 }}>
@@ -207,7 +198,7 @@ export async function GET(req: NextRequest) {
                   boxShadow: '0 8px 32px rgba(99,102,241,0.2)',
                 }}
               >
-                <span style={{ color: '#e0e7ff', fontSize: '24px', fontWeight: 700, textAlign: 'center' }}>Neynar</span>
+                <span style={{ color: '#e0e7ff', fontSize: '30px', fontWeight: 800, textAlign: 'center' }}>Neynar</span>
                 <span style={{ color: '#818cf8', fontSize: '56px', fontWeight: 900, lineHeight: 1, textAlign: 'center' }}>
                   {neynarScore}
                 </span>
@@ -229,7 +220,7 @@ export async function GET(req: NextRequest) {
                   boxShadow: '0 8px 32px rgba(0,82,255,0.25)',
                 }}
               >
-                <span style={{ color: '#dbeafe', fontSize: '24px', fontWeight: 700, textAlign: 'center' }}>Base</span>
+                <span style={{ color: '#dbeafe', fontSize: '30px', fontWeight: 800, textAlign: 'center' }}>Base</span>
                 <span style={{ color: '#60a5fa', fontSize: '56px', fontWeight: 900, lineHeight: 1, textAlign: 'center' }}>
                   {builderScore}
                 </span>
@@ -251,7 +242,7 @@ export async function GET(req: NextRequest) {
                   boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
                 }}
               >
-                <span style={{ color: '#e5e7eb', fontSize: '24px', fontWeight: 700, textAlign: 'center' }}>Ethos</span>
+                <span style={{ color: '#e5e7eb', fontSize: '30px', fontWeight: 800, textAlign: 'center' }}>Ethos</span>
                 <span style={{ color: ethosColor, fontSize: '56px', fontWeight: 900, lineHeight: 1, textAlign: 'center' }}>
                   {ethosScore}
                 </span>
@@ -273,7 +264,7 @@ export async function GET(req: NextRequest) {
                   boxShadow: '0 8px 32px rgba(255,165,0,0.25)',
                 }}
               >
-                <span style={{ color: '#fef3c7', fontSize: '24px', fontWeight: 700, textAlign: 'center' }}>OpenRank</span>
+                <span style={{ color: '#fef3c7', fontSize: '30px', fontWeight: 800, textAlign: 'center' }}>OpenRank</span>
                 <span style={{ color: '#fbbf24', fontSize: '56px', fontWeight: 900, lineHeight: 1, textAlign: 'center' }}>
                   {openRankScore}
                 </span>
