@@ -379,6 +379,9 @@ export async function GET(req: NextRequest) {
     console.error('Error generating share image:', error);
     return new Response(`Failed to generate image: ${error.message}`, {
       status: 500,
+      headers: {
+        'Cache-Control': 'no-store, max-age=0',
+      },
     });
   }
 }
