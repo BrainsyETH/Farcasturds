@@ -348,28 +348,41 @@ export default function UserProfile({ userFid }: UserProfileProps) {
         <div className="fc-card" ref={scoresCardRef}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
             <h3 className="fc-card-title" style={{ margin: 0 }}>Reputation Scores</h3>
-            {!scoresLoading && userScores && (
+            {userScores && (
               <button
                 onClick={handleShareScores}
-                disabled={isGeneratingImage}
+                disabled={isGeneratingImage || scoresLoading}
                 style={{
                   padding: '0.5rem 1rem',
-                  backgroundColor: isGeneratingImage ? '#444' : '#8b5cf6',
+                  backgroundColor: (isGeneratingImage || scoresLoading) ? '#444' : '#8b5cf6',
                   color: '#fff',
                   border: 'none',
                   borderRadius: '8px',
                   fontSize: '0.875rem',
                   fontWeight: 600,
-                  cursor: isGeneratingImage ? 'not-allowed' : 'pointer',
+                  cursor: (isGeneratingImage || scoresLoading) ? 'not-allowed' : 'pointer',
                   transition: 'background-color 0.2s',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '0.5rem'
                 }}
-                onMouseOver={(e) => !isGeneratingImage && (e.currentTarget.style.backgroundColor = '#7c3aed')}
-                onMouseOut={(e) => !isGeneratingImage && (e.currentTarget.style.backgroundColor = '#8b5cf6')}
+                onMouseOver={(e) => !(isGeneratingImage || scoresLoading) && (e.currentTarget.style.backgroundColor = '#7c3aed')}
+                onMouseOut={(e) => !(isGeneratingImage || scoresLoading) && (e.currentTarget.style.backgroundColor = '#8b5cf6')}
               >
-                {isGeneratingImage ? (
+                {scoresLoading ? (
+                  <>
+                    <span style={{
+                      display: 'inline-block',
+                      width: '12px',
+                      height: '12px',
+                      border: '2px solid #fff',
+                      borderTopColor: 'transparent',
+                      borderRadius: '50%',
+                      animation: 'spin 1s linear infinite'
+                    }} />
+                    Loading Scores...
+                  </>
+                ) : isGeneratingImage ? (
                   <>
                     <span style={{
                       display: 'inline-block',
