@@ -115,7 +115,11 @@ export async function GET(req: NextRequest) {
             {/* Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <span style={{ fontSize: '48px' }}>💩</span>
+                <img
+                  src="https://farcasturds.vercel.app/splash.png"
+                  alt="Farcasturds"
+                  style={{ width: '56px', height: '56px' }}
+                />
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                   <span
                     style={{
@@ -126,7 +130,7 @@ export async function GET(req: NextRequest) {
                       textTransform: 'uppercase',
                     }}
                   >
-                    Reputation Scores
+                    Onchain Scores
                   </span>
                   <span style={{ color: '#e5e7eb', fontSize: '26px', fontWeight: 700 }}>
                     @{username} • FID {fid}
@@ -136,15 +140,19 @@ export async function GET(req: NextRequest) {
               <div
                 style={{
                   background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
-                  color: '#fff',
-                  padding: '12px 20px',
+                  padding: '14px 24px',
                   borderRadius: '14px',
-                  fontWeight: 800,
-                  fontSize: '18px',
                   boxShadow: '0 8px 32px rgba(139,92,246,0.5)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                 }}
               >
-                farcasturds.xyz
+                <img
+                  src="https://farcasturds.vercel.app/farcasturdsv3.png"
+                  alt="Farcasturds"
+                  style={{ height: '28px' }}
+                />
               </div>
             </div>
 
@@ -160,19 +168,24 @@ export async function GET(req: NextRequest) {
                   display: 'flex',
                   flexDirection: 'column',
                   justifyContent: 'space-between',
+                  alignItems: 'center',
                   flex: 1,
                   boxShadow: '0 8px 32px rgba(139,92,246,0.2)',
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ fontSize: '28px' }}>💩</span>
-                  <span style={{ color: '#e0e7ff', fontSize: '20px', fontWeight: 700 }}>Turd</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <img
+                    src="https://farcasturds.vercel.app/splash.png"
+                    alt="Turd"
+                    style={{ width: '32px', height: '32px' }}
+                  />
+                  <span style={{ color: '#e0e7ff', fontSize: '28px', fontWeight: 700 }}>Turd</span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
-                  <span style={{ color: turdColor, fontSize: '52px', fontWeight: 900, lineHeight: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', justifyContent: 'center' }}>
+                  <span style={{ color: turdColor, fontSize: '64px', fontWeight: 900, lineHeight: 1 }}>
                     {turdScore}
                   </span>
-                  <span style={{ color: '#c4b5fd', fontSize: '28px', fontWeight: 700 }}>%</span>
+                  <span style={{ color: '#c4b5fd', fontSize: '32px', fontWeight: 700 }}>%</span>
                 </div>
               </div>
 
@@ -186,12 +199,13 @@ export async function GET(req: NextRequest) {
                   display: 'flex',
                   flexDirection: 'column',
                   justifyContent: 'space-between',
+                  alignItems: 'center',
                   flex: 1,
                   boxShadow: '0 8px 32px rgba(99,102,241,0.2)',
                 }}
               >
-                <span style={{ color: '#e0e7ff', fontSize: '20px', fontWeight: 700 }}>Neynar</span>
-                <span style={{ color: '#818cf8', fontSize: '52px', fontWeight: 900, lineHeight: 1 }}>
+                <span style={{ color: '#e0e7ff', fontSize: '28px', fontWeight: 700, textAlign: 'center' }}>Neynar</span>
+                <span style={{ color: '#818cf8', fontSize: '64px', fontWeight: 900, lineHeight: 1, textAlign: 'center' }}>
                   {neynarScore}
                 </span>
               </div>
@@ -206,12 +220,13 @@ export async function GET(req: NextRequest) {
                   display: 'flex',
                   flexDirection: 'column',
                   justifyContent: 'space-between',
+                  alignItems: 'center',
                   flex: 1,
                   boxShadow: '0 8px 32px rgba(0,82,255,0.25)',
                 }}
               >
-                <span style={{ color: '#dbeafe', fontSize: '20px', fontWeight: 700 }}>Base</span>
-                <span style={{ color: '#60a5fa', fontSize: '52px', fontWeight: 900, lineHeight: 1 }}>
+                <span style={{ color: '#dbeafe', fontSize: '28px', fontWeight: 700, textAlign: 'center' }}>Base</span>
+                <span style={{ color: '#60a5fa', fontSize: '64px', fontWeight: 900, lineHeight: 1, textAlign: 'center' }}>
                   {builderScore}
                 </span>
               </div>
@@ -226,12 +241,13 @@ export async function GET(req: NextRequest) {
                   display: 'flex',
                   flexDirection: 'column',
                   justifyContent: 'space-between',
+                  alignItems: 'center',
                   flex: 1,
                   boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
                 }}
               >
-                <span style={{ color: '#e5e7eb', fontSize: '20px', fontWeight: 700 }}>Ethos</span>
-                <span style={{ color: ethosColor, fontSize: '52px', fontWeight: 900, lineHeight: 1 }}>
+                <span style={{ color: '#e5e7eb', fontSize: '28px', fontWeight: 700, textAlign: 'center' }}>Ethos</span>
+                <span style={{ color: ethosColor, fontSize: '64px', fontWeight: 900, lineHeight: 1, textAlign: 'center' }}>
                   {ethosScore}
                 </span>
               </div>
@@ -247,11 +263,17 @@ export async function GET(req: NextRequest) {
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
+                gap: '8px',
               }}
             >
               <span style={{ color: '#f3f4f6', fontSize: '18px', fontWeight: 700, textAlign: 'center' }}>
-                Tap to view full reputation & mint turds 💩
+                Tap to view full onchain scores & mint turds
               </span>
+              <img
+                src="https://farcasturds.vercel.app/splash.png"
+                alt="Turd"
+                style={{ width: '20px', height: '20px' }}
+              />
             </div>
           </div>
         </div>
