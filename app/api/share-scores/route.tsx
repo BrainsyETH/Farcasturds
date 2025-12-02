@@ -2,6 +2,8 @@ import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
 
 export const runtime = 'edge';
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 const normalizeValue = (value: string | null, fallback = 'N/A') => {
   if (!value) return fallback;
@@ -257,6 +259,10 @@ export async function GET(req: NextRequest) {
       {
         width: 1200,
         height: 630,
+        headers: {
+          'Content-Type': 'image/png',
+          'Cache-Control': 'no-store, max-age=0',
+        },
       }
     );
   } catch (error: any) {

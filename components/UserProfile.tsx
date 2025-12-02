@@ -186,24 +186,16 @@ export default function UserProfile({ userFid }: UserProfileProps) {
       // Build the image URL with score parameters
       const baseUrl = window.location.origin;
       const imageUrl = new URL('/api/share-scores', baseUrl);
-      const previewImageUrl = new URL('/api/share-scores-preview', baseUrl);
       imageUrl.searchParams.set('fid', userFid.toString());
       imageUrl.searchParams.set('username', username);
       imageUrl.searchParams.set('neynarScore', userScores.neynarScore?.toFixed(2) || 'N/A');
       imageUrl.searchParams.set('builderScore', userScores.builderScore?.toString() || 'N/A');
       imageUrl.searchParams.set('ethosScore', userScores.ethosScore?.toString() || 'N/A');
       imageUrl.searchParams.set('turdScore', userStats.turdScore?.toString() || 'N/A');
-      previewImageUrl.searchParams.set('fid', userFid.toString());
-      previewImageUrl.searchParams.set('username', username);
-      previewImageUrl.searchParams.set('neynarScore', userScores.neynarScore?.toFixed(2) || 'N/A');
-      previewImageUrl.searchParams.set('builderScore', userScores.builderScore?.toString() || 'N/A');
-      previewImageUrl.searchParams.set('ethosScore', userScores.ethosScore?.toString() || 'N/A');
-      previewImageUrl.searchParams.set('turdScore', userStats.turdScore?.toString() || 'N/A');
 
-      // Miniapp URL for link embed - use share-specific route to inject reputation image as splash/preview
+      // Miniapp URL for link embed - use share-specific route to inject reputation image as OG preview
       const miniappUrl = new URL('/share-miniapp', baseUrl);
-      miniappUrl.searchParams.set('image', imageUrl.toString());
-      miniappUrl.searchParams.set('preview', previewImageUrl.toString());
+      miniappUrl.searchParams.set('preview', imageUrl.toString());
       miniappUrl.searchParams.set('username', username);
       miniappUrl.searchParams.set('fid', userFid.toString());
 
