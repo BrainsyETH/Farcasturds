@@ -6,13 +6,30 @@ type Props = {
 };
 
 export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
-  // Get the preview image URL from search params
-  const preview = typeof searchParams.preview === 'string' ? searchParams.preview : null;
+  // Extract score parameters from search params
   const username = typeof searchParams.username === 'string' ? searchParams.username : 'User';
   const fid = typeof searchParams.fid === 'string' ? searchParams.fid : '';
+  const pfpUrl = typeof searchParams.pfpUrl === 'string' ? searchParams.pfpUrl : '';
+  const neynarScore = typeof searchParams.neynarScore === 'string' ? searchParams.neynarScore : '';
+  const builderScore = typeof searchParams.builderScore === 'string' ? searchParams.builderScore : '';
+  const ethosScore = typeof searchParams.ethosScore === 'string' ? searchParams.ethosScore : '';
+  const openRankRank = typeof searchParams.openRankRank === 'string' ? searchParams.openRankRank : '';
+  const turdScore = typeof searchParams.turdScore === 'string' ? searchParams.turdScore : '';
 
-  // Use preview for OG image or fallback to default
-  const ogImage = preview || `${process.env.NEXT_PUBLIC_APP_URL}/splash.png`;
+  // Construct the image URL from score parameters if we have them
+  let ogImage = `${process.env.NEXT_PUBLIC_APP_URL}/splash.png`;
+  if (fid && username) {
+    const imageUrl = new URL('/api/share-scores', process.env.NEXT_PUBLIC_APP_URL || '');
+    imageUrl.searchParams.set('fid', fid);
+    imageUrl.searchParams.set('username', username);
+    if (pfpUrl) imageUrl.searchParams.set('pfpUrl', pfpUrl);
+    if (neynarScore) imageUrl.searchParams.set('neynarScore', neynarScore);
+    if (builderScore) imageUrl.searchParams.set('builderScore', builderScore);
+    if (ethosScore) imageUrl.searchParams.set('ethosScore', ethosScore);
+    if (openRankRank) imageUrl.searchParams.set('openRankRank', openRankRank);
+    if (turdScore) imageUrl.searchParams.set('turdScore', turdScore);
+    ogImage = imageUrl.toString();
+  }
 
   return {
     title: `${username}'s Reputation Scores | Farcasturds`,
