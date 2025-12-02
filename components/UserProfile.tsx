@@ -230,7 +230,7 @@ export default function UserProfile({ userFid }: UserProfileProps) {
         await sdk.actions.composeCast({ text: castText, embeds });
       } catch (sdkError) {
         console.error('SDK compose failed, falling back to Warpcast URL:', sdkError);
-        const composerUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(castText)}&embeds[]=${encodeURIComponent(shareUrl.toString())}`;
+        const composerUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(castText)}&embeds[]=${encodeURIComponent(imageUrl.toString())}`;
         window.location.href = composerUrl;
       }
 
