@@ -318,9 +318,9 @@ export async function GET(req: NextRequest) {
     // DEBUG: Add diagnostic info to response
     const onchainDebug = {
       status: onchainResult.status,
-      value: onchainResult.value,
+      value: onchainResult.status === 'fulfilled' ? onchainResult.value : null,
       addressChecked: addressForReputation,
-      reason: onchainResult.status === 'rejected' ? (onchainResult as PromiseRejectedResult).reason?.message : null,
+      reason: onchainResult.status === 'rejected' ? onchainResult.reason?.message : null,
     };
 
     // Extract OpenRank score
