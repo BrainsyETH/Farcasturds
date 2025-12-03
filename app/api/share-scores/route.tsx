@@ -193,30 +193,30 @@ export async function GET(req: NextRequest) {
                 style={{
                   background: 'linear-gradient(145deg, rgba(139,92,246,0.15), rgba(168,85,247,0.08))',
                   border: '2px solid rgba(139,92,246,0.4)',
-                  borderRadius: '12px',
-                  padding: '14px 10px',
+                  borderRadius: '14px',
+                  padding: '18px 12px',
                   display: 'flex',
                   flexDirection: 'column',
-                  justifyContent: 'space-between',
+                  justifyContent: 'center',
                   alignItems: 'center',
                   flex: 1,
-                  gap: '7px',
+                  gap: '10px',
                   boxShadow: '0 8px 32px rgba(139,92,246,0.2)',
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
                   <img
                     src="https://farcasturds.vercel.app/splash.png"
                     alt="Turd"
-                    style={{ width: '22px', height: '22px' }}
+                    style={{ width: '28px', height: '28px' }}
                   />
-                  <span style={{ color: '#e0e7ff', fontSize: '18px', fontWeight: 800 }}>Turd</span>
+                  <span style={{ color: '#e0e7ff', fontSize: '24px', fontWeight: 800 }}>Turd</span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: '3px', justifyContent: 'center' }}>
-                  <span style={{ color: turdColor, fontSize: '36px', fontWeight: 900, lineHeight: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', justifyContent: 'center' }}>
+                  <span style={{ color: turdColor, fontSize: '52px', fontWeight: 900, lineHeight: 1 }}>
                     {turdScore}
                   </span>
-                  <span style={{ color: '#c4b5fd', fontSize: '16px', fontWeight: 700 }}>%</span>
+                  <span style={{ color: '#c4b5fd', fontSize: '24px', fontWeight: 700 }}>%</span>
                 </div>
               </div>
 
@@ -225,26 +225,26 @@ export async function GET(req: NextRequest) {
                 style={{
                   background: 'linear-gradient(145deg, rgba(99,102,241,0.15), rgba(99,102,241,0.08))',
                   border: '2px solid rgba(99,102,241,0.4)',
-                  borderRadius: '12px',
-                  padding: '14px 10px',
+                  borderRadius: '14px',
+                  padding: '18px 12px',
                   display: 'flex',
                   flexDirection: 'column',
-                  justifyContent: 'space-between',
+                  justifyContent: 'center',
                   alignItems: 'center',
                   flex: 1,
-                  gap: '7px',
+                  gap: '10px',
                   boxShadow: '0 8px 32px rgba(99,102,241,0.2)',
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
                   <img
                     src={neynarLogo}
                     alt="Neynar"
-                    style={{ width: '22px', height: '22px' }}
+                    style={{ width: '28px', height: '28px' }}
                   />
-                  <span style={{ color: '#e0e7ff', fontSize: '18px', fontWeight: 800 }}>Neynar</span>
+                  <span style={{ color: '#e0e7ff', fontSize: '24px', fontWeight: 800 }}>Neynar</span>
                 </div>
-                <span style={{ color: '#818cf8', fontSize: '36px', fontWeight: 900, lineHeight: 1, textAlign: 'center' }}>
+                <span style={{ color: '#818cf8', fontSize: '52px', fontWeight: 900, lineHeight: 1, textAlign: 'center' }}>
                   {neynarScore}
                 </span>
               </div>
@@ -254,26 +254,26 @@ export async function GET(req: NextRequest) {
                 style={{
                   background: 'linear-gradient(145deg, rgba(0,82,255,0.18), rgba(0,122,255,0.1))',
                   border: '2px solid rgba(0,82,255,0.5)',
-                  borderRadius: '12px',
-                  padding: '14px 10px',
+                  borderRadius: '14px',
+                  padding: '18px 12px',
                   display: 'flex',
                   flexDirection: 'column',
-                  justifyContent: 'space-between',
+                  justifyContent: 'center',
                   alignItems: 'center',
                   flex: 1,
-                  gap: '7px',
+                  gap: '10px',
                   boxShadow: '0 8px 32px rgba(0,82,255,0.25)',
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
                   <img
                     src={baseLogo}
                     alt="Base"
-                    style={{ width: '22px', height: '22px' }}
+                    style={{ width: '28px', height: '28px' }}
                   />
-                  <span style={{ color: '#dbeafe', fontSize: '18px', fontWeight: 800 }}>Base</span>
+                  <span style={{ color: '#dbeafe', fontSize: '24px', fontWeight: 800 }}>Base</span>
                 </div>
-                <span style={{ color: '#60a5fa', fontSize: '36px', fontWeight: 900, lineHeight: 1, textAlign: 'center' }}>
+                <span style={{ color: '#60a5fa', fontSize: '52px', fontWeight: 900, lineHeight: 1, textAlign: 'center' }}>
                   {builderScore}
                 </span>
               </div>
@@ -286,26 +286,26 @@ export async function GET(req: NextRequest) {
                 style={{
                   background: 'linear-gradient(145deg, rgba(75,85,99,0.2), rgba(75,85,99,0.1))',
                   border: '2px solid rgba(75,85,99,0.4)',
-                  borderRadius: '12px',
-                  padding: '14px 10px',
+                  borderRadius: '14px',
+                  padding: '18px 12px',
                   display: 'flex',
                   flexDirection: 'column',
-                  justifyContent: 'space-between',
+                  justifyContent: 'center',
                   alignItems: 'center',
                   flex: 1,
-                  gap: '7px',
+                  gap: '10px',
                   boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
                   <img
                     src={ethosLogo}
                     alt="Ethos"
-                    style={{ width: '22px', height: '22px' }}
+                    style={{ width: '28px', height: '28px' }}
                   />
-                  <span style={{ color: '#e5e7eb', fontSize: '18px', fontWeight: 800 }}>Ethos</span>
+                  <span style={{ color: '#e5e7eb', fontSize: '24px', fontWeight: 800 }}>Ethos</span>
                 </div>
-                <span style={{ color: ethosColor, fontSize: '36px', fontWeight: 900, lineHeight: 1, textAlign: 'center' }}>
+                <span style={{ color: ethosColor, fontSize: '52px', fontWeight: 900, lineHeight: 1, textAlign: 'center' }}>
                   {ethosScore}
                 </span>
               </div>
@@ -315,26 +315,26 @@ export async function GET(req: NextRequest) {
                 style={{
                   background: 'linear-gradient(145deg, rgba(255,165,0,0.18), rgba(255,140,0,0.1))',
                   border: '2px solid rgba(255,165,0,0.5)',
-                  borderRadius: '12px',
-                  padding: '14px 10px',
+                  borderRadius: '14px',
+                  padding: '18px 12px',
                   display: 'flex',
                   flexDirection: 'column',
-                  justifyContent: 'space-between',
+                  justifyContent: 'center',
                   alignItems: 'center',
                   flex: 1,
-                  gap: '7px',
+                  gap: '10px',
                   boxShadow: '0 8px 32px rgba(255,165,0,0.25)',
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
                   <img
                     src={openRankLogo}
                     alt="OpenRank"
-                    style={{ width: '22px', height: '22px' }}
+                    style={{ width: '28px', height: '28px' }}
                   />
-                  <span style={{ color: '#fef3c7', fontSize: '18px', fontWeight: 800 }}>OpenRank</span>
+                  <span style={{ color: '#fef3c7', fontSize: '24px', fontWeight: 800 }}>OpenRank</span>
                 </div>
-                <span style={{ color: '#fbbf24', fontSize: '36px', fontWeight: 900, lineHeight: 1, textAlign: 'center' }}>
+                <span style={{ color: '#fbbf24', fontSize: '52px', fontWeight: 900, lineHeight: 1, textAlign: 'center' }}>
                   {openRankDisplay}
                 </span>
               </div>
