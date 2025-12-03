@@ -4,7 +4,7 @@ import { NeynarAPIClient } from "@neynar/nodejs-sdk";
 import { createPublicClient, http } from "viem";
 import { normalize } from "viem/ens";
 import { mainnet, base } from "viem/chains";
-import { CdpClient, ExternalAddress } from "@coinbase/cdp-sdk";
+import { Coinbase, ExternalAddress } from "@coinbase/coinbase-sdk";
 
 const neynar = new NeynarAPIClient({
   apiKey: process.env.NEYNAR_API_KEY!,
@@ -101,8 +101,11 @@ async function getOnchainScore(address: string): Promise<number | null> {
       return null;
     }
 
-    // Initialize CDP client
-    const cdp = new CdpClient();
+    // Configure Coinbase SDK with API credentials
+    Coinbase.configure({
+      apiKeyName: apiKeyName,
+      privateKey: apiKeyPrivateKey,
+    });
 
     // Create ExternalAddress with the wallet address on Base network
     const external = new ExternalAddress("base", address);
@@ -114,9 +117,6 @@ async function getOnchainScore(address: string): Promise<number | null> {
 
     if (score !== null) {
       console.log(`[Coinbase CDP] ✓ Onchain Score for ${address}: ${score} (range: -100 to +100)`);
-      if (rep.activity) {
-        console.log(`[Coinbase CDP] Activity metadata:`, rep.activity);
-      }
     }
 
     return score;
