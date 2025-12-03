@@ -109,15 +109,20 @@ async function getOnchainScore(addressOrName: string): Promise<number | null> {
     });
 
     // Create ExternalAddress - SDK can handle addresses, ENS names, and Basenames
+    console.log(`[Coinbase CDP] Creating ExternalAddress with network="base", identifier="${addressOrName}"`);
     const external = new ExternalAddress("base", addressOrName);
 
     // Fetch reputation score
+    console.log(`[Coinbase CDP] Calling reputation() method...`);
     const rep = await external.reputation();
 
     // Debug: log full response to understand structure
     console.log(`[Coinbase CDP] Full reputation response:`, JSON.stringify(rep, null, 2));
+    console.log(`[Coinbase CDP] Response type:`, typeof rep);
+    console.log(`[Coinbase CDP] Response keys:`, Object.keys(rep || {}));
 
     const score = rep.score ?? null;
+    console.log(`[Coinbase CDP] Extracted score value:`, score, `(type: ${typeof score})`);
 
     if (score !== null) {
       console.log(`[Coinbase CDP] ✓ Onchain Score for ${addressOrName}: ${score} (range: -100 to +100)`);
