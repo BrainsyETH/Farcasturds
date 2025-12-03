@@ -113,10 +113,15 @@ async function getOnchainScore(address: string): Promise<number | null> {
     // Fetch reputation score
     const rep = await external.reputation();
 
+    // Debug: log full response to understand structure
+    console.log(`[Coinbase CDP] Full reputation response:`, JSON.stringify(rep, null, 2));
+
     const score = rep.score ?? null;
 
     if (score !== null) {
       console.log(`[Coinbase CDP] ✓ Onchain Score for ${address}: ${score} (range: -100 to +100)`);
+    } else {
+      console.warn(`[Coinbase CDP] Score is null for ${address}`);
     }
 
     return score;
