@@ -10,7 +10,7 @@ interface UserProfileProps {
 interface UserScores {
   neynarScore: number | null;
   ethosScore: number | null;
-  builderScore: number | null;
+  onchainScore: number | null;
   openRankScore: number | null;
   openRankRank: number | null;
   username: string | null;
@@ -193,7 +193,7 @@ export default function UserProfile({ userFid }: UserProfileProps) {
       sharePageUrl.searchParams.set('username', username);
       sharePageUrl.searchParams.set('pfpUrl', userScores.pfpUrl || 'https://farcasturds.vercel.app/splash.png');
       sharePageUrl.searchParams.set('neynarScore', userScores.neynarScore?.toFixed(2) || 'N/A');
-      sharePageUrl.searchParams.set('builderScore', userScores.builderScore?.toString() || 'N/A');
+      sharePageUrl.searchParams.set('onchainScore', userScores.onchainScore?.toString() || 'N/A');
       sharePageUrl.searchParams.set('ethosScore', userScores.ethosScore?.toString() || 'N/A');
       sharePageUrl.searchParams.set('openRankRank', userScores.openRankRank?.toString() || 'N/A');
       sharePageUrl.searchParams.set('turdScore', userStats.turdScore?.toString() || 'N/A');
@@ -204,7 +204,7 @@ export default function UserProfile({ userFid }: UserProfileProps) {
       imageUrl.searchParams.set('username', username);
       imageUrl.searchParams.set('pfpUrl', userScores.pfpUrl || 'https://farcasturds.vercel.app/splash.png');
       imageUrl.searchParams.set('neynarScore', userScores.neynarScore?.toFixed(2) || 'N/A');
-      imageUrl.searchParams.set('builderScore', userScores.builderScore?.toString() || 'N/A');
+      imageUrl.searchParams.set('onchainScore', userScores.onchainScore?.toString() || 'N/A');
       imageUrl.searchParams.set('ethosScore', userScores.ethosScore?.toString() || 'N/A');
       imageUrl.searchParams.set('openRankRank', userScores.openRankRank?.toString() || 'N/A');
       imageUrl.searchParams.set('turdScore', userStats.turdScore?.toString() || 'N/A');
@@ -616,7 +616,7 @@ export default function UserProfile({ userFid }: UserProfileProps) {
                 </div>
               )}
 
-              {/* Base Onchain Score (Talent Protocol Builder Score) */}
+              {/* Base Onchain Score (Coinbase CDP) */}
               <div style={{
                 padding: '1rem',
                 background: 'linear-gradient(135deg, rgba(0, 82, 255, 0.12), rgba(0, 122, 255, 0.08))',
@@ -632,10 +632,10 @@ export default function UserProfile({ userFid }: UserProfileProps) {
                     </svg>
                     Base Onchain Score
                     <span
-                      ref={(el) => (tooltipRefs.current['builderScore'] = el)}
-                      onPointerEnter={handleTooltipPointerEnter('builderScore')}
+                      ref={(el) => (tooltipRefs.current['onchainScore'] = el)}
+                      onPointerEnter={handleTooltipPointerEnter('onchainScore')}
                       onPointerLeave={handleTooltipPointerLeave}
-                      onClick={toggleTooltip('builderScore')}
+                      onClick={toggleTooltip('onchainScore')}
                       style={{
                         cursor: 'help',
                         fontSize: '0.7rem',
@@ -652,7 +652,7 @@ export default function UserProfile({ userFid }: UserProfileProps) {
                       }}
                     >
                       i
-                      {activeTooltip === 'builderScore' && (
+                      {activeTooltip === 'onchainScore' && (
                         <span
                           style={{
                             position: 'absolute',
@@ -671,8 +671,8 @@ export default function UserProfile({ userFid }: UserProfileProps) {
                             textAlign: 'center'
                           }}
                         >
-                          Your onchain score on Base Network.<br />
-                          Based on transactions, activity, swaps, and more.
+                          Your onchain reputation score (-100 to +100).<br />
+                          Based on transactions, activity, and reputation.
                           <span
                             style={{
                               position: 'absolute',
@@ -698,19 +698,17 @@ export default function UserProfile({ userFid }: UserProfileProps) {
                     WebkitTextFillColor: 'transparent',
                     backgroundClip: 'text'
                   }}>
-                    {userScores.builderScore !== null ? userScores.builderScore : 'N/A'}
+                    {userScores.onchainScore !== null ? userScores.onchainScore : 'N/A'}
                   </div>
                 </div>
-                {userScores.builderScore === null ? (
+                {userScores.onchainScore === null ? (
                   <div style={{ fontSize: '0.75rem', color: 'var(--fc-text-soft)' }}>
-                    Pending Talent Protocol granting me API access 🙃
+                    Score not available from Coinbase CDP
                   </div>
                 ) : (
                   <div style={{ fontSize: '0.75rem', color: 'var(--fc-text-soft)' }}>
                     <a
-                      href={userScores.username
-                        ? `https://www.base.org/name/${encodeURIComponent(userScores.username.toLowerCase())}`
-                        : 'https://www.base.org/name/scores'}
+                      href="https://docs.cdp.coinbase.com/reputation/docs/welcome"
                       target="_blank"
                       rel="noopener noreferrer"
                       style={{
@@ -719,7 +717,7 @@ export default function UserProfile({ userFid }: UserProfileProps) {
                         fontWeight: 500
                       }}
                     >
-                      View on Base →
+                      Learn about Onchain Reputation →
                     </a>
                   </div>
                 )}
