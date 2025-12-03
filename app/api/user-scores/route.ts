@@ -88,9 +88,10 @@ async function resolveENS(ensName: string): Promise<string | null> {
 }
 
 // Get Onchain Score from Coinbase CDP (official Base reputation score)
-async function getOnchainScore(address: string): Promise<number | null> {
+// addressOrName can be an Ethereum address, ENS name, or Basename
+async function getOnchainScore(addressOrName: string): Promise<number | null> {
   try {
-    console.log(`[Coinbase CDP] Fetching Onchain Score for ${address}...`);
+    console.log(`[Coinbase CDP] Fetching Onchain Score for ${addressOrName}...`);
 
     // Check if CDP API keys are configured
     const apiKeyName = process.env.CDP_API_KEY_NAME;
@@ -107,8 +108,8 @@ async function getOnchainScore(address: string): Promise<number | null> {
       privateKey: apiKeyPrivateKey,
     });
 
-    // Create ExternalAddress with the wallet address on Base network
-    const external = new ExternalAddress("base", address);
+    // Create ExternalAddress - SDK can handle addresses, ENS names, and Basenames
+    const external = new ExternalAddress("base", addressOrName);
 
     // Fetch reputation score
     const rep = await external.reputation();
@@ -119,14 +120,14 @@ async function getOnchainScore(address: string): Promise<number | null> {
     const score = rep.score ?? null;
 
     if (score !== null) {
-      console.log(`[Coinbase CDP] ✓ Onchain Score for ${address}: ${score} (range: -100 to +100)`);
+      console.log(`[Coinbase CDP] ✓ Onchain Score for ${addressOrName}: ${score} (range: -100 to +100)`);
     } else {
-      console.warn(`[Coinbase CDP] Score is null for ${address}`);
+      console.warn(`[Coinbase CDP] Score is null for ${addressOrName}`);
     }
 
     return score;
   } catch (error) {
-    console.error(`[Coinbase CDP] Error fetching score for ${address}:`, error);
+    console.error(`[Coinbase CDP] Error fetching score for ${addressOrName}:`, error);
     return null;
   }
 }
@@ -259,21 +260,29 @@ export async function GET(req: NextRequest) {
       addressesToCheck.push(user.custody_address);
     }
 
-    // Try to resolve ENS name first to use as primary address
-    const ensName = user.username ? `${user.username}.eth` : null;
-    const ensAddress = ensName ? await resolveENS(ensName) : null;
+    // For Coinbase reputation, try Basename first (e.g., brainsy.base.eth)
+    // The SDK can resolve Basenames, ENS names, and addresses directly
+    const username = user.username;
+    const basename = username ? `${username}.base.eth` : null;
+    const ensName = username ? `${username}.eth` : null;
 
-    // Use ENS address if available, otherwise fall back to verified addresses
-    const primaryAddress = ensAddress || user.verifications?.[0] || user.custody_address;
+    // Try Basename first, then ENS, then verified address
+    const addressForReputation = basename || ensName || user.verifications?.[0] || user.custody_address;
 
-    console.log(`[/api/user-scores] Primary address for reputation check: ${primaryAddress}`);
+    console.log(`[/api/user-scores] Checking reputation for: ${addressForReputation}`);
+
+    // For Ethos (which needs resolved addresses), resolve ENS
+    let ensAddress = null;
+    if (ensName) {
+      ensAddress = await resolveENS(ensName);
+    }
 
     // Parallelize external API calls for faster loading
     const [ethosResult, onchainResult, openRankResult] = await Promise.allSettled([
       // Get Ethos score from any of the addresses
       getEthosScoreFromAddresses(addressesToCheck),
-      // Get Coinbase Onchain Score from primary address (ENS-resolved if available)
-      primaryAddress ? getOnchainScore(primaryAddress) : Promise.resolve(null),
+      // Get Coinbase Onchain Score - pass Basename directly, SDK will resolve it
+      addressForReputation ? getOnchainScore(addressForReputation) : Promise.resolve(null),
       // Get OpenRank score from FID
       getOpenRankScore(fid)
     ]);
