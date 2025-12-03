@@ -186,8 +186,19 @@ export default function UserProfile({ userFid }: UserProfileProps) {
       const context = await sdk.context;
       const username = context?.user?.username || 'user';
 
-      // Build the image URL with score parameters
+      // Build the share page URL with score parameters
       const baseUrl = window.location.origin;
+      const sharePageUrl = new URL('/share-miniapp', baseUrl);
+      sharePageUrl.searchParams.set('fid', userFid.toString());
+      sharePageUrl.searchParams.set('username', username);
+      sharePageUrl.searchParams.set('pfpUrl', userScores.pfpUrl || 'https://farcasturds.vercel.app/splash.png');
+      sharePageUrl.searchParams.set('neynarScore', userScores.neynarScore?.toFixed(2) || 'N/A');
+      sharePageUrl.searchParams.set('builderScore', userScores.builderScore?.toString() || 'N/A');
+      sharePageUrl.searchParams.set('ethosScore', userScores.ethosScore?.toString() || 'N/A');
+      sharePageUrl.searchParams.set('openRankRank', userScores.openRankRank?.toString() || 'N/A');
+      sharePageUrl.searchParams.set('turdScore', userStats.turdScore?.toString() || 'N/A');
+
+      // Also build the image URL for pre-fetching
       const imageUrl = new URL('/api/share-scores', baseUrl);
       imageUrl.searchParams.set('fid', userFid.toString());
       imageUrl.searchParams.set('username', username);
@@ -227,7 +238,7 @@ export default function UserProfile({ userFid }: UserProfileProps) {
         await sdk.actions.composeCast({ text: castText, embeds });
       } catch (sdkError) {
         console.error('SDK compose failed, falling back to Warpcast URL:', sdkError);
-        const composerUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(castText)}&embeds[]=${encodeURIComponent(imageUrl.toString())}`;
+        const composerUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(castText)}&embeds[]=${encodeURIComponent(sharePageUrl.toString())}`;
         window.location.href = composerUrl;
       }
 
