@@ -137,16 +137,16 @@ export async function GET(req: NextRequest) {
           {/* Main container */}
           <div
             style={{
-              width: '750px',
-              height: '540px',
+              width: '950px',
+              height: '560px',
               background: 'linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02))',
               borderRadius: '24px',
               border: '2px solid rgba(255,255,255,0.1)',
               boxShadow: '0 40px 100px rgba(0,0,0,0.6), inset 0 0 60px rgba(255,255,255,0.03)',
-              padding: '26px 30px',
+              padding: '28px 36px',
               display: 'flex',
               flexDirection: 'column',
-              gap: '18px',
+              gap: '20px',
               backdropFilter: 'blur(20px)',
             }}
           >
@@ -185,9 +185,9 @@ export async function GET(req: NextRequest) {
             </div>
 
             {/* Scores Grid - 2 rows: 3 cards on top, 2 cards on bottom */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', flex: 1 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', flex: 1 }}>
               {/* First Row - Top 3 scores */}
-              <div style={{ display: 'flex', gap: '10px', flex: 1 }}>
+              <div style={{ display: 'flex', gap: '14px', flex: 1 }}>
               {/* Turd Score */}
               <div
                 style={{
@@ -280,7 +280,7 @@ export async function GET(req: NextRequest) {
               </div>
 
               {/* Second Row - Bottom 2 scores */}
-              <div style={{ display: 'flex', gap: '10px', flex: 1, justifyContent: 'center' }}>
+              <div style={{ display: 'flex', gap: '14px', flex: 1, justifyContent: 'center' }}>
               {/* Ethos Score */}
               <div
                 style={{

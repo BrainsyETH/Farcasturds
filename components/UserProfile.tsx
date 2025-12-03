@@ -272,13 +272,14 @@ export default function UserProfile({ userFid }: UserProfileProps) {
               style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-                gap: '2rem',
+                gap: '3rem',
                 alignItems: 'center',
                 justifyItems: 'center',
-                textAlign: 'center'
+                textAlign: 'center',
+                padding: '0.5rem 1rem'
               }}
             >
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem', width: '100%' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', position: 'relative' }}>
                   <img src="/splash.png" alt="" style={{ width: '1em', height: '1em', display: 'inline-block', verticalAlign: 'middle' }} />
                   <h3 className="fc-card-title" style={{ margin: 0 }}>Turd Score</h3>
@@ -347,7 +348,7 @@ export default function UserProfile({ userFid }: UserProfileProps) {
                 </div>
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.75rem' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', width: '100%' }}>
                 <h3 className="fc-card-title" style={{ margin: 0 }}>Your Stats</h3>
                 <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', justifyContent: 'center' }}>
                   <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
