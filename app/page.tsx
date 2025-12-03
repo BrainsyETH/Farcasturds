@@ -1136,20 +1136,22 @@ export default function HomePage() {
 
                   <div className="fc-meta-block">
                     <div style={{ textAlign: "center" }}>
-                      <strong style={{ color: "var(--fc-text)" }}>Image URL:</strong>{" "}
                       <a
                         href={meta.image}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="fc-code"
                         style={{
-                          color: "var(--fc-text)",
-                          opacity: 0.8,
-                          textDecoration: "underline",
-                          cursor: "pointer"
+                          color: "#c084fc",
+                          fontSize: "0.9rem",
+                          textDecoration: "none",
+                          fontWeight: 600,
+                          opacity: 0.9,
+                          transition: "opacity 0.2s"
                         }}
+                        onMouseOver={(e) => e.currentTarget.style.opacity = "1"}
+                        onMouseOut={(e) => e.currentTarget.style.opacity = "0.9"}
                       >
-                        {meta.image}
+                        View your Farcasturd →
                       </a>
                     </div>
                   </div>
@@ -1277,20 +1279,22 @@ export default function HomePage() {
 
                   <div className="fc-meta-block">
                     <div style={{ textAlign: "center" }}>
-                      <strong style={{ color: "var(--fc-text)" }}>Image URL:</strong>{" "}
                       <a
                         href={meta.image}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="fc-code"
                         style={{
-                          color: "var(--fc-text)",
-                          opacity: 0.8,
-                          textDecoration: "underline",
-                          cursor: "pointer"
+                          color: "#c084fc",
+                          fontSize: "0.9rem",
+                          textDecoration: "none",
+                          fontWeight: 600,
+                          opacity: 0.9,
+                          transition: "opacity 0.2s"
                         }}
+                        onMouseOver={(e) => e.currentTarget.style.opacity = "1"}
+                        onMouseOut={(e) => e.currentTarget.style.opacity = "0.9"}
                       >
-                        {meta.image}
+                        View your Farcasturd →
                       </a>
                     </div>
                   </div>

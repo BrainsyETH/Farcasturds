@@ -347,20 +347,20 @@ export default function UserProfile({ userFid }: UserProfileProps) {
                 </div>
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.75rem' }}>
                 <h3 className="fc-card-title" style={{ margin: 0 }}>Your Stats</h3>
-                <div style={{ display: 'flex', gap: '2rem', alignItems: 'flex-start', justifyContent: 'center' }}>
-                  <div className="fc-stat-item" style={{ textAlign: 'center' }}>
-                    <div className="fc-stat-value">{userStats.received}</div>
-                    <div className="fc-stat-label">
-                      <img src="/splash.png" alt="" style={{ width: '1em', height: '1em', display: 'inline-block', verticalAlign: 'middle', marginRight: '0.2em' }} />
+                <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', justifyContent: 'center' }}>
+                  <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    <div className="fc-stat-value" style={{ fontSize: '2rem' }}>{userStats.received}</div>
+                    <div className="fc-stat-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem' }}>
+                      <img src="/splash.png" alt="" style={{ width: '1em', height: '1em', display: 'inline-block' }} />
                       Received
                     </div>
                   </div>
-                  <div className="fc-stat-item" style={{ textAlign: 'center' }}>
-                    <div className="fc-stat-value">{userStats.sent}</div>
-                    <div className="fc-stat-label">
-                      <img src="/splash.png" alt="" style={{ width: '1em', height: '1em', display: 'inline-block', verticalAlign: 'middle', marginRight: '0.2em' }} />
+                  <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    <div className="fc-stat-value" style={{ fontSize: '2rem' }}>{userStats.sent}</div>
+                    <div className="fc-stat-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem' }}>
+                      <img src="/splash.png" alt="" style={{ width: '1em', height: '1em', display: 'inline-block' }} />
                       Sent
                     </div>
                   </div>
