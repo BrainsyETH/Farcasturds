@@ -259,32 +259,29 @@ export async function GET(req: NextRequest) {
       addressesToCheck.push(user.custody_address);
     }
 
-    // Get primary address for Onchain score
-    const primaryAddress = user.verifications?.[0] || user.custody_address;
+    // Try to resolve ENS name first to use as primary address
+    const ensName = user.username ? `${user.username}.eth` : null;
+    const ensAddress = ensName ? await resolveENS(ensName) : null;
 
-    // Parallelize all external API calls for faster loading
-    const [ensResult, ethosResult, onchainResult, openRankResult] = await Promise.allSettled([
-      // 2. Try to resolve ENS name if available (run in parallel)
-      (async () => {
-        const ensName = user.username ? `${user.username}.eth` : null;
-        if (ensName) {
-          const ensAddress = await resolveENS(ensName);
-          return ensAddress;
-        }
-        return null;
-      })(),
+    // Use ENS address if available, otherwise fall back to verified addresses
+    const primaryAddress = ensAddress || user.verifications?.[0] || user.custody_address;
+
+    console.log(`[/api/user-scores] Primary address for reputation check: ${primaryAddress}`);
+
+    // Parallelize external API calls for faster loading
+    const [ethosResult, onchainResult, openRankResult] = await Promise.allSettled([
       // Get Ethos score from any of the addresses
       getEthosScoreFromAddresses(addressesToCheck),
-      // Get Coinbase Onchain Score from primary address
+      // Get Coinbase Onchain Score from primary address (ENS-resolved if available)
       primaryAddress ? getOnchainScore(primaryAddress) : Promise.resolve(null),
       // Get OpenRank score from FID
       getOpenRankScore(fid)
     ]);
 
     // Add ENS address to addressesToCheck if resolved
-    if (ensResult.status === 'fulfilled' && ensResult.value) {
-      addressesToCheck.push(ensResult.value);
-      console.log(`[ENS] ✓ Resolved to ${ensResult.value}`);
+    if (ensAddress) {
+      addressesToCheck.push(ensAddress);
+      console.log(`[ENS] ✓ Using ENS address: ${ensAddress} for reputation checks`);
     }
 
     // Extract Ethos score or default to 1213 (neutral)
