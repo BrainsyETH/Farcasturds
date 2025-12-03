@@ -90,6 +90,9 @@ async function resolveENS(ensName: string): Promise<string | null> {
 // Get Onchain Score from Coinbase CDP (official Base reputation score)
 // addressOrName can be an Ethereum address, ENS name, or Basename
 async function getOnchainScore(addressOrName: string): Promise<number | null> {
+  console.log(`[Coinbase CDP] === START getOnchainScore function ===`);
+  console.log(`[Coinbase CDP] Input addressOrName:`, addressOrName);
+
   try {
     console.log(`[Coinbase CDP] Fetching Onchain Score for ${addressOrName}...`);
 
@@ -97,8 +100,12 @@ async function getOnchainScore(addressOrName: string): Promise<number | null> {
     const apiKeyName = process.env.CDP_API_KEY_NAME;
     const apiKeyPrivateKey = process.env.CDP_API_KEY_PRIVATE_KEY;
 
+    console.log(`[Coinbase CDP] API Key Name exists:`, !!apiKeyName);
+    console.log(`[Coinbase CDP] API Key Private Key exists:`, !!apiKeyPrivateKey);
+
     if (!apiKeyName || !apiKeyPrivateKey) {
       console.warn('[Coinbase CDP] API keys not configured (CDP_API_KEY_NAME and CDP_API_KEY_PRIVATE_KEY required)');
+      console.log(`[Coinbase CDP] === EARLY RETURN: Missing API keys ===`);
       return null;
     }
 
