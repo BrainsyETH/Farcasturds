@@ -186,8 +186,19 @@ export default function UserProfile({ userFid }: UserProfileProps) {
       const context = await sdk.context;
       const username = context?.user?.username || 'user';
 
-      // Build the image URL with score parameters
+      // Build the share page URL with score parameters
       const baseUrl = window.location.origin;
+      const sharePageUrl = new URL('/share-miniapp', baseUrl);
+      sharePageUrl.searchParams.set('fid', userFid.toString());
+      sharePageUrl.searchParams.set('username', username);
+      sharePageUrl.searchParams.set('pfpUrl', userScores.pfpUrl || 'https://farcasturds.vercel.app/splash.png');
+      sharePageUrl.searchParams.set('neynarScore', userScores.neynarScore?.toFixed(2) || 'N/A');
+      sharePageUrl.searchParams.set('builderScore', userScores.builderScore?.toString() || 'N/A');
+      sharePageUrl.searchParams.set('ethosScore', userScores.ethosScore?.toString() || 'N/A');
+      sharePageUrl.searchParams.set('openRankRank', userScores.openRankRank?.toString() || 'N/A');
+      sharePageUrl.searchParams.set('turdScore', userStats.turdScore?.toString() || 'N/A');
+
+      // Also build the image URL for pre-fetching
       const imageUrl = new URL('/api/share-scores', baseUrl);
       imageUrl.searchParams.set('fid', userFid.toString());
       imageUrl.searchParams.set('username', username);
@@ -218,19 +229,16 @@ export default function UserProfile({ userFid }: UserProfileProps) {
         // Continue anyway - the image might still work
       }
 
-      // The miniapp link to include in the text
-      const miniappLink = 'https://farcaster.xyz/miniapps/asmxYIFlnWF0/farcasturds';
-
-      // Create cast with the image URL directly as an embed and the miniapp link in the text
-      const castText = `Check out my reputation scores on Farcasturds! 💩\n\n${miniappLink}`;
-      const embeds: [string] = [imageUrl.toString()];
+      // Create cast with the share page URL (which has proper OG metadata)
+      const castText = `Check out my reputation scores on Farcasturds! 💩`;
+      const embeds: [string] = [sharePageUrl.toString()];
 
       // Use miniapp SDK to open the composer in the main Farcaster app
       try {
         await sdk.actions.composeCast({ text: castText, embeds });
       } catch (sdkError) {
         console.error('SDK compose failed, falling back to Warpcast URL:', sdkError);
-        const composerUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(castText)}&embeds[]=${encodeURIComponent(imageUrl.toString())}`;
+        const composerUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(castText)}&embeds[]=${encodeURIComponent(sharePageUrl.toString())}`;
         window.location.href = composerUrl;
       }
 
