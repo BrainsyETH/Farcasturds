@@ -315,6 +315,14 @@ export async function GET(req: NextRequest) {
       ? onchainResult.value
       : null;
 
+    // DEBUG: Add diagnostic info to response
+    const onchainDebug = {
+      status: onchainResult.status,
+      value: onchainResult.status === 'fulfilled' ? onchainResult.value : null,
+      addressChecked: addressForReputation,
+      reason: onchainResult.status === 'rejected' ? onchainResult.reason?.message : null,
+    };
+
     // Extract OpenRank score
     const openRankData = (openRankResult.status === 'fulfilled' && openRankResult.value)
       ? openRankResult.value
@@ -342,6 +350,11 @@ export async function GET(req: NextRequest) {
       pfpUrl: user.pfp_url || null,
       followerCount: user.follower_count || 0,
       followingCount: user.following_count || 0,
+      // DEBUG: Include diagnostic info
+      _debug: {
+        onchain: onchainDebug,
+        hasApiKeys: !!(process.env.CDP_API_KEY_NAME && process.env.CDP_API_KEY_PRIVATE_KEY),
+      }
     });
   } catch (error: any) {
     console.error('[/api/user-scores] Error:', error);
