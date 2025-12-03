@@ -229,9 +229,9 @@ export default function UserProfile({ userFid }: UserProfileProps) {
         // Continue anyway - the image might still work
       }
 
-      // Create cast with the share page URL (which has proper OG metadata)
+      // Create cast with just the text - image will be auto-embedded
       const castText = `Check out my reputation scores on Farcasturds! 💩`;
-      const embeds: [string] = [sharePageUrl.toString()];
+      const embeds: [string] = [imageUrl.toString()];
 
       // Use miniapp SDK to open the composer in the main Farcaster app
       try {
