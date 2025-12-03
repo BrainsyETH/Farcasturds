@@ -272,11 +272,10 @@ export default function UserProfile({ userFid }: UserProfileProps) {
               style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-                gap: '3rem',
+                gap: '2rem',
                 alignItems: 'center',
                 justifyItems: 'center',
-                textAlign: 'center',
-                padding: '0.5rem 1rem'
+                textAlign: 'center'
               }}
             >
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem', width: '100%' }}>
