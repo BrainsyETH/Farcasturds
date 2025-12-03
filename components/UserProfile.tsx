@@ -208,6 +208,8 @@ export default function UserProfile({ userFid }: UserProfileProps) {
       imageUrl.searchParams.set('ethosScore', userScores.ethosScore?.toString() || 'N/A');
       imageUrl.searchParams.set('openRankRank', userScores.openRankRank?.toString() || 'N/A');
       imageUrl.searchParams.set('turdScore', userStats.turdScore?.toString() || 'N/A');
+      // Add timestamp to bust cache and ensure fresh image generation
+      imageUrl.searchParams.set('v', Date.now().toString());
 
       // Pre-fetch the image to warm up edge function and ensure it's generated
       // This prevents cold start issues when Farcaster tries to fetch the OG image
@@ -229,8 +231,9 @@ export default function UserProfile({ userFid }: UserProfileProps) {
         // Continue anyway - the image might still work
       }
 
-      // Create cast with just the text - image will be auto-embedded
-      const castText = `Check out my reputation scores on Farcasturds! 💩`;
+      // Create cast with text and miniapp link
+      const miniappLink = 'https://farcaster.xyz/miniapps/asmxYIFlnWF0/farcasturds';
+      const castText = `Check out my reputation scores on Farcasturds! 💩\n\n${miniappLink}`;
       const embeds: [string] = [imageUrl.toString()];
 
       // Use miniapp SDK to open the composer in the main Farcaster app
