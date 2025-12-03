@@ -4,6 +4,7 @@ import { NeynarAPIClient } from "@neynar/nodejs-sdk";
 import { createPublicClient, http } from "viem";
 import { normalize } from "viem/ens";
 import { mainnet, base } from "viem/chains";
+import { CdpClient, ExternalAddress } from "@coinbase/cdp-sdk";
 
 const neynar = new NeynarAPIClient({
   apiKey: process.env.NEYNAR_API_KEY!,
@@ -86,40 +87,41 @@ async function resolveENS(ensName: string): Promise<string | null> {
   }
 }
 
-// Get Builder Score from Talent Protocol (official Base reputation score)
-async function getTalentBuilderScore(address: string): Promise<number | null> {
+// Get Onchain Score from Coinbase CDP (official Base reputation score)
+async function getOnchainScore(address: string): Promise<number | null> {
   try {
-    console.log(`[Talent Protocol] Fetching Builder Score for ${address}...`);
+    console.log(`[Coinbase CDP] Fetching Onchain Score for ${address}...`);
 
-    const apiKey = process.env.TALENT_PROTOCOL_API_KEY;
-    if (!apiKey) {
-      console.warn('[Talent Protocol] API key not configured');
+    // Check if CDP API keys are configured
+    const apiKeyName = process.env.CDP_API_KEY_NAME;
+    const apiKeyPrivateKey = process.env.CDP_API_KEY_PRIVATE_KEY;
+
+    if (!apiKeyName || !apiKeyPrivateKey) {
+      console.warn('[Coinbase CDP] API keys not configured (CDP_API_KEY_NAME and CDP_API_KEY_PRIVATE_KEY required)');
       return null;
     }
 
-    const response = await fetch(`https://api.talentprotocol.com/api/v2/passports/${address}`, {
-      headers: {
-        'X-API-KEY': apiKey,
-        'Accept': 'application/json',
-      },
-      next: { revalidate: 3600 } // Cache for 1 hour
-    });
+    // Initialize CDP client
+    const cdp = new CdpClient();
 
-    if (!response.ok) {
-      console.warn(`[Talent Protocol] Failed to fetch score for ${address}: ${response.status}`);
-      return null;
-    }
+    // Create ExternalAddress with the wallet address on Base network
+    const external = new ExternalAddress("base", address);
 
-    const data = await response.json();
-    const score = data.passport?.score ?? null;
+    // Fetch reputation score
+    const rep = await external.reputation();
+
+    const score = rep.score ?? null;
 
     if (score !== null) {
-      console.log(`[Talent Protocol] ✓ Builder Score for ${address}: ${score}`);
+      console.log(`[Coinbase CDP] ✓ Onchain Score for ${address}: ${score} (range: -100 to +100)`);
+      if (rep.activity) {
+        console.log(`[Coinbase CDP] Activity metadata:`, rep.activity);
+      }
     }
 
     return score;
   } catch (error) {
-    console.error(`[Talent Protocol] Error fetching score for ${address}:`, error);
+    console.error(`[Coinbase CDP] Error fetching score for ${address}:`, error);
     return null;
   }
 }
@@ -252,11 +254,11 @@ export async function GET(req: NextRequest) {
       addressesToCheck.push(user.custody_address);
     }
 
-    // Get primary address for Talent Protocol
+    // Get primary address for Onchain score
     const primaryAddress = user.verifications?.[0] || user.custody_address;
 
     // Parallelize all external API calls for faster loading
-    const [ensResult, ethosResult, builderResult, openRankResult] = await Promise.allSettled([
+    const [ensResult, ethosResult, onchainResult, openRankResult] = await Promise.allSettled([
       // 2. Try to resolve ENS name if available (run in parallel)
       (async () => {
         const ensName = user.username ? `${user.username}.eth` : null;
@@ -268,8 +270,8 @@ export async function GET(req: NextRequest) {
       })(),
       // Get Ethos score from any of the addresses
       getEthosScoreFromAddresses(addressesToCheck),
-      // Get Talent Protocol Builder Score from primary address
-      primaryAddress ? getTalentBuilderScore(primaryAddress) : Promise.resolve(null),
+      // Get Coinbase Onchain Score from primary address
+      primaryAddress ? getOnchainScore(primaryAddress) : Promise.resolve(null),
       // Get OpenRank score from FID
       getOpenRankScore(fid)
     ]);
@@ -285,9 +287,9 @@ export async function GET(req: NextRequest) {
       ? ethosResult.value
       : 1213;
 
-    // Extract Builder score
-    const builderScore = (builderResult.status === 'fulfilled')
-      ? builderResult.value
+    // Extract Onchain score
+    const onchainScore = (onchainResult.status === 'fulfilled')
+      ? onchainResult.value
       : null;
 
     // Extract OpenRank score
@@ -301,7 +303,7 @@ export async function GET(req: NextRequest) {
       neynarScore,
       neynarSpamScore,
       ethosScore,
-      builderScore,
+      onchainScore,
       openRankScore: openRankData.score,
       openRankRank: openRankData.rank
     });
@@ -310,7 +312,7 @@ export async function GET(req: NextRequest) {
       neynarScore,
       neynarSpamScore,
       ethosScore,
-      builderScore,
+      onchainScore,
       openRankScore: openRankData.score,
       openRankRank: openRankData.rank,
       username: user.username || null,
