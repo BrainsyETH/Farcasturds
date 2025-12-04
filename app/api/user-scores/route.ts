@@ -115,10 +115,10 @@ async function getOnchainScore(addressOrName: string): Promise<number | null> {
       privateKey: apiKeyPrivateKey,
     });
 
-    // Try ethereum network first (base.org shows "Transactions on Ethereum & Base")
-    // The SDK might aggregate data from ethereum mainnet
-    console.log(`[Coinbase CDP] Creating ExternalAddress with network="ethereum", identifier="${addressOrName}"`);
-    const external = new ExternalAddress("ethereum", addressOrName);
+    // Base network for Base onchain activity (not ethereum mainnet!)
+    // The address's activity is on Base, so we must query the Base network
+    console.log(`[Coinbase CDP] Creating ExternalAddress with network="base-mainnet", identifier="${addressOrName}"`);
+    const external = new ExternalAddress("base-mainnet", addressOrName);
 
     // Fetch reputation score
     console.log(`[Coinbase CDP] Calling reputation() method...`);
