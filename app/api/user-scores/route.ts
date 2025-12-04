@@ -128,7 +128,8 @@ async function getOnchainScore(addressOrName: string): Promise<number | null> {
     console.log(`[Coinbase CDP] Response type:`, typeof rep);
     console.log(`[Coinbase CDP] Response keys:`, Object.keys(rep || {}));
 
-    const score = rep.score ?? null;
+    // Score is nested in model.score, not at top level
+    const score = rep.model?.score ?? null;
     console.log(`[Coinbase CDP] Extracted score value:`, score, `(type: ${typeof score})`);
 
     if (score !== null) {
