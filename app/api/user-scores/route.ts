@@ -275,12 +275,17 @@ export async function GET(req: NextRequest) {
     // For Coinbase reputation, try Basename first (e.g., brainsy.base.eth)
     // The SDK can resolve Basenames, ENS names, and addresses directly
     const username = user.username;
-    const basename = username ? `${username}.base.eth` : null;
-    const ensName = username ? `${username}.eth` : null;
+
+    // Strip .eth from username if present to get the base name
+    const baseName = username ? username.replace(/\.eth$/, '') : null;
+
+    const basename = baseName ? `${baseName}.base.eth` : null;
+    const ensName = baseName ? `${baseName}.eth` : null;
 
     // Try Basename first, then ENS, then verified address
     const addressForReputation = basename || ensName || user.verifications?.[0] || user.custody_address;
 
+    console.log(`[/api/user-scores] Username: ${username}, Base name: ${baseName}, Basename: ${basename}`);
     console.log(`[/api/user-scores] Checking reputation for: ${addressForReputation}`);
 
     // For Ethos (which needs resolved addresses), resolve ENS
