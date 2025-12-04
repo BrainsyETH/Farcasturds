@@ -273,42 +273,41 @@ export async function GET(req: NextRequest) {
       addressesToCheck.push(user.custody_address);
     }
 
-    // For Coinbase reputation, try Basename first (e.g., brainsy.base.eth)
-    // The SDK can resolve Basenames, ENS names, and addresses directly
+    // For Coinbase reputation, we need to use the actual Ethereum address
+    // The SDK may not properly resolve Basenames for reputation lookups
     const username = user.username;
 
     // Strip .eth from username if present to get the base name
     const baseName = username ? username.replace(/\.eth$/, '') : null;
-
-    const basename = baseName ? `${baseName}.base.eth` : null;
     const ensName = baseName ? `${baseName}.eth` : null;
 
-    // Try Basename first, then ENS, then verified address
-    const addressForReputation = basename || ensName || user.verifications?.[0] || user.custody_address;
-
-    console.log(`[/api/user-scores] Username: ${username}, Base name: ${baseName}, Basename: ${basename}`);
-    console.log(`[/api/user-scores] Checking reputation for: ${addressForReputation}`);
-
-    // For Ethos (which needs resolved addresses), resolve ENS
-    let ensAddress = null;
+    // Resolve ENS to get the actual Ethereum address for reputation check
+    let addressForReputation = user.verifications?.[0] || user.custody_address;
     if (ensName) {
-      ensAddress = await resolveENS(ensName);
+      const resolvedAddress = await resolveENS(ensName);
+      if (resolvedAddress) {
+        addressForReputation = resolvedAddress;
+        console.log(`[/api/user-scores] Using ENS-resolved address for reputation: ${resolvedAddress}`);
+      }
     }
+
+    console.log(`[/api/user-scores] Username: ${username}, Base name: ${baseName}`);
+    console.log(`[/api/user-scores] Checking reputation for address: ${addressForReputation}`);
 
     // Parallelize external API calls for faster loading
     const [ethosResult, onchainResult, openRankResult] = await Promise.allSettled([
       // Get Ethos score from any of the addresses
       getEthosScoreFromAddresses(addressesToCheck),
-      // Get Coinbase Onchain Score - pass Basename directly, SDK will resolve it
+      // Get Coinbase Onchain Score - use resolved Ethereum address
       addressForReputation ? getOnchainScore(addressForReputation) : Promise.resolve(null),
       // Get OpenRank score from FID
       getOpenRankScore(fid)
     ]);
 
-    // Add ENS address to addressesToCheck if resolved
-    if (ensAddress) {
-      addressesToCheck.push(ensAddress);
-      console.log(`[ENS] ✓ Using ENS address: ${ensAddress} for reputation checks`);
+    // Add resolved ENS address to addressesToCheck if not already there
+    if (addressForReputation && !addressesToCheck.includes(addressForReputation)) {
+      addressesToCheck.push(addressForReputation);
+      console.log(`[ENS] ✓ Using address: ${addressForReputation} for reputation checks`);
     }
 
     // Extract Ethos score or default to 1213 (neutral)
