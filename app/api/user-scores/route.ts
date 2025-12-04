@@ -115,9 +115,10 @@ async function getOnchainScore(addressOrName: string): Promise<number | null> {
       privateKey: apiKeyPrivateKey,
     });
 
-    // Create ExternalAddress - SDK can handle addresses, ENS names, and Basenames
-    console.log(`[Coinbase CDP] Creating ExternalAddress with network="base", identifier="${addressOrName}"`);
-    const external = new ExternalAddress("base", addressOrName);
+    // Try ethereum network first (base.org shows "Transactions on Ethereum & Base")
+    // The SDK might aggregate data from ethereum mainnet
+    console.log(`[Coinbase CDP] Creating ExternalAddress with network="ethereum", identifier="${addressOrName}"`);
+    const external = new ExternalAddress("ethereum", addressOrName);
 
     // Fetch reputation score
     console.log(`[Coinbase CDP] Calling reputation() method...`);
