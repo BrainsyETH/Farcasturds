@@ -128,6 +128,7 @@ async function getOnchainScore(addressOrName: string): Promise<number | null> {
     console.log(`[Coinbase CDP] Response type:`, typeof rep);
     console.log(`[Coinbase CDP] Response keys:`, Object.keys(rep || {}));
 
+    // Access score via getter - SDK should provide a score getter that accesses model.score
     const score = rep.score ?? null;
     console.log(`[Coinbase CDP] Extracted score value:`, score, `(type: ${typeof score})`);
 
