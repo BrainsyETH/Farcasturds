@@ -140,17 +140,29 @@ async function getOnchainScore(addressOrName: string): Promise<{
       console.error(`[Coinbase CDP] Error fetching Ethereum score:`, error);
     }
 
-    // Try Base network
+    // Try Base network (try "base" first, then "base-mainnet" as fallback)
     try {
-      console.log(`[Coinbase CDP] Creating ExternalAddress with network="base-mainnet", identifier="${addressOrName}"`);
-      const baseExternal = new ExternalAddress("base-mainnet", addressOrName);
+      console.log(`[Coinbase CDP] Creating ExternalAddress with network="base", identifier="${addressOrName}"`);
+      const baseExternal = new ExternalAddress("base", addressOrName);
       console.log(`[Coinbase CDP] Calling reputation() method for Base...`);
       const baseRep = await baseExternal.reputation();
       baseScore = baseRep.score ?? null;
       console.log(`[Coinbase CDP] Base reputation response:`, JSON.stringify(baseRep, null, 2));
       console.log(`[Coinbase CDP] Base score:`, baseScore);
     } catch (error) {
-      console.error(`[Coinbase CDP] Error fetching Base score:`, error);
+      console.error(`[Coinbase CDP] Error fetching Base score with "base":`, error);
+
+      // Try base-mainnet as fallback
+      try {
+        console.log(`[Coinbase CDP] Retrying with network="base-mainnet", identifier="${addressOrName}"`);
+        const baseMainnetExternal = new ExternalAddress("base-mainnet", addressOrName);
+        const baseMainnetRep = await baseMainnetExternal.reputation();
+        baseScore = baseMainnetRep.score ?? null;
+        console.log(`[Coinbase CDP] Base Mainnet reputation response:`, JSON.stringify(baseMainnetRep, null, 2));
+        console.log(`[Coinbase CDP] Base Mainnet score:`, baseScore);
+      } catch (fallbackError) {
+        console.error(`[Coinbase CDP] Error fetching Base score with "base-mainnet":`, fallbackError);
+      }
     }
 
     // Determine the maximum score and which network it came from
