@@ -89,7 +89,13 @@ async function resolveENS(ensName: string): Promise<string | null> {
 
 // Get Onchain Score from Coinbase CDP (official Base reputation score)
 // addressOrName can be an Ethereum address, ENS name, or Basename
-async function getOnchainScore(addressOrName: string): Promise<number | null> {
+// Returns an object with scores from both Ethereum and Base networks, plus the maximum score
+async function getOnchainScore(addressOrName: string): Promise<{
+  score: number | null;
+  ethereumScore: number | null;
+  baseScore: number | null;
+  network: string | null;
+}> {
   console.log(`[Coinbase CDP] === START getOnchainScore function ===`);
   console.log(`[Coinbase CDP] Input addressOrName:`, addressOrName);
 
@@ -106,7 +112,7 @@ async function getOnchainScore(addressOrName: string): Promise<number | null> {
     if (!apiKeyName || !apiKeyPrivateKey) {
       console.warn('[Coinbase CDP] API keys not configured (CDP_API_KEY_NAME and CDP_API_KEY_PRIVATE_KEY required)');
       console.log(`[Coinbase CDP] === EARLY RETURN: Missing API keys ===`);
-      return null;
+      return { score: null, ethereumScore: null, baseScore: null, network: null };
     }
 
     // Configure Coinbase SDK with API credentials
@@ -115,34 +121,73 @@ async function getOnchainScore(addressOrName: string): Promise<number | null> {
       privateKey: apiKeyPrivateKey,
     });
 
-    // Try ethereum network first (base.org shows "Transactions on Ethereum & Base")
-    // The SDK might aggregate data from ethereum mainnet
-    console.log(`[Coinbase CDP] Creating ExternalAddress with network="ethereum", identifier="${addressOrName}"`);
-    const external = new ExternalAddress("ethereum", addressOrName);
+    // Check both Ethereum and Base networks since users may have transactions on both
+    console.log(`[Coinbase CDP] Checking reputation on both Ethereum and Base networks...`);
 
-    // Fetch reputation score
-    console.log(`[Coinbase CDP] Calling reputation() method...`);
-    const rep = await external.reputation();
+    let ethereumScore: number | null = null;
+    let baseScore: number | null = null;
 
-    // Debug: log full response to understand structure
-    console.log(`[Coinbase CDP] Full reputation response:`, JSON.stringify(rep, null, 2));
-    console.log(`[Coinbase CDP] Response type:`, typeof rep);
-    console.log(`[Coinbase CDP] Response keys:`, Object.keys(rep || {}));
-
-    // Access score via getter - SDK should provide a score getter that accesses model.score
-    const score = rep.score ?? null;
-    console.log(`[Coinbase CDP] Extracted score value:`, score, `(type: ${typeof score})`);
-
-    if (score !== null) {
-      console.log(`[Coinbase CDP] ✓ Onchain Score for ${addressOrName}: ${score} (range: -100 to +100)`);
-    } else {
-      console.warn(`[Coinbase CDP] Score is null for ${addressOrName}`);
+    // Try Ethereum network
+    try {
+      console.log(`[Coinbase CDP] Creating ExternalAddress with network="ethereum", identifier="${addressOrName}"`);
+      const ethereumExternal = new ExternalAddress("ethereum", addressOrName);
+      console.log(`[Coinbase CDP] Calling reputation() method for Ethereum...`);
+      const ethereumRep = await ethereumExternal.reputation();
+      ethereumScore = ethereumRep.score ?? null;
+      console.log(`[Coinbase CDP] Ethereum reputation response:`, JSON.stringify(ethereumRep, null, 2));
+      console.log(`[Coinbase CDP] Ethereum score:`, ethereumScore);
+    } catch (error) {
+      console.error(`[Coinbase CDP] Error fetching Ethereum score:`, error);
     }
 
-    return score;
+    // Try Base network
+    try {
+      console.log(`[Coinbase CDP] Creating ExternalAddress with network="base-mainnet", identifier="${addressOrName}"`);
+      const baseExternal = new ExternalAddress("base-mainnet", addressOrName);
+      console.log(`[Coinbase CDP] Calling reputation() method for Base...`);
+      const baseRep = await baseExternal.reputation();
+      baseScore = baseRep.score ?? null;
+      console.log(`[Coinbase CDP] Base reputation response:`, JSON.stringify(baseRep, null, 2));
+      console.log(`[Coinbase CDP] Base score:`, baseScore);
+    } catch (error) {
+      console.error(`[Coinbase CDP] Error fetching Base score:`, error);
+    }
+
+    // Determine the maximum score and which network it came from
+    let finalScore: number | null = null;
+    let sourceNetwork: string | null = null;
+
+    if (ethereumScore !== null && baseScore !== null) {
+      // Both networks have scores - use the maximum
+      if (ethereumScore >= baseScore) {
+        finalScore = ethereumScore;
+        sourceNetwork = 'ethereum';
+      } else {
+        finalScore = baseScore;
+        sourceNetwork = 'base';
+      }
+      console.log(`[Coinbase CDP] ✓ Using maximum score: ${finalScore} from ${sourceNetwork} (Ethereum: ${ethereumScore}, Base: ${baseScore})`);
+    } else if (ethereumScore !== null) {
+      finalScore = ethereumScore;
+      sourceNetwork = 'ethereum';
+      console.log(`[Coinbase CDP] ✓ Using Ethereum score: ${finalScore}`);
+    } else if (baseScore !== null) {
+      finalScore = baseScore;
+      sourceNetwork = 'base';
+      console.log(`[Coinbase CDP] ✓ Using Base score: ${finalScore}`);
+    } else {
+      console.warn(`[Coinbase CDP] No score available from either network for ${addressOrName}`);
+    }
+
+    return {
+      score: finalScore,
+      ethereumScore,
+      baseScore,
+      network: sourceNetwork
+    };
   } catch (error) {
     console.error(`[Coinbase CDP] Error fetching score for ${addressOrName}:`, error);
-    return null;
+    return { score: null, ethereumScore: null, baseScore: null, network: null };
   }
 }
 
@@ -300,7 +345,7 @@ export async function GET(req: NextRequest) {
       // Get Ethos score from any of the addresses
       getEthosScoreFromAddresses(addressesToCheck),
       // Get Coinbase Onchain Score - use resolved Ethereum address
-      addressForReputation ? getOnchainScore(addressForReputation) : Promise.resolve(null),
+      addressForReputation ? getOnchainScore(addressForReputation) : Promise.resolve({ score: null, ethereumScore: null, baseScore: null, network: null }),
       // Get OpenRank score from FID
       getOpenRankScore(fid)
     ]);
@@ -316,15 +361,21 @@ export async function GET(req: NextRequest) {
       ? ethosResult.value
       : 1213;
 
-    // Extract Onchain score
-    const onchainScore = (onchainResult.status === 'fulfilled')
+    // Extract Onchain score data
+    const onchainData = (onchainResult.status === 'fulfilled')
       ? onchainResult.value
-      : null;
+      : { score: null, ethereumScore: null, baseScore: null, network: null };
+
+    const onchainScore = onchainData.score;
 
     // DEBUG: Add diagnostic info to response
     const onchainDebug = {
       status: onchainResult.status,
       value: onchainResult.status === 'fulfilled' ? onchainResult.value : null,
+      score: onchainData.score,
+      ethereumScore: onchainData.ethereumScore,
+      baseScore: onchainData.baseScore,
+      network: onchainData.network,
       addressChecked: addressForReputation,
       reason: onchainResult.status === 'rejected' ? onchainResult.reason?.message : null,
     };
